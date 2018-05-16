@@ -1,0 +1,61 @@
+//IPUS
+// input: 2 exposures
+// line 0: combined l/s (line 0) + vs
+// line 1: combined l/s + vs (line 0)
+// output: combined
+// line 0: combined l/s/vs
+// parameters
+// gpr0         processed line length
+// gpr1         gap between lines
+// gpr14:       shift right for vs
+// gpr15:       shift right for long/short
+
+// instrcution format:
+// inst outreg,inreg1,inreg2
+// inst outreg,inreg1,immediate
+// inst outreg,inreg1
+
+.global nohdr_start
+nohdr_start:
+
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ )
+	// in case of line reduction
+	//lsr loopcnt,gpr1,1       // Margin is subtracted in graph
+	//and loopcnt,0xfffe       // make sure it starts on even pixel
+	// in case of line extension
+
+	add loopcnt,1            // fetch first pixel
+
+nohdr_linestart:
+        ldon nohdr_linestart,i
+	mov loopcnt,gpr0         // line length
+
+nohdr_loop:
+	ldot ina0,nohdr_loop,ixo
+
+nohdr_lineend:
+	// in case of line reduction
+	//mov loopcnt,gpr1         // gaps between lines
+  	//bal nohdr_linestart
+	
+	// in case of line extension
+	mov gpr2,ina0
+	dout ina0,nohdr_lineend1,ixo
+nohdr_lineend1:
+	mov gpr3,ina0
+	dout ina0,nohdr_lineend2,ixo
+nohdr_lineend2:
+	dout gpr2,nohdr_lineend3,xo
+nohdr_lineend3:
+	dout gpr3,nohdr_lineend4,xo
+nohdr_lineend4:
+	dout gpr2,nohdr_lineend5,xo
+nohdr_lineend5:
+	dout gpr3,nohdr_lineend6,xo
+nohdr_lineend6:
+	
+	mov loopcnt,gpr0       // process last two pixels separety
+	bal nohdr_loop
+
+.global nohdr_end
+nohdr_end:

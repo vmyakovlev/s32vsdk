@@ -1,0 +1,36 @@
+# for IPUS
+# function:
+# swap endianess
+# shift by 1 pixels at input and output
+# inputs:
+# line 0: one endian
+# output:
+# line 0: other endian
+# parameters:
+# gpr14: endianess swap: 1 = turn on 
+# gpr15: 8
+
+.global endian_start
+endian_start:
+  mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (15<<4) /*shr*/)
+  mov gpr15,8
+  or  gpr14,gpr14,gpr14	
+  done endian_d1,i
+
+endian_d1:
+  bne endian_swp_loop
+
+endian_cp_loop:	
+  dout ina0,endian_cp_loop,ixo
+
+
+	
+endian_swp_loop:	
+  lsl gpr0,ina0,gpr15
+  lsr gpr1,ina0,gpr15
+  or  out0,gpr0,gpr1
+  done endian_swp_loop,ixo
+
+  //halt
+.global endian_end
+endian_end:

@@ -1,0 +1,15 @@
+//Of course missing is the sequence to wakeup the A53 cluster.
+SYStem.RESet
+SYStem.CPU S32V
+CORE.ASSIGN 1.       // starting only with one core first
+Trace.DISable        // Maybe required
+SYStem.up
+
+IF RUN()
+    Break.direct
+
+mode.hll
+setup.var %hex
+b.d
+y.spath add libs/apex/
+ENDDO

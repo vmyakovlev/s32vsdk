@@ -1,0 +1,15 @@
+#ifndef _REMAP_H_
+
+#define _REMAP_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+void Resize_Interpolation_SingleView(unsigned short *resize_lut,unsigned int **remap_lut, unsigned char * dout,int Nwidth,int Nheight);
+
+#ifdef __cplusplus
+}
+#endif
+
+
+#endif

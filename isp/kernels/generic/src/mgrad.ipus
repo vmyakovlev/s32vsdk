@@ -1,0 +1,44 @@
+# IPUS
+# Function:
+# morphological gradient:
+#    mgrad = max(neighborhood) - min(neighborhood)
+# set shift_in/x to 1 pixels
+# set shift_out to 1 pixels
+# input to line 0,1,2
+# out0 : copied input value
+
+.global mgrad_start
+mgrad_start:
+	// configure sorting tree
+        mov confsort,(1 /*ina*/ | (1<<2) /*no mask*/)    | (0<<3) /*unsigned*/)
+
+	// shift in first 3 columns, no output
+        done mgrad_in1,i    // load first pixel
+mgrad_in1:
+	done mgrad_in2,i    // load first pixel
+mgrad_in2:
+	done mgrad_loop,i    // load first pixel
+
+
+//// mgrad_copyloop:
+//        mov loopcnt,640    // copy first 640 pixels from input
+//// do copy in left half of the line/image
+//        ldot ina4,mgrad_copyloop,ixo
+//// add a black line between left and right half	
+//        dout zero,generic_select,ixo
+
+mgrad_loop:
+	// compute morphological gradient:
+	// output0 = max(in0..in8) - min (in0..in8)
+        sub out0,max,min
+
+	// multiply by 2 to make the lines brighter on the screen
+	//asl out0,out0,1
+	
+	// now we are done and we can write the output and
+	// get the next input pixels
+        done mgrad_loop,ixo
+
+	halt
+.global mgrad_end
+mgrad_end:

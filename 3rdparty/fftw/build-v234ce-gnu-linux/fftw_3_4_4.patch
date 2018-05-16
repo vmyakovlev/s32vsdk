@@ -1,0 +1,161 @@
+diff -Naur fftw_src_origina/configure fftw_src/configure
+--- fftw_src_origina/configure	2014-03-04 13:44:58.000000000 +0100
++++ fftw_src/configure	2017-06-30 15:27:05.000000000 +0200
+@@ -14111,8 +14111,7 @@
+ $as_echo "$ax_check_compiler_flags" >&6; }
+ if test "x$ax_check_compiler_flags" = xyes; then
+ 	NEON_CFLAGS="-mfpu=neon"
+-else
+-	as_fn_error $? "Need a version of gcc with -mfpu=neon" "$LINENO" 5
++
+ fi
+ 
+ 	fi
+diff -Naur fftw_src_origina/libbench2/bench-main.c fftw_src/libbench2/bench-main.c
+--- fftw_src_origina/libbench2/bench-main.c	2013-03-18 08:10:46.000000000 +0100
++++ fftw_src/libbench2/bench-main.c	2017-06-30 15:27:05.000000000 +0200
+@@ -26,6 +26,14 @@
+ 
+ int verbose;
+ 
++typedef void(*func_ptr)(void);
++
++func_ptr __init_array_start__;
++func_ptr __init_array_end__;
++ unsigned int __SP_IRQ_INIT;
++ unsigned int __SP_IRQ2_INIT;
++ unsigned int __SP_INIT;
++
+ static const struct my_option options[] =
+ {
+   {"accuracy", REQARG, 'a'},
+@@ -54,7 +62,7 @@
+   {0, NOARG, 0}
+ };
+ 
+-int bench_main(int argc, char *argv[])
++int main(int argc, char *argv[])
+ {
+      double tmin = 0.0;
+      double tol;
+diff -Naur fftw_src_origina/libbench2/timer.c fftw_src/libbench2/timer.c
+--- fftw_src_origina/libbench2/timer.c	2013-03-18 08:10:46.000000000 +0100
++++ fftw_src/libbench2/timer.c	2017-06-30 15:27:05.000000000 +0200
+@@ -33,6 +33,8 @@
+ #include <unistd.h>
+ #endif
+ 
++//#include <oal.h>
++
+ #ifdef HAVE_BSDGETTIMEOFDAY
+ #ifndef HAVE_GETTIMEOFDAY
+ #define gettimeofday BSDgettimeofday
+@@ -66,7 +68,7 @@
+ #endif
+ 
+ 
+-#if defined(HAVE_GETTIMEOFDAY) && !defined(HAVE_TIMER)
++/*#if defined(HAVE_GETTIMEOFDAY) && !defined(HAVE_TIMER)
+ typedef struct timeval mytime;
+ 
+ static mytime get_time(void)
+@@ -83,7 +85,27 @@
+ }
+ 
+ #define HAVE_TIMER
+-#endif
++#endif*/
++
++
++#define GETTIME(time) \
++{ \
++struct timeval lTime; gettimeofday(&lTime,0); \
++*time=(lTime.tv_sec*1000000+lTime.tv_usec);   \
++}
++
++typedef unsigned long mytime;
++//static mytime get_time(void)
++//{	
++//	return get_uptime_microS();
++//}
++
++static double elapsed(mytime t1, mytime t0)
++{
++	return ((double)t1 - (double)t0);
++}
++
++#define HAVE_TIMER
+ 
+ #ifndef HAVE_TIMER
+ #error "timer not defined"
+@@ -120,15 +142,25 @@
+ 
+ void timer_start(int n)
+ {
+-     BENCH_ASSERT(n >= 0 && n < BENCH_NTIMERS);
+-     t0[n] = get_time();
++  //   BENCH_ASSERT(n >= 0 && n < BENCH_NTIMERS);
++       GETTIME(&t0[n]);
+ }
+ 
+ double timer_stop(int n)
+ {
+      mytime t1;
+-     BENCH_ASSERT(n >= 0 && n < BENCH_NTIMERS);
+-     t1 = get_time();
++//     BENCH_ASSERT(n >= 0 && n < BENCH_NTIMERS);
++     GETTIME(&t1);
+      return elapsed(t1, t0[n]);
+ }
+ 
++//unsigned long get_actuall_time()
++//{
++//	return get_uptime_microS();
++//}
++
++unsigned long get_elapsed_time(unsigned long t0, unsigned long t1)
++{
++	unsigned long elapsed_time = t1 - t0;
++	return elapsed_time;
++}
+\ No newline at end of file
+diff -Naur fftw_src_origina/simd-support/simd-neon.h fftw_src/simd-support/simd-neon.h
+--- fftw_src_origina/simd-support/simd-neon.h	2014-03-04 13:41:04.000000000 +0100
++++ fftw_src/simd-support/simd-neon.h	2017-06-30 15:27:05.000000000 +0200
+@@ -28,7 +28,7 @@
+ #define VL 2            /* SIMD complex vector length */
+ #define SIMD_VSTRIDE_OKA(x) ((x) == 2)
+ #define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
+-
++#define __ARM_NEON__
+ #if defined(__GNUC__) && !defined(__ARM_NEON__)
+ #error "compiling simd-neon.h requires -mfpu=neon or equivalent"
+ #endif
+diff -Naur fftw_src_origina/tools/fftw-wisdom.c fftw_src/tools/fftw-wisdom.c
+--- fftw_src_origina/tools/fftw-wisdom.c	2014-03-04 13:41:04.000000000 +0100
++++ fftw_src/tools/fftw-wisdom.c	2017-06-30 15:27:05.000000000 +0200
+@@ -26,6 +26,14 @@
+ #define FFTW(x) CONCAT(fftw_, x)
+ #endif
+ 
++typedef void(*func_ptr)(void);
++
++func_ptr __init_array_start__;
++func_ptr __init_array_end__;
++unsigned int __SP_IRQ_INIT;
++unsigned int __SP_IRQ2_INIT;
++unsigned int __SP_INIT;
++
+ /* from bench.c: */
+ extern unsigned the_flags;
+ extern int usewisdom;
+@@ -147,7 +155,8 @@
+ 
+ #define NELEM(array)(sizeof(array) / sizeof((array)[0]))
+ 
+-int bench_main(int argc, char *argv[])
++//int bench_main(int argc, char *argv[])
++int main(int argc, char *argv[])
+ {
+      int c;
+      unsigned i;

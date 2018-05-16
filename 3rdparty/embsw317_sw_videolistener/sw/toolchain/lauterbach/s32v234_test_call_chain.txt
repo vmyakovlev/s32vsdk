@@ -1,0 +1,7 @@
+1.) Makefile creates master T32 instance
+2.) Master T32 instance runs "s32v234_run_slave.cmm"
+3.) "s32v234_run_slave.cmm" creates slave T32 instance
+4.) The slave T32 instance:
+    "s32v234_startup.cmm" -> "load_a5_app.cmm" -> "S32V234.cmm"
+                                               -> "S32V234-CA53.cmm" -> "S32V234-CM4.cmm"
+                                               -> "s32v234_finalize_test.cmm"

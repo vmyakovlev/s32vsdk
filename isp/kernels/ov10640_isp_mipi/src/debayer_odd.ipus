@@ -1,0 +1,61 @@
+// IPUS1/2/4/5
+// geometry reduced by 1 line and 1 pixel
+// processing only odd lines (red lines)
+// 3 input lines top right starting with R
+// 2 lines out
+//   out 0: green  
+//   out 1: red
+//   out 2: blue
+// r and b swapped in ncase of OV Sensor
+// Parameters:
+// gpr0:    # of valid pixels per line
+// gpr13:   maximum ypos
+	
+.global debayer_odd_start
+debayer_odd_start:
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ ) 
+        mov confaddt,(0/*w*/) | (0 /*apply mask*/<<2) | (0 /* unsigned*/<<3) | (0/* shift right*/ <<5) | (64 /* factor*/ <<9)
+        mov confsort,(1/*ina*/) | (0 /*apply mask*/<<2) | (0 /* unsigned*/<<3)
+
+	mov loopcnt,3
+	max gpr13,gpr13,ypos
+
+debayer_odd_in:
+        ldon debayer_odd_in,i
+	mov loopcnt,gpr0
+
+debayer_odd_redline0_first:
+	lsr sacc1,ina1,1         // b -> operation A moved to fill stall
+	lsr sacc0,ina3,1         // r -> operation B moved to fill stall
+	lsr acc1, ina7,1         // b -> operation C moved to fill stall
+
+debayer_odd_redline0:
+	mov maskv,0b111111111    // shift down 
+	//lsr sacc1,ina1,1         // b -> operation A moved to fill stall
+	//lsr sacc0,ina3,1         // r -> operation B moved to fill stall
+	//lsr acc1, ina7,1         // b -> operation C moved to fill stall
+	lsr acc0, ina5,1         // r
+	mov out2,acc1            // b
+	mov out1,acc0            // r
+	ldot ina4,debayer_odd_redline1,ixo
+
+debayer_odd_redline1:
+	lsr w,ina,2
+	mov maskv,0b101000101    // for b
+        mov out1,ina4            // r value
+	//nop  // maskv -> sum
+	lsr sacc1,ina0,1         // fill stall with operation A
+	mov out2,sum             // b value
+	mov maskv,0b010101010    // for green
+	//nop  // maskv -> sum
+	lsr sacc0,ina4,1         // fill stall with operation B
+	//nop  // maskv -> sum
+	lsr acc1,ina6,1          // fill stall with operation C
+	ldot median,debayer_odd_redline0,ixo
+
+	mov loopcnt,2
+	bal debayer_odd_in
+
+//        halt
+.global debayer_odd_end	
+debayer_odd_end:

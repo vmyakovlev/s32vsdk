@@ -1,0 +1,103 @@
+// for IPUS with Histogram engine
+// 0 channels in: bayer-pattern L/S odd  lines, starting with R
+// 1 channels in: bayer-pattern L/S even lines, starting with GR
+// 2 channels in: bayer-pattern VS  even lines, starting with R
+// 1 channel out: dummy
+// histogram out:
+// CAM1:
+//   0- 31: R  long/short
+//  32- 63: GR long/short
+//  64- 95: GR very short
+//  96-127: B  long/short
+// CAM2:
+// 128-159: R  long/short
+// 160-191: GR long/short
+// 192-223: GR very short
+// 224-256: B  long/short
+// parameters:
+// gpr0         processed line length
+// gpr1         gap between lines
+// gpr2         Gr/Gb comparision
+// used registers:
+// gpr3		VS histogram threshold constant for debugging breakpoint
+// gpr9		factor for line 1 (long exposure) computed from gpr8
+// gpr11,ww     histogram input shift (11 bit)
+// gpr12        histogram offset R  long/short
+// gpr13        histogram offset GR long/short
+// gpr14        histogram offset GR very short
+// gpr15        histogram offset B
+
+.global histogram_start
+histogram_start:
+
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ ) 
+
+	// parameters for histogram bin computation
+        mov gpr11,11             # ina(15:0)  >> 11 for histogram (32 bins per component)
+        mov gpr3,0x1000          # MA test
+        mov gpr12,0              # offset bin for R  long/short
+        mov gpr13,32             # offset bin for G  long/short
+        mov gpr14,64             # offset bin for GR very short
+        mov gpr15,96             # offset bin for B  long/short
+        mov confhist,((11 <<8) | 64)
+	mov maskv,0b011011011    # 
+        mov lock,0
+	mov loopcnt,2            # load 2 pixels, inital gap done in gpraph
+	mov w,gpr11              # lsr value of 11
+	mov w1,1                 # lsr value of 1 for GR/GB
+	mov w3,1
+	swp                      # move W to WW
+
+histogram_linestart:
+        ldon histogram_linestart,i
+	mov loopcnt,gpr0         # line length
+       
+histogram_loop:
+	lsr w,ina,ww             # w[] = ina[] >> ww[]
+	add hbinincl,w4,gpr12    # add R  to histogram
+	add w1,w1,w3             # GR>>1 + GB>>1
+	lsr w1,w1,gpr11
+	add hbinincl,w1,gpr13    # add G to histogram
+	add hbinincl,w0,gpr15    # add B  to histogram
+	mov hbininch,ina6        # add GR VS to histogram
+#       debug VS green Histogram
+#	sub ina6,ina6,gpr3
+#	blt histogram_0
+#	nop
+
+histogram_0:
+        ldon histogram_1,ix
+
+histogram_1:
+	# balance between GR and GB
+	sub zero,ina4,ina2
+	blt histogram_inc_g
+	sub gpr2,1
+	bal histogram_inc_g_end
+histogram_inc_g:
+	add gpr2,1
+histogram_inc_g_end:
+
+	ldon histogram_2,ix
+histogram_2:
+	ldon histogram_3,ix
+	
+histogram_3:
+	ldon histogram_loop,ix
+
+        mov gpr12,128             # offset bin for GR long/short
+        mov gpr13,160             # offset bin for GR long/short
+        mov gpr14,192             # offset bin for GR very short
+        mov gpr15,224             # offset bin for B  long/short
+        mov confhist,((11 <<8) | 192)
+
+	// in case of line reduction
+	//mov loopcnt,gpr1          #half gaps between lines
+  	//bal histogram_linestart
+	// in case of no line reduction
+	mov loopcnt,gpr0
+  	bal histogram_loop
+
+//        halt
+.global histogram_end
+histogram_end:

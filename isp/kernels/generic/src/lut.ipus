@@ -1,0 +1,34 @@
+# IPUS
+# Look Up Table:
+# transform image acordng to Look Up Table
+#    out = lut[in]
+# set shift_in/x to 1 pixels
+# set shift_out to 1 pixels
+# input to line 0,1,2
+# out0 : copied input value
+
+.global lut_start
+lut_start:
+	// configure ALU
+        mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (14<<4) /*shr*/)
+
+	// shift in first 3 columns, no output
+	// in that case we could go with 1x1 input but we stay on 3x3
+        done lut_in1,i    // load first pixel
+lut_in1:
+	done lut_in2,i    // load first pixel
+lut_in2:
+	done lut_loop,i   // load first pixel
+
+lut_loop:
+	// do look up table transformation
+	// out = lut[ina4>>4]  : 12bit (4KLut) to 16 bit
+        lsr luta,ina4,4
+
+ 	// now we are done and we can write the output and
+	// get the next input pixels
+	dout lut,lut_loop,ixo
+
+	halt
+.global lut_end
+lut_end:

@@ -1,0 +1,24 @@
+// IPUS kernel
+// 3 input lines: line 0, line 1, line 2
+// interleaves 3 planes to packed pixels  
+// 000  111  222    012012012
+// 000, 111, 222 -> 012012012
+// 000  111  222    012012012
+//
+// no subsampling
+// out 0: 0,1,2
+
+.global in3_planar2interleaved_start
+
+in3_planar2interleaved_start:
+done in3_planar2interleaved_0,i # load first pixel
+
+in3_planar2interleaved_0:
+        dout ina0,in3_planar2interleaved_1,o
+in3_planar2interleaved_1:
+        dout ina3,in3_planar2interleaved_2,o
+in3_planar2interleaved_2:
+        dout ina6,in3_planar2interleaved_0,ixo
+
+.global in3_planar2interleaved_end
+in3_planar2interleaved_end:

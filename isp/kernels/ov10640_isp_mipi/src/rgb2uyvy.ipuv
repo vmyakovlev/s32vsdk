@@ -1,0 +1,72 @@
+# for IPUV
+# set shift_in/x/out to 4 pixels
+# in0  :  R 16bit
+# in1  :  G 16bit
+# in2  :  B 16bit
+# out0 :  U, Y, V, Y
+# parameters
+# gpr16       : shift for making brighter
+# used registers
+# gpr0 -gpr6  : conversion coefficients
+# gpr8 -gpr15 : intermediate results
+
+.global rgb2uyvy_start
+rgb2uyvy_start:
+  // scaled to 32768 = 15 bits to allow to deal with overflows
+  // Y= 0,299xR + 0,587xG + 0,114xB
+  mov gpr0,9797   //R*gpr0->Y :  32768 * 0,299
+  mov gpr1,19235  //G*gpr1->Y :  32768 * 0,587
+  mov gpr2,3735   //B*gpr2->Y :  32768 * 0,114
+  mov gpr3,16154  //(B-Y)*gpr3->U :  32768 * 0,493
+  mov gpr4,28737  //(R-Y)*gpr4->V :  32768 * 0,877
+  mov gpr5,0x4000 // U and V offset for 0 position
+  mov gpr6,1      // shift value for output data
+
+  mov gpr14,4
+  mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/) | (16<<4) /*shr*/)
+  done rgb2uyvy_loop,i
+	
+rgb2uyvy_loop:	
+
+  //Y
+  mulh vsacc0,vh0,gpr0  // R->Y (15bit)
+  mulh vacc0,vh5,gpr1   // G->Y (15bit)
+  mulh vacc0,vh10,gpr2  // B->Y (15bit)
+  nop
+  asl  vh15,vacc0,gpr6  // store Y(16bit) vector in vh15
+  // U
+  mulh vgpr3,vh10,gpr3  // B->U (15bit)
+  mulh vgpr2,vh15,gpr3  // Y->U (15bit)
+  add vgpr3,vgpr3,gpr5  // offset (15bits)
+  sub vgpr3,vgpr3,vgpr2 // U (15bit)
+  asl vh5,vgpr3,gpr6    // store U (16bit) vector in vh5
+  // V
+  mulh vgpr3,vh0,gpr4   // R->V (15bit)
+  mulh vgpr2,vh15,gpr4  // Y->V (15bit)
+  add vgpr3,vgpr3,gpr5  // offset (15bit)
+  sub vgpr3,vgpr3,vgpr2 // V (15bit)
+  asl vh10,vgpr3,gpr6   // store V(16bit) vector in vh10
+
+  sub vgpr3,vh15,vh16   // if y[3]>y[2] and y[1]>y[0]
+  //asl vh15,vh15,gpr16   // make y brighter! camera issue
+  mov out2,in27         // Y[3]
+  mov out0,in26         // Y[2]
+  mov maskv,vflag_c
+
+  add vh5,vh6,zero      // U: copy 1->0 and 3->2 if negative flag is set
+  add vh10,vh11,zero    // V: copy 1->0 and 3->2 if negative flag is set
+
+  mov out3,in10         // U[2]
+  mov out1,in18         // V[2]
+  done rgb2uyvy_2nd,o
+rgb2uyvy_2nd:
+  mov out3,in8          // U[0]
+  mov out2,in25         // Y[1]
+  mov out1,in16         // V[0]
+  mov out0,in24         // Y[0]
+  mov maskv,one
+  done rgb2uyvy_loop,ixo
+
+  //halt
+.global rgb2uyvy_end
+rgb2uyvy_end:

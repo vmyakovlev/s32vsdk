@@ -1,0 +1,46 @@
+# IPUV
+# set shift_in/x/out to 4 pixels
+# in0  :  UV UV  13 bit, signed
+# in1  :  UV UV  13 bit, signed
+# in2  :  UV UV  13 bit, signed
+# in3  :  UV UV  13 bit, signed
+# out0 :  UV denoised 16 bit unsigned
+
+# box taps
+# U  V  U  V
+# 1  1  1  1
+# 1  1  1  1
+# 1  1  1  1
+# 1  1  1  1
+
+# sum = 16
+
+# gpr8 : 0x8000, offset from signed to unsigned
+# gpr12: maximum ypos
+# gpr16-19: intermediate data
+
+.global denoise4x4_uv_start
+denoise4x4_uv_start:
+  
+	mov gpr8,0x8000    // offset for signed UV to unsigned UV
+	max gpr12,gpr12,ypos
+
+        done denoise4x4_uv_d1,i
+denoise4x4_uv_d1:
+        done denoise4x4_uv_loop,i
+denoise4x4_uv_loop:
+        mov confalu,(1 /*signed*/ | (1<<1) /*saturate*/ | (4<<4) /*shr*/)
+        // FIR
+        add gpr19,vv7,vv5
+        add gpr18,vv6,vv4
+        add gpr17,vv5,vv3
+        add gpr16,vv4,vv2
+
+	mov confalu,(0 /*signed*/ | (0<<1) /*saturate*/ | (4<<4) /*shr*/)
+	add vout0,vgpr4,gpr8
+ 
+        done denoise4x4_uv_loop,ixo     // output filtered
+
+        //halt
+.global denoise4x4_uv_end
+denoise4x4_uv_end:

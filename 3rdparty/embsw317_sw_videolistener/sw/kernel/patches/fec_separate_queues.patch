@@ -1,0 +1,154 @@
+diff --git a/drivers/net/ethernet/freescale/fec.h b/drivers/net/ethernet/freescale/fec.h
+old mode 100644
+new mode 100755
+index b99ee30..758fe6e
+--- a/drivers/net/ethernet/freescale/fec.h
++++ b/drivers/net/ethernet/freescale/fec.h
+@@ -486,8 +486,16 @@ struct fec_enet_private {
+ 
+ 	bool ptp_clk_on;
+ 	struct mutex ptp_clk_mutex;
+-	unsigned int num_tx_queues;
+-	unsigned int num_rx_queues;
++	/* Number of queues which shall be enabled by the driver
++	(the driver is responsible for the whole controller) */
++	unsigned int num_tx_queues; /* Number of HW supported TX queues */
++	unsigned int num_rx_queues; /* Number of HW supported RX queues */
++	/* Number of queues actually handled by the driver. Some queues
++	may have different handling sw thus the driver will not use them. */
++	/* Number of tx queues handled by the driver */
++	unsigned int num_tx_queues_served;
++	/* Number of rx queues handled by the driver */
++	unsigned int num_rx_queues_served;
+ 
+ 	/* The saved address of a sent-in-place packet/buffer, for skfree(). */
+ 	struct fec_enet_priv_tx_q *tx_queue[FEC_ENET_MAX_TX_QS];
+diff --git a/drivers/net/ethernet/freescale/fec_main.c b/drivers/net/ethernet/freescale/fec_main.c
+old mode 100644
+new mode 100755
+index 1bda8d4..c81ae64
+--- a/drivers/net/ethernet/freescale/fec_main.c
++++ b/drivers/net/ethernet/freescale/fec_main.c
+@@ -63,6 +63,7 @@
+ 
+ #include "fec.h"
+ #define ENET_ALIGN_FRAME_PAYLOAD
++#define AVB_FIQ_EXTENSION
+ #define FEC_RACC_SHIFT16 0x80
+ static void set_multicast_list(struct net_device *ndev);
+ static void fec_enet_itr_coal_init(struct net_device *ndev);
+@@ -847,10 +848,10 @@ fec_restart(struct net_device *ndev)
+ 	writel(0xffffffff, fep->hwp + FEC_IEVENT);
+ 
+ 	/* Initialize all buffer descriptors of all queues */
+-	for (i = 0; i < fep->num_tx_queues; i++)
++	for (i = 0; i < fep->num_tx_queues_served; i++)
+ 		fec_init_tx_queue(ndev, i);
+ 
+-	for (i = 0; i < fep->num_rx_queues; i++)
++	for (i = 0; i < fep->num_rx_queues_served; i++)
+ 		fec_init_rx_queue(ndev, i);
+ 
+ 	/* Reset tx SKB buffers. */
+@@ -1010,7 +1011,7 @@ fec_restart(struct net_device *ndev)
+ 	/* Init the interrupt coalescing */
+ 	fec_enet_itr_coal_init(ndev);
+ 	/* Activate RX rings - receptions can start */
+-	for (i = 0; i < fep->num_rx_queues; i++)
++	for (i = 0; i < fep->num_rx_queues_served; i++)
+ 		writel(0, fep->hwp + FEC_R_DES_ACTIVE(i));
+ }
+ 
+@@ -2569,7 +2570,7 @@ static void fec_enet_free_buffers(struct net_device *ndev)
+ 	struct fec_enet_priv_rx_q *rxq;
+ 	unsigned int q;
+ 
+-	for (q = 0; q < fep->num_rx_queues; q++) {
++	for (q = 0; q < fep->num_rx_queues_served; q++) {
+ 		rxq = fep->rx_queue[q];
+ 		bdp = rxq->q.bd_base;
+ 		for (i = 0; i < rxq->q.ring_size; i++) {
+@@ -2586,7 +2587,7 @@ static void fec_enet_free_buffers(struct net_device *ndev)
+ 		}
+ 	}
+ 
+-	for (q = 0; q < fep->num_tx_queues; q++) {
++	for (q = 0; q < fep->num_tx_queues_served; q++) {
+ 		txq = fep->tx_queue[q];
+ 		bdp = txq->q.bd_base;
+ 		for (i = 0; i < txq->q.ring_size; i++) {
+@@ -2683,11 +2684,11 @@ static int fec_enet_alloc_buffers(struct net_device *ndev)
+ 	struct fec_enet_private *fep = netdev_priv(ndev);
+ 	unsigned int i;
+ 
+-	for (i = 0; i < fep->num_rx_queues; i++)
++	for (i = 0; i < fep->num_rx_queues_served; i++)
+ 		if (fec_enet_alloc_rxq_buffers(ndev, i))
+ 			return -ENOMEM;
+ 
+-	for (i = 0; i < fep->num_tx_queues; i++)
++	for (i = 0; i < fep->num_tx_queues_served; i++)
+ 		if (fec_enet_alloc_txq_buffers(ndev, i))
+ 			return -ENOMEM;
+ 	return 0;
+@@ -3129,13 +3130,13 @@ static int fec_enet_init(struct net_device *ndev)
+ 	else
+ 		fep->bufdesc_size = sizeof(struct bufdesc);
+ 		/* Allocate RX queues */
+-	for (i = 0; i < fep->num_rx_queues; i++) {
++	for (i = 0; i < fep->num_rx_queues_served; i++) {
+ 		if (fec_alloc_rx_queue(ndev, i))
+ 			goto rx_queue_init_fail;
+ 	}
+ 
+ 	/* Allocate TX queues */
+-	for (i = 0; i < fep->num_tx_queues; i++) {
++	for (i = 0; i < fep->num_tx_queues_served; i++) {
+ 		if (fec_alloc_tx_queue(ndev, i))
+ 			goto tx_queue_init_fail;
+ 	}
+@@ -3178,12 +3179,12 @@ static int fec_enet_init(struct net_device *ndev)
+ 	return 0;
+ tx_queue_init_fail:
+ 	/* Use wrap around as stop */
+-	for (i--; i < fep->num_tx_queues; i--)
++	for (i--; i < fep->num_tx_queues_served; i--)
+ 		fec_free_tx_queue(ndev, i);
+ 
+ rx_queue_init_fail:
+ 	/* Use wrap around as stop */
+-	for (i--; i < fep->num_rx_queues; i--)
++	for (i--; i < fep->num_rx_queues_served; i--)
+ 		fec_free_rx_queue(ndev, i);
+ 	return -ENOMEM;
+ 
+@@ -3319,6 +3320,19 @@ fec_probe(struct platform_device *pdev)
+ 		goto failed_ioremap;
+ 	}
+ 
++#ifdef AVB_FIQ_EXTENSION
++	if (num_rx_qs < 2) {
++		ret = -ENOMEM;
++		goto failed_avb;
++	}
++	/* Save one queue for AVB */
++	fep->num_rx_queues_served = num_rx_qs - 1;
++	fep->num_tx_queues_served = num_tx_qs - 1;
++#else
++	fep->num_rx_queues_served = num_rx_qs;
++#endif
++	fep->num_tx_queues_served = num_tx_qs;
++
+ 	fep->pdev = pdev;
+ 	fep->dev_id = dev_id++;
+ 
+@@ -3462,6 +3476,9 @@ failed_regulator:
+ 	fec_enet_clk_enable(ndev, false);
+ failed_clk:
+ failed_phy:
++#ifdef AVB_FIQ_EXTENSION
++failed_avb:
++#endif
+ 	iounmap(fep->hwp);
+ 	of_node_put(phy_node);
+ failed_ioremap:

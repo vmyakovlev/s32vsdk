@@ -1,0 +1,24 @@
+#!gbuild
+[INTEGRITY Application]
+	-wantprototype
+	:sourceDir=$__OS_DIR/modules/ghs/vfs_server
+	:sourceDir=$__OS_DIR/tcpip/modules/ftpserver
+	:sourceDir=$__OS_DIR/tcpip/modules/ftpclient
+	:sourceDir=$__OS_DIR/modules/ghs/ffs/
+	:sourceDir=$__OS_DIR/INTEGRITY-include/util/rpc_server
+	:sourceDir=$__OS_DIR/modules/ghs/net_server
+	-non_shared
+	-intex_var __OS_DIR=$__OS_DIR
+	-Wl,-C__INTEGRITY_RamLimitSize=0x1000000
+	-headerfiledir src
+network_server_child.gpj		[INTEGRITY Application]
+	:binDir=${%option_value(:outputDir)}/MultipleLoginNetworkServer
+	:postexec="gbin2c -list ${%option_value(:binDir)}/network_server_child -o ${%option_value(:binDir)}/net_server_child_image.c"
+	:sourceDirNonRelative=${%option_value(:binDir)}
+	:extraOutputFile=${%option_value(:binDir)}/net_server_child_image.c
+multi_login_net_server_kernel.gpj		[Program]
+	:sourceDirNonRelative=${%option_value(:outputDir)}/MultipleLoginNetworkServer
+net_server_parent_as.gpj		[Program]
+baseimage_ivfsserver_module.gpj		[Program]
+iftpserver_module.gpj		[Program]
+baseimage.int

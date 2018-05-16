@@ -1,0 +1,34 @@
+#.org    0x00
+.global census_start
+# input to line 0,1,2
+# in 8b to LSB
+# out 16b 
+# out0 : 
+# If (CentrePixelIntensity>CurrentPixelIntensity) 		=> (CurrentPixelIntensity-CentrePixelIntensity) < 0
+#		boolean bit=0 else boolean bit= 1
+# Comparison bit is shifted to the left forming a 9 bit result
+
+census_start:
+	mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (0<<4) /*shr*/)
+	#mset 0x1ff
+	mov gpr14, 0x1ff
+	mov loopcnt,640    // copy first 640 pixels from input
+	done census_in1,i    // load first pixel
+census_in1:
+	done census_in2,i    // load first pixel
+census_in2:
+	done census_copyloop,i    // load first pixel
+
+.local census_copyloop
+census_copyloop:
+    ldot ina4,census_copyloop,ixo
+	
+census_loop:
+	thf w,ina, ina4
+	xor gpr15, mflag_z, gpr14	//invert zero flag 
+	dout gpr15,census_loop, ixo
+
+
+	halt
+.global census_end
+census_end:

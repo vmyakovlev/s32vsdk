@@ -1,0 +1,33 @@
+# for IPUV1
+#.org    0x00
+.global drawyuv_start
+# set shift_in/x/out to 4 pixels
+# in0  :  R >>1
+# in1  :  G
+# in2  :  B >>1
+# out0 :  Y
+# out1 :  U
+# out2 :  V
+
+        
+drawyuv_start:
+  // scaled to 32768 = 15 bits to allow to deal with overflows
+  // Y= 0,299xR + 0,587xG + 0,114xB
+  mov gpr0,0x9000  // const U value
+  mov gpr1,0x7000  // const V value
+  mov gpr2,5     // bits to shift xpos to output
+  done drawyuv_loop,i
+
+drawyuv_loop:	
+
+
+  //Y
+  lsl gpr3,xpos,6
+  mov vout0,gpr3
+  mov vout1,gpr0
+  mov vout2,gpr1
+  done drawyuv_loop,ixo
+
+  //halt
+.global drawyuv_end
+drawyuv_end:

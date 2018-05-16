@@ -1,0 +1,64 @@
+# IPUV
+# set shift_in/x/out to 4 pixels
+# in0  :  Y
+# in1  :  Y
+# in2  :  Y
+# out0 :  Y denoised / or original
+
+# gaussian taps GPR4 - GPR6
+# 1  2  1
+# 2  4  2
+# 1  2  1
+
+# sum = 16
+
+# GPR0-3     used by rgb2y... do not put parameters here
+# GPR7       threshold
+# GPR8-11    vgpr2: absdiff between orig and low pass filtered
+# GPR12      0: mark edge pixels black 0xffff: normal mode.
+# GPR16-19   vgpr4: select input or 0
+  
+.global denoise3x3_start
+denoise3x3_start:
+        mov gpr4,1
+        mov gpr5,2
+        mov gpr6,4
+        //mov gpr7,0x0300  // threshold
+  
+        mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (4<<4) /*shr*/)
+        done denoise3x3_d1,i
+denoise3x3_d1:
+        done denoise3x3_loop,i
+denoise3x3_loop:
+        // FIR
+        mov maskv,0xf
+        mulh vsacc0,vh0,gpr4
+        mulh vacc0,vh1 ,gpr5
+        mulh vacc0,vh2 ,gpr4
+        mulh vacc0,vh5 ,gpr5
+        mulh vacc0,vh6 ,gpr6
+        mulh vacc0,vh7 ,gpr5
+        mulh vacc0,vh10,gpr4
+        mulh vacc0,vh11,gpr5
+        mulh vacc0,vh12,gpr4
+
+        // compare difference with threshold
+        abd vgpr2,vacc0,vh6
+        sub vgpr2,vgpr2,gpr7
+
+        // select filtered if lower than threshold
+        mov maskv, vflag_c
+        mov vout0,vacc0
+
+        // keep input signal when higher than threshold
+        xor maskv,maskv,one
+	//mov vout0,vh6       // if static denoise function
+	and vgpr4,vh6,gpr12   // if select edge view
+	mov vout0,vgpr4
+ 
+        done denoise3x3_loop,ixo     // output filtered
+        //dvot vh12,denoise3x3_loop,ixo  // output original input
+
+        //halt
+.global denoise3x3_end
+denoise3x3_end:

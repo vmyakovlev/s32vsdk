@@ -1,0 +1,14 @@
+&curdir=os.pwd()
+INTERCOM.execute 10000 cd "&curdir"
+INTERCOM.execute 10000 do ./S32V234-CM4.cmm
+INTERCOM.wait 10000
+INTERCOM.execute 10000 data.load.elf ../m4_startup/binary.elf
+INTERCOM.wait 10000
+INTERCOM.execute 10000 go
+INTERCOM.wait 10000
+INTERCOM.execute 10000 wait 1.s
+INTERCOM.wait 10000
+INTERCOM.execute 10000 Break.direct
+INTERCOM.wait 10000
+INTERCOM.execute 10000 sys.down
+INTERCOM.wait 10000

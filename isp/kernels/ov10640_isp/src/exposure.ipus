@@ -1,0 +1,69 @@
+//IPUS
+// function:
+// black level correction
+// channel gain for red and blue (green assumed to be 1.0)
+// histogram measurement for R, GR, GB, B
+// input: single line starting top left with B
+// output: single line with channel gained
+//gpr0		B black  offset: default 0xf08 
+//gpr1		Gb black offset: default 0xf08
+//gpr2		Gr black offset: default 0xf08
+//gpr3		R black  offset: default 0xf08
+//
+//gain factors
+//gpr4		B  gain default: 400 (OVT cam)
+//gpr7		R  gain	default: 490 (OVT cam)
+
+.global exposure_start
+exposure_start:
+
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ ) 
+        //mov confshr,8
+	mov gpr10,256
+	sub gpr10,gpr10,gpr8
+	sub gpr10,gpr10,gpr9
+
+        done exposure_d1_2,i
+exposure_d1_2:
+        lsl zero,ypos,15
+        mov lock,0
+        bne exposure_oddline1
+
+exposure_evenline1:
+        mov confhist,((10 <<8) | 64)
+        mov gpr12,10             # ina(15:0)  >> 10 for histogram  hbinl
+        mov gpr13,0
+exposure_loop0_0:  //B
+        sub ina0,ina0,gpr0       # black correction
+        lsr hbinincl,ina0,gpr12  # b exposure histogram (0-63)
+        mulh ina0,ina0,gpr4      # channel gain
+
+        dout ina0,exposure_loop0_1,ixo
+
+exposure_loop0_1:  //GB
+        sub ina0,ina0,gpr1       # black correction
+        mov hbininch,ina0        # gb exposure histogram
+        dout ina0,exposure_loop0_0,ixo
+
+exposure_oddline1:
+        mov confhist,((10 <<8) | 192)
+        mov gpr12,10             # ina(15:0)  >> 10 for histogram  hbinincl (64 bins per component)
+        mov gpr13,128            # offset bin for odd lines
+
+exposure_loop1_0:  // GR
+        sub ina0,ina0,gpr2       # black correction
+
+        lsr ina1,ina0,gpr12      # scale for 64 bins
+        add hbinincl,ina1,gpr13  # long exposure_tonehdr3x histogram
+        dout ina0,exposure_loop1_1,ixo
+
+exposure_loop1_1: //R
+        sub ina0,ina0,gpr3       # black correction
+        mov hbininch,ina0        # long exposure_tonehdr3x histogram
+
+        mulh ina0,ina0,gpr7      # channel gain
+        dout ina0,exposure_loop1_0,ixo
+  
+//        halt
+.global exposure_end
+exposure_end:

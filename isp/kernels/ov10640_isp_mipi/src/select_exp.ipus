@@ -1,0 +1,34 @@
+#.org    0x00
+.global select_exp_ipus_start
+# set shift_in/x to 1 pixels
+# set shift_out to 1 pixels
+# input to line 0
+# in to LSB
+# out from LSB
+# out0 : copied input value
+
+select_exp_ipus_start:
+        //mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (14<<4) /*shr*/)
+	mov gpr0, 1	// 1=L - 2=S - 3=VS
+	done select_exp_select, i // first input
+
+select_exp_select:
+        mov gpr1,gpr0
+        sub gpr1,1  //cmp gpr0,1
+        beq select_exp_ipus_in1
+        sub gpr1,1  // cmp gpr0,2
+        beq select_exp_ipus_in2
+
+select_exp_ipus_in0:
+	dout ina0,select_exp_ipus_in0,ixo
+
+select_exp_ipus_in2:
+	dout ina6,select_exp_ipus_in2,ixo     
+	
+select_exp_ipus_in1:
+	dout ina3,select_exp_ipus_in1,ixo	
+
+
+        halt
+.global select_exp_ipus_end
+select_exp_ipus_end:

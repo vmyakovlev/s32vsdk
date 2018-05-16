@@ -1,0 +1,370 @@
+
+Allocating common symbols
+Common symbol       size              file
+
+excep_ptr           0x4               startup/m4_functions.o
+slave               0x1               startup/i2c.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+m4_0_intvec      0x3e800000         0x00002000
+sram             0x3e802000         0x000fd000
+heap             0x3e8ff000         0x00000000
+stack            0x3e8ff000         0x00001000
+c5_0_code        0x3e900000         0x00100000
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD startup/crt0_m4_0.o
+LOAD startup/linflex_serial.o
+LOAD startup/m4_functions.o
+LOAD startup/pll.o
+LOAD startup/printf.o
+LOAD startup/SetupLPDDR2.o
+LOAD startup/qspi_driver.o
+LOAD startup/i2c.o
+LOAD startup/MIPI.o
+LOAD startup/HDMI.o
+LOAD startup/SetupDDR3.o
+LOAD main.o
+
+.intvec         0x3e800000        0x0
+                0x3e800000                M4_0_VECTOR_TABLE = .
+                0x3e800000                M4_0_VECTOR_RAM = .
+ *(.intvec*)
+                0x00002000                M4_0_VECTOR_SIZE = 0x2000
+
+.init
+ *(.init)
+
+.text           0x3e802000     0x4308
+ *(.text*)
+ .text          0x3e802000       0x84 startup/crt0_m4_0.o
+                0x3e802000                _start_cm4_0
+                0x3e80206e                _exit
+                0x3e802070                interrupt_enable
+                0x3e802074                m4_hard_fault_handler
+ .text          0x3e802084      0x154 startup/linflex_serial.o
+                0x3e802084                LinFlex0_Init
+                0x3e8020e8                sci_0_getchar
+                0x3e802130                sci_0_putchar
+                0x3e802180                ConfigureSciPins
+                0x3e8021b0                Linflex_SetSpeed
+ .text          0x3e8021d8      0x118 startup/m4_functions.o
+                0x3e8021d8                m4_hard_fault_routine
+ .text          0x3e8022f0      0xb68 startup/pll.o
+                0x3e8022f0                pll_init
+                0x3e802dd4                clkout_settings
+ .text          0x3e802e58      0x888 startup/printf.o
+                0x3e802e58                strlen
+                0x3e803048                printk
+                0x3e803660                printf
+                0x3e803698                sprintf
+ .text          0x3e8036e0      0x7dc startup/SetupLPDDR2.o
+                0x3e8036e0                lpddr_config_SIUL
+                0x3e803c80                probe_lpddr2
+                0x3e803d2c                config_lpddr2
+ .text          0x3e803ebc      0x874 startup/qspi_driver.o
+                0x3e803ebc                QSPI_setup_hyp
+                0x3e804048                quadspi_erase_hyp
+                0x3e8040c8                quadspi_program_word_hyp
+                0x3e804120                quadspi_program_hyp
+                0x3e80427c                quadspi_read_hyp
+                0x3e8042b0                quadspi_read_ip_hyp
+                0x3e8043c8                quadspi_status_hyp
+                0x3e804460                quadspi_send_instruction_hyp
+                0x3e8044cc                quadspi_set_lut
+                0x3e804538                quadspi_id_entry_hyp
+                0x3e804600                quadspi_cfi_entry_hyp
+                0x3e804704                quadspi_cfi_read_hyp
+ .text          0x3e804730      0xa0c startup/i2c.o
+                0x3e804730                I2C_Pin_Init
+                0x3e804970                I2C_Init_Config
+                0x3e804a58                I2C_start
+                0x3e804bf0                I2C_write
+                0x3e804cf0                I2C_read
+                0x3e804f08                I2C_stop
+                0x3e80500c                I2C8_TX
+                0x3e805068                I2C_Tx
+                0x3e8050d0                I2C_Rx
+ .text          0x3e80513c       0xd8 startup/MIPI.o
+                0x3e80513c                MIPI_trig_execute
+                0x3e805164                MIPI_init
+ .text          0x3e805214      0x134 startup/HDMI.o
+                0x3e805214                HDMI_configuration
+ .text          0x3e805348      0xbdc startup/SetupDDR3.o
+                0x3e805348                ddr3_config_SIUL
+                0x3e805db8                config_ddr3
+ .text          0x3e805f24      0x3e4 main.o
+                0x3e805f24                main
+                0x3e805fe8                mode_init
+                0x3e8060ac                mode_enter
+                0x3e806108                axbs_settings
+                0x3e8061a0                xrdc_settings
+                0x3e8061b8                peripherals_clock_enable
+
+.glue_7         0x3e806308        0x0
+ .glue_7        0x00000000        0x0 linker stubs
+
+.glue_7t        0x3e806308        0x0
+ .glue_7t       0x00000000        0x0 linker stubs
+
+.vfp11_veneer   0x3e806308        0x0
+ .vfp11_veneer  0x00000000        0x0 linker stubs
+
+.v4_bx          0x3e806308        0x0
+ .v4_bx         0x00000000        0x0 linker stubs
+
+.iplt           0x3e806308        0x0
+ .iplt          0x00000000        0x0 startup/crt0_m4_0.o
+
+.syscall
+ *(.syscall*)
+
+.secinfo
+ *(.secinfo*)
+
+.fini
+ *(.fini*)
+
+.eh_frame
+ *(.eh_frame*)
+
+.init_array
+ *(.init_array*)
+
+.jcr
+ *(.jcr*)
+
+.ARM.exidx
+ *(..ARM.exidx*)
+
+.rodata         0x3e806308       0x10
+ *(.rodata*)
+ .rodata        0x3e806308       0x10 main.o
+
+.rel.dyn        0x3e806318        0x0
+ .rel.iplt      0x00000000        0x0 startup/crt0_m4_0.o
+
+.sdabase
+ *(.sdabase*)
+
+.sdata
+ *(.sdata*)
+
+.sdata2
+ *(.sdata2*)
+
+.sbss
+ *(.sbss*)
+
+.data           0x3e806320        0x0
+                0x3e806320                DATA_SRAM = .
+                0x3e806320                DATA_ROM = .
+ *(.data*)
+ .data          0x3e806320        0x0 startup/crt0_m4_0.o
+ .data          0x3e806320        0x0 startup/linflex_serial.o
+ .data          0x3e806320        0x0 startup/m4_functions.o
+ .data          0x3e806320        0x0 startup/pll.o
+ .data          0x3e806320        0x0 startup/printf.o
+ .data          0x3e806320        0x0 startup/SetupLPDDR2.o
+ .data          0x3e806320        0x0 startup/qspi_driver.o
+ .data          0x3e806320        0x0 startup/i2c.o
+ .data          0x3e806320        0x0 startup/MIPI.o
+ .data          0x3e806320        0x0 startup/HDMI.o
+ .data          0x3e806320        0x0 startup/SetupDDR3.o
+ .data          0x3e806320        0x0 main.o
+                0x3e806320                DATA_ROM_END = .
+
+.igot.plt       0x3e806320        0x0
+ .igot.plt      0x00000000        0x0 startup/crt0_m4_0.o
+
+.bss            0x3e806320        0x9
+                0x3e806320                _BSS_BEGIN = .
+                0x3e806320                __bss_start__ = .
+ *(.bss*)
+ .bss           0x3e806320        0x0 startup/crt0_m4_0.o
+ .bss           0x3e806320        0x0 startup/linflex_serial.o
+ .bss           0x3e806320        0x4 startup/m4_functions.o
+                0x3e806320                hard_fault_num
+ .bss           0x3e806324        0x0 startup/pll.o
+ .bss           0x3e806324        0x0 startup/printf.o
+ .bss           0x3e806324        0x0 startup/SetupLPDDR2.o
+ .bss           0x3e806324        0x0 startup/qspi_driver.o
+ .bss           0x3e806324        0x0 startup/i2c.o
+ .bss           0x3e806324        0x0 startup/MIPI.o
+ .bss           0x3e806324        0x0 startup/HDMI.o
+ .bss           0x3e806324        0x0 startup/SetupDDR3.o
+ .bss           0x3e806324        0x0 main.o
+ *(COMMON)
+ COMMON         0x3e806324        0x4 startup/m4_functions.o
+                0x3e806324                excep_ptr
+ COMMON         0x3e806328        0x1 startup/i2c.o
+                0x3e806328                slave
+                0x3e806329                __bss_end__ = .
+                0x3e806329                _BSS_END = .
+
+.CodeRelocateRam
+                0x3e806329        0x0
+                0x3e806329                CODE_RELOCATE_SRAM = .
+                0x3e806329                CODE_RELOCATE_ROM = .
+ *(.CodeRelocateRam*)
+                0x3e806329                CODE_RELOCATE_ROM_END = .
+
+.heap
+ *(.heap*)
+
+.stack          0x3e8ff000        0x0
+                0x3e900000                __CM4_0_STACK_ADDRESS = (. + 0x1000)
+
+.c5_0_code
+ *(.stack*)
+OUTPUT(binary.elf elf32-littlearm)
+
+.ARM.attributes
+                0x00000000       0x2e
+ .ARM.attributes
+                0x00000000       0x20 startup/crt0_m4_0.o
+ .ARM.attributes
+                0x00000020       0x37 startup/linflex_serial.o
+ .ARM.attributes
+                0x00000057       0x37 startup/m4_functions.o
+ .ARM.attributes
+                0x0000008e       0x37 startup/pll.o
+ .ARM.attributes
+                0x000000c5       0x37 startup/printf.o
+ .ARM.attributes
+                0x000000fc       0x37 startup/SetupLPDDR2.o
+ .ARM.attributes
+                0x00000133       0x37 startup/qspi_driver.o
+ .ARM.attributes
+                0x0000016a       0x37 startup/i2c.o
+ .ARM.attributes
+                0x000001a1       0x37 startup/MIPI.o
+ .ARM.attributes
+                0x000001d8       0x37 startup/HDMI.o
+ .ARM.attributes
+                0x0000020f       0x37 startup/SetupDDR3.o
+ .ARM.attributes
+                0x00000246       0x37 main.o
+
+.comment        0x00000000       0x63
+ .comment       0x00000000       0x63 startup/linflex_serial.o
+                                 0x64 (size before relaxing)
+ .comment       0x00000000       0x64 startup/m4_functions.o
+ .comment       0x00000000       0x64 startup/pll.o
+ .comment       0x00000000       0x64 startup/printf.o
+ .comment       0x00000000       0x64 startup/SetupLPDDR2.o
+ .comment       0x00000000       0x64 startup/qspi_driver.o
+ .comment       0x00000000       0x64 startup/i2c.o
+ .comment       0x00000000       0x64 startup/MIPI.o
+ .comment       0x00000000       0x64 startup/HDMI.o
+ .comment       0x00000000       0x64 startup/SetupDDR3.o
+ .comment       0x00000000       0x64 main.o
+
+.debug_line     0x00000000     0x1064
+ .debug_line    0x00000000       0x72 startup/crt0_m4_0.o
+ .debug_line    0x00000072       0xa8 startup/linflex_serial.o
+ .debug_line    0x0000011a       0x91 startup/m4_functions.o
+ .debug_line    0x000001ab      0x1d5 startup/pll.o
+ .debug_line    0x00000380      0x21d startup/printf.o
+ .debug_line    0x0000059d      0x1f7 startup/SetupLPDDR2.o
+ .debug_line    0x00000794      0x221 startup/qspi_driver.o
+ .debug_line    0x000009b5      0x2a5 startup/i2c.o
+ .debug_line    0x00000c5a       0x8d startup/MIPI.o
+ .debug_line    0x00000ce7       0x63 startup/HDMI.o
+ .debug_line    0x00000d4a      0x224 startup/SetupDDR3.o
+ .debug_line    0x00000f6e       0xf6 main.o
+
+.debug_info     0x00000000    0x1f173
+ .debug_info    0x00000000       0x90 startup/crt0_m4_0.o
+ .debug_info    0x00000090     0x24c7 startup/linflex_serial.o
+ .debug_info    0x00002557     0x1850 startup/m4_functions.o
+ .debug_info    0x00003da7     0x76db startup/pll.o
+ .debug_info    0x0000b482      0x4d4 startup/printf.o
+ .debug_info    0x0000b956     0x3fd5 startup/SetupLPDDR2.o
+ .debug_info    0x0000f92b     0x43ca startup/qspi_driver.o
+ .debug_info    0x00013cf5     0x1b36 startup/i2c.o
+ .debug_info    0x0001582b     0x16f7 startup/MIPI.o
+ .debug_info    0x00016f22       0x68 startup/HDMI.o
+ .debug_info    0x00016f8a     0x3f3e startup/SetupDDR3.o
+ .debug_info    0x0001aec8     0x42ab main.o
+
+.debug_abbrev   0x00000000     0x108a
+ .debug_abbrev  0x00000000       0x14 startup/crt0_m4_0.o
+ .debug_abbrev  0x00000014      0x188 startup/linflex_serial.o
+ .debug_abbrev  0x0000019c      0x13b startup/m4_functions.o
+ .debug_abbrev  0x000002d7      0x172 startup/pll.o
+ .debug_abbrev  0x00000449      0x1df startup/printf.o
+ .debug_abbrev  0x00000628      0x16a startup/SetupLPDDR2.o
+ .debug_abbrev  0x00000792      0x21b startup/qspi_driver.o
+ .debug_abbrev  0x000009ad      0x1d3 startup/i2c.o
+ .debug_abbrev  0x00000b80      0x113 startup/MIPI.o
+ .debug_abbrev  0x00000c93       0x42 startup/HDMI.o
+ .debug_abbrev  0x00000cd5      0x150 startup/SetupDDR3.o
+ .debug_abbrev  0x00000e25      0x265 main.o
+
+.debug_aranges  0x00000000      0x180
+ .debug_aranges
+                0x00000000       0x20 startup/crt0_m4_0.o
+ .debug_aranges
+                0x00000020       0x20 startup/linflex_serial.o
+ .debug_aranges
+                0x00000040       0x20 startup/m4_functions.o
+ .debug_aranges
+                0x00000060       0x20 startup/pll.o
+ .debug_aranges
+                0x00000080       0x20 startup/printf.o
+ .debug_aranges
+                0x000000a0       0x20 startup/SetupLPDDR2.o
+ .debug_aranges
+                0x000000c0       0x20 startup/qspi_driver.o
+ .debug_aranges
+                0x000000e0       0x20 startup/i2c.o
+ .debug_aranges
+                0x00000100       0x20 startup/MIPI.o
+ .debug_aranges
+                0x00000120       0x20 startup/HDMI.o
+ .debug_aranges
+                0x00000140       0x20 startup/SetupDDR3.o
+ .debug_aranges
+                0x00000160       0x20 main.o
+
+.debug_str      0x00000000     0x966b
+ .debug_str     0x00000000     0x1171 startup/linflex_serial.o
+                               0x11ed (size before relaxing)
+ .debug_str     0x00001171      0x93e startup/m4_functions.o
+                                0xa9c (size before relaxing)
+ .debug_str     0x00001aaf     0x3d47 startup/pll.o
+                               0x48a7 (size before relaxing)
+ .debug_str     0x000057f6      0x12c startup/printf.o
+                                0x232 (size before relaxing)
+ .debug_str     0x00005922     0x1d6a startup/SetupLPDDR2.o
+                               0x2887 (size before relaxing)
+ .debug_str     0x0000768c      0xae8 startup/qspi_driver.o
+                               0x26de (size before relaxing)
+ .debug_str     0x00008174      0x252 startup/i2c.o
+                                0xd73 (size before relaxing)
+ .debug_str     0x000083c6      0xc10 startup/MIPI.o
+                                0xd55 (size before relaxing)
+ .debug_str     0x00008fd6       0x22 startup/HDMI.o
+                                0x147 (size before relaxing)
+ .debug_str     0x00008ff8       0x31 startup/SetupDDR3.o
+                               0x2856 (size before relaxing)
+ .debug_str     0x00009029      0x642 main.o
+                               0x1cbb (size before relaxing)
+
+.debug_frame    0x00000000      0x7f8
+ .debug_frame   0x00000000       0xbc startup/linflex_serial.o
+ .debug_frame   0x000000bc       0x38 startup/m4_functions.o
+ .debug_frame   0x000000f4       0x60 startup/pll.o
+ .debug_frame   0x00000154      0x168 startup/printf.o
+ .debug_frame   0x000002bc       0x84 startup/SetupLPDDR2.o
+ .debug_frame   0x00000340      0x1a4 startup/qspi_driver.o
+ .debug_frame   0x000004e4      0x168 startup/i2c.o
+ .debug_frame   0x0000064c       0x50 startup/MIPI.o
+ .debug_frame   0x0000069c       0x2c startup/HDMI.o
+ .debug_frame   0x000006c8       0x5c startup/SetupDDR3.o
+ .debug_frame   0x00000724       0xd4 main.o

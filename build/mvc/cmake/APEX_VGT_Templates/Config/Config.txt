@@ -1,0 +1,38 @@
+//configInstallationDir = C:\eclipse\
+eclipseWS = C:\Users\B48304\runtime-EclipseApplication\
+cmakeInstallationDir = C:\Program Files (x86)\cmake\bin\ // Please configure this variable to the actual installation directory of your cmake
+executeCMake = 1 //if set to 1, the cmake will be called upon diagram saving. Otherwise the CMakeLists.txt files are only generated and not compiled.
+//templateRootDir  = eclipseInstallationDir + "APEX_VGT_Templates\"; // If changed, this path should be adapted also in the c:/eclipse/ directory
+//configurationFileDir = templateRootDir + "Config\\"; 	// Directory of this file as it is compiled into the Java Package – Cannot be changed
+//configurationFileName = "Config.txt";					// Name of this file as it is compiled into the Java Package – Cannot be changed
+
+// Constants for the Build templates
+//applTemplateDir = templateRootDir + application\ //Only set if it has an other absolute path. !!!CAUTION: If changed, this path should be adapted also in the APEX_VGT_Templates directory
+//kernelTemplateDir = templateRootDir + kernels\cat\ //Only set if it has an other absolute path. !!!CAUTION: If changed, this path should be adapted also in the APEX_VGT_Templates directory
+	
+	
+// Constants for the directories where the source code shall be generated
+rootDir = c:\tmp\generatedProject\	/// default directory for the generated code. Please change it if another location is wished
+srcDir = src\ 						/// default sub-directory  under rootDir, where application sources will be saved in
+graphDir =graphs\					/// default sub-directory  under rootDir, where ACF-graphs will be saved in
+ownKernelsDir =kernels\				/// default sub-directory  under rootDir, where own kernels will be saved in
+	
+mainFileName = main					/// the name of the main file
+definesAndGlobalsFileName = definesAndGlobals // the name of the file where global definitions and variables will be saved in
+
+
+// The root directory for the kernel libraries will be read from the S32V234_SDK_ROOT environment variable, but overwritten if it is set here
+//sdkRootDir = Y:\projects\vsdk\s32v234_sdk\		
+//sdkRootDir = Y:\Freescale\VisionSDK_S32V2xx_EAR_0_8_1_b7f886\s32v234_sdk
+//kernelRootDir = Y:\projects\vsdk\s32v234_sdk\kernels\apu\ //Only set if it has an other absolute path
+		
+	 
+linuxProj=BUILD.mk
+cmake_generatedFile = CMakeLists_generated.txt	/// CAUTION if this is changed, it should be changed also in the template CMakeLists.txt from the application
+graphImportBuildFile =  Build_GraphImport.mk 	/// CAUTION if this is changed, it should be changed also in the template BUILD.mk from the application directory
+kernelsImportBuildFile =  Build_KernelImport.mk /// CAUTION if this is changed, it should be changed also in the template BUILD.mk from the kernels directory
+buildKernelsDir = build-apu-tct-sa-d			/// The directory where the Makefile for the kernels resides
+build_vs_dir	= build-deskwin32				/// The directory where the Visual Studio projects are located
+		
+maxNrKernelPorts = 16
+genLibrary = 0 								/// if set to 1, then a run_function is defined for each Meta_GraphClass in a separate .cpp,h file pair. This generates a library of processes

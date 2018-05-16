@@ -1,0 +1,43 @@
+# for IPUS
+#.org    0x00
+# set shift_in/x to 1 pixels
+# set shift_out to 1 pixels
+# line0: y values
+# line1: u values  / horizontally upscaled by stream DMA in case of yuv422
+# line3: v values  / horizontally upscaled by stream DMA in case of yuv422
+# out0 cycle 0 : U
+# out0 cycle 1 : Y
+# out0 cycle 2 : V
+# out0 cycle 3 : Y
+
+.global yuv420planar2yuv422interleaved_scale2to1_start
+yuv420planar2yuv422interleaved_scale2to1_start:
+
+        done yuv420planar2yuv422interleaved_scale2to1_u,i  // load first 2 pixles yuyv
+
+yuv420planar2yuv422interleaved_scale2to1_u:
+        mov out0,ina3
+        done yuv420planar2yuv422interleaved_scale2to1_y0,o
+
+yuv420planar2yuv422interleaved_scale2to1_y0:
+        mov out0,ina0 
+        done yuv420planar2yuv422interleaved_scale2to1_v,o
+
+yuv420planar2yuv422interleaved_scale2to1_v:
+        mov out0,ina6
+        done yuv420planar2yuv422interleaved_scale2to1_y1,io
+
+yuv420planar2yuv422interleaved_scale2to1_y1:
+        mov out0,ina0
+        done yuv420planar2yuv422interleaved_scale2to1_skip0,ixo
+
+yuv420planar2yuv422interleaved_scale2to1_skip0:        
+        mov loopcnt,0x1
+yuv420planar2yuv422interleaved_scale2to1_loop0:
+        ldon yuv420planar2yuv422interleaved_scale2to1_loop0,i # shift input by 4
+        
+        done yuv420planar2yuv422interleaved_scale2to1_u,i
+
+        halt
+.global yuv420planar2yuv422interleaved_scale2to1_end
+yuv420planar2yuv422interleaved_scale2to1_end:

@@ -1,0 +1,63 @@
+# for IPUV
+# input shift: 4
+# x-counter shift: 4
+# out counter shift 3 (x4)
+# function:
+# compress RGB according to the compression factor
+# in0  :  R
+# in1  :  G
+# in2  :  B
+# in4  :  Y
+# in3  :  comression factor in (8.8)
+# in4  :  Y
+# out0 :  compressed VYU
+
+        
+.global rgb_compress_vyu_start
+rgb_compress_vyu_start:
+  // to 15 bits!
+  
+  mov gpr0,16154  //(B-Y)*gpr0->U :  32768 * 0,493
+  mov gpr1,28737  //(R-Y)*gpr1->V :  32768 * 0,877
+  mov gpr2,0x8000 // U and V offset for 0 position
+  //mov gpr3,0x100  // x1 factor for UV compression in 7.9
+  //mov gpr8-11   // effective compression factor for UV
+  mov gpr6,0x1    // shift by 1 bit
+  mov gpr7,0x7fff // max unsigned value
+ 
+  done rgb_compress_vyu_loop,i
+
+rgb_compress_vyu_loop:	
+
+  mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (9<<4) /*shr*/)
+  mulh vgpr2,vh15,gpr3  // compute UV compression
+  mulh vh19,vh20,vh15   // compress Y
+  mulh vh14,vh0 ,vh15   // compress R
+  //mulh vh9 ,vh5, vh15    // compress G
+  mulh vh4 ,vh10,vh15   // compress B
+  min  vh14,vh14,gpr7   // sth sub or min??? is that already 15 bit coming from the debayer?
+  min  vh4 ,vh4 ,gpr7
+  asl  vh9,vh19 ,gpr6
+
+  mov confalu,(1 /*signed*/ | (1<<1) /*saturate*/ | (15<<4) /*shr*/)
+  sub  vh14,vh14,vh19   // R - Y
+  sub  vh4 ,vh4 ,vh19   // B - Y    
+  mulh vh14,vh14,gpr1   // V signed
+  mulh vh4 ,vh4 ,gpr0   // U signed
+  mov confalu,(1 /*signed*/ | (0<<1) /*saturate*/ | (15<<4) /*shr*/)
+  add  vh14,vh14,gpr2   // V unsigned
+  add  vh4 ,vh4 ,gpr2   // U unsigned
+  
+rgb_compress_vyu_out0:	
+  dvot vv7,rgb_compress_vyu_out1,o
+rgb_compress_vyu_out1:	
+  dvot vv6,rgb_compress_vyu_out2,o
+rgb_compress_vyu_out2:	
+  dvot vv5,rgb_compress_vyu_out3,o
+rgb_compress_vyu_out3:	
+  dvot vv4,rgb_compress_vyu_loop,ixo
+	
+
+  //halt
+.global rgb_compress_vyu_end
+rgb_compress_vyu_end:

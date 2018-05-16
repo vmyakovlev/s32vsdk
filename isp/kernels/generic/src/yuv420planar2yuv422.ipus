@@ -1,0 +1,40 @@
+// IPUS kernel
+// INPUT:
+// INA0: line to be 2x upsampled in width and height
+// OUTPUT:
+// OUT0: first time upsampled line
+// OUT1: second time upsampled line
+// upsamplig by 2
+// REGISTERS:
+// SET BY SEQUENCER
+// SET BY KERNEL
+
+.global yuv420planar2yuv422_start
+yuv420planar2yuv422_start:
+       mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (0<<4) /*shr*/)
+
+       done yuv420planar2yuv422_u,i  // load first 2 pixles yuyv   
+       
+yuv420planar2yuv422_u:
+        mov  out0,ina3
+        mov  out1,ina3
+        done yuv420planar2yuv422_y0,o
+
+yuv420planar2yuv422_y0:
+        mov  out0,ina0
+        mov  out1,inb0
+        done yuv420planar2yuv422_v,o
+
+yuv420planar2yuv422_v:
+        mov  out0,ina6
+        mov  out1,ina6
+        done yuv420planar2yuv422_y1,ixo
+        
+yuv420planar2yuv422_y1:
+        mov  out0,ina0
+        mov  out1,inb0
+        done yuv420planar2yuv422_u,ixo 
+
+        halt
+.global yuv420planar2yuv422_end
+yuv420planar2yuv422_end:

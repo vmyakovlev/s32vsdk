@@ -1,0 +1,15 @@
+#!gbuild
+[Program]
+	-kernel
+	-delete
+	-ldebug
+	-lres
+	-lload
+	-lip4
+	-livfs
+	-lcore
+${__VISION_S32V234_SDK}/libs/arm/utils/oal/kernel/build-v234ce-ghs-integrity-d/multi/liboaldriver.gpj		[Library]
+${__VISION_S32V234_SDK}/libs/arm/apex/apex/kernel/build-v234ce-ghs-integrity-d/multi/libapexdriver.gpj		[Library]
+global_table.c
+net_server_child_image.c
+

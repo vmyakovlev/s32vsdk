@@ -1,0 +1,64 @@
+// for IPUS with Histogram engine
+// 1 channels in: bayer-pattern, top left is R
+// 1 channel out: combined exposure
+// histogram out:
+//   0- 63: R  long
+//  64-127: GR long
+// 128-191: GB short
+// 192-155: B  long
+// parameters:
+// 
+// knee point from 0 - 256
+// gpr8		factor for line 0 (short exposure)
+
+// used registers:
+// gpr9		factor for line 1 (long exposure) computed from gpr8
+// gpr12        histogram input shift (10 bit)
+// gpr13        histogram offset (blue line: 128)
+
+.global histogram_start
+histogram_start:
+
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ ) 
+
+	// parameters for histogram bin computation
+        mov gpr12,10             # ina(15:0)  >> 10 for histogram (64 bins per component)
+        mov gpr13,128            # offset bin for odd lines
+       
+        done histogram_d1_2,i
+       
+histogram_d1_2:
+	// check even or odd line
+        lsl zero,ypos,15
+        mov lock,0
+        bne histogram_oddline1
+  
+histogram_evenline1:
+        mov confhist,((10 <<8) | 64)
+histogram_loop0_0:  //R
+ 
+        lsr hbinincl,ina0,gpr12  # long histogram histogram (0-63)
+        done histogram_loop0_1,ixo
+
+histogram_loop0_1:  //GR
+ 
+        mov hbininch,ina0        # long histogram histogram
+        done histogram_loop0_0,ixo
+
+histogram_oddline1:
+        mov confhist,((10 <<8) | 192)
+
+histogram_loop1_0:  // GB
+
+        lsr ina0,ina0,gpr12   # scale for 64 bins
+        add hbinincl,ina0,gpr13  # long histogram histogram
+        done histogram_loop1_1,ixo
+
+histogram_loop1_1: //B
+ 
+        mov hbininch,ina0        # long histogram histogram
+        done histogram_loop1_0,ixo
+  
+//        halt
+.global histogram_end
+histogram_end:

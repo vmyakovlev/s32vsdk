@@ -1,0 +1,38 @@
+// IPUV kernel
+// setup: read, process, output 4 pixels per done
+// input 3 lines
+// line0: long exposure
+// line1: short expsoure
+// line3: very short expsoure
+// output 1 line
+// out0: combined
+// parameters:
+// gpr0: Long alpha value
+// gpr1: short alpha value
+// gpr2: very short alpha value
+// gpr0+gpr1+gpr2=256
+// registes:
+// vacc0: pwl mapped output
+
+.global tonehdr3x_start
+tonehdr3x_start:
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ ) 
+        mov maskv,0xf
+        done tonehdr3x_d0,i
+tonehdr3x_d0:
+        mov lock,0
+
+//long   exposure line0/vh0
+//short  exposure line1/vh5
+//vshort exposure line2/vh10
+
+  
+tonehdr3x_loop:
+        mulh vsacc0, vh0,gpr0     # multiply long   exposure with scaling value
+        mulh vacc0,  vh5,gpr1     # multiply short  exposure with scaling value
+        mulh vacc0, vh10,gpr2     # multiply vshort exposure with scaling value
+        dvot vacc0,tonehdr3x_loop,ixo
+
+//        halt
+.global tonehdr3x_end
+tonehdr3x_end:

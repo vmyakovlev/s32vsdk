@@ -1,0 +1,39 @@
+// for IPUS with Histogram engine
+// 0 channels in: bayer-pattern L,  starting with B
+// 1 channels in: bayer-pattern S,  starting with B
+// 2 channels in: bayer-pattern VS, starting with B
+// 1 channel out: na
+// histogram out:
+//   0-127: L   histogram (128 bins)
+// 128-191: S   histogram (64 bins)
+// 102-155: VS  histogram (64 bins)
+// parameters:
+// none
+// used registers:
+// gpr0        bin offset between L ald VS = 192
+
+.global histogram_3comb_start
+histogram_3comb_start:
+
+  mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ )
+
+  mov confhist,(((16-6)<<8) | 128)// for S
+                                //   shift right for 16bits -> 6bits
+                                //   offset from 128 bins
+  mov gpr0,192                  //   offset between L and VS in the hist
+  mov lock,(1<<9)               // unlock histogram read out
+  done histogram_3comb_loop,i   // load first pixels
+
+histogram_3comb_loop:
+  lsr gpr1,ina0,(16-6)        // shift V from 16bit > 6 bits
+  add hbinincl,gpr1,gpr0      // add to histogram with offset 192
+  			      
+  asl gpr1,ina0,4             // saturate combined at bit 12 for S and
+  mov hbininch,gpr1           //   add to histogram
+  asl ina0,ina0,8             // saturate combined at bit 8 for L
+  lsr hbinincl,ina0,(16-7)    // shift saturated L from 16 to 7 bits
+  done histogram_3comb_loop,ix // next pixels (no output)
+
+// halt
+.global histogram_3comb_end
+histogram_3comb_end:

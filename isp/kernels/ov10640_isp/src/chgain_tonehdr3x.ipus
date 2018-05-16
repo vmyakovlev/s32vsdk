@@ -1,0 +1,93 @@
+# IPUS 
+//gpr0		R black  offset: default 0xf08 
+//gpr1		Gr black offset: default 0xf08
+//gpr2		Gb black offset: default 0xf08
+//gpr3		B black  offset: default 0xf08
+//
+//gain factors
+//gpr4		R  gain default: 400 (Soyn cam), 590 (Sony EVB), 
+//gpr7		B  gain	default: 490 (Soyn cam), 402 (Sony EVB), 
+//
+//knee point from 0 - 256
+//gpr8		factor for line 0 (long exposure)
+//gpr9		factor for line 1 (short exposure)
+//gpr10         factor for line 2 (very short) computed from gpr8 and gpr9
+
+.global chgain_tonehdr3x_start
+chgain_tonehdr3x_start:
+
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ ) 
+        //mov confshr,8
+	mov gpr10,256
+	sub gpr10,gpr10,gpr8
+	sub gpr10,gpr10,gpr9
+
+  
+        lsl zero,ypos,15
+        done chgain_tonehdr3x_d1_2,i
+chgain_tonehdr3x_d1_2:
+        bne chgain_tonehdr3x_oddline1
+
+
+  
+chgain_tonehdr3x_evenline1:
+chgain_tonehdr3x_loop0_0:  //R
+        sub ina0,ina0,gpr0       # black correction
+        mulh ina0,ina0,gpr4      # channel gain
+        sub ina3,ina3,gpr0       # black correction
+        mulh ina3,ina3,gpr4      # channel gain
+        sub ina6,ina6,gpr0       # black correction
+        mulh ina6,ina6,gpr4      # channel gain
+
+        mulh sacc0,ina0,gpr8     # hdr3x knee point
+        mulh acc0,ina3,gpr9      # hdr3x knee2
+        mulh acc0,ina6,gpr10     # hdr3x kneeq
+
+        dout acc0,chgain_tonehdr3x_loop0_1,ixo
+
+chgain_tonehdr3x_loop0_1:  //GR
+        sub ina0,ina0,gpr1       # black correction
+        //mulh ina0,ina0,gpr5      # channel gain
+        sub ina3,ina3,gpr1       # black correction
+        //mulh ina3,ina3,gpr5      # channel gain
+        sub ina6,ina6,gpr1       # black correction
+        //mulh ina6,ina6,gpr5      # channel gain
+
+        mulh sacc0,ina0,gpr8     # hdr3x knee point
+        mulh acc0,ina3,gpr9      # hdr3x knee2
+        mulh acc0,ina6,gpr10     # hdr3x kneeq
+
+        dout acc0,chgain_tonehdr3x_loop0_0,ixo
+
+chgain_tonehdr3x_oddline1:
+chgain_tonehdr3x_loop1_0:  // GB
+        sub ina0,ina0,gpr2       # black correction
+        //mulh ina0,ina0,gpr6      # channel gain
+        sub ina3,ina3,gpr2       # black correction
+        //mulh ina3,ina3,gpr6      # channel gain
+        sub ina6,ina6,gpr2       # black correction
+        //mulh ina6,ina6,gpr6      # channel gain
+
+        mulh sacc0,ina0,gpr8     # hdr3x knee point
+        mulh acc0,ina3,gpr9      # hdr3x knee2
+        mulh acc0,ina6,gpr10     # hdr3x kneeq
+
+        dout acc0,chgain_tonehdr3x_loop1_1,ixo
+
+chgain_tonehdr3x_loop1_1: //B
+        sub ina0,ina0,gpr3       # black correction
+        mulh ina0,ina0,gpr7      # channel gain
+        sub ina3,ina3,gpr3       # black correction
+        mulh ina3,ina3,gpr7      # channel gain
+        sub ina6,ina6,gpr3       # black correction
+        mulh ina6,ina6,gpr7      # channel gain
+
+        mulh sacc0,ina0,gpr8     # hdr3x knee point
+        mulh acc0,ina3,gpr9      # hdr3x knee2
+        mulh acc0,ina6,gpr10     # hdr3x kneeq
+
+        dout acc0,chgain_tonehdr3x_loop1_0,ixo
+  
+//        halt
+.global chgain_tonehdr3x_end
+chgain_tonehdr3x_end:

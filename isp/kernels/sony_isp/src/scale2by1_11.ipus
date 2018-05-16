@@ -1,0 +1,20 @@
+.global scale2by1_11_start
+scale2by1_11_start:
+        mov  confalu, (0 /*unsigned*/ | (1<<1) /*saturate*/)
+        mov  confaddt,(0 /*w*/ | (0<<3) /*unsigned*/ | (0<<5) /*shift*/| (0x40 << 9) /* scale*/)
+        done scale2by1_11_d0,i
+scale2by1_11_d0: 
+        done scale2by1_11_d1,i
+scale2by1_11_d1:
+        // shift matrix
+        // 0 2 2                              0 1 1
+        // 0 2 2   => FIR coefficients 1/4  * 0 1 1
+        // 0 0 0                              0 0 0
+        mset 0b000011011
+scale2by1_11_loop:
+        lsr  w,ina,2
+        dout sum,scale2by1_11_odd,ixo
+scale2by1_11_odd:
+        done scale2by1_11_loop,i
+.global scale2by1_11_end
+scale2by1_11_end:

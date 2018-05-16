@@ -1,0 +1,133 @@
+diff --git a/arch/arm64/boot/dts/freescale/s32v234-evbbcm.dts b/arch/arm64/boot/dts/freescale/s32v234-evbbcm.dts
+old mode 100644
+new mode 100755
+index 0f4811e..1b26923
+--- a/arch/arm64/boot/dts/freescale/s32v234-evbbcm.dts
++++ b/arch/arm64/boot/dts/freescale/s32v234-evbbcm.dts
+@@ -13,6 +13,9 @@
+ 
+ &fec {
+ 	phy-mode = "rgmii";
+-	fixed-link = <1 1 1000 0 0>;
+ 	status = "okay";
++	fixed-link {
++		speed=<1000>;
++		full-duplex;
++	};
+ };
+diff --git a/arch/arm64/boot/dts/freescale/s32v234.dtsi b/arch/arm64/boot/dts/freescale/s32v234.dtsi
+old mode 100644
+new mode 100755
+index ed4c285..87f3270
+--- a/arch/arm64/boot/dts/freescale/s32v234.dtsi
++++ b/arch/arm64/boot/dts/freescale/s32v234.dtsi
+@@ -6,6 +6,7 @@
+  * the Free Software Foundation; either version 2 of the License, or
+  * (at your option) any later version.
+  */
++
+ #include <dt-bindings/clock/s32v234-clock.h>
+ #include <dt-bindings/pinctrl/s32v234-pinctrl.h>
+ 
+@@ -109,6 +110,39 @@
+ 			reg = <0x0 0xC1000000 0x0 0x100000>;    /* 1 MB */
+ 			no-map;
+ 		};
++        
++		resmem: rmem@C4F00000 {
++			reg = <0 0xC4F00000 0 0x100000>;
++			no-map;
++		};
++
++	oalddr0_allocator_memory: oalddr0@0x8B000000 {
++            reg = <0x0 0x8B000000 0x0 0x05000000>;  /* 80 MB */
++            no-map;
++        };
++        
++        oalddr1_allocator_memory: oalddr1@0xCB000000 {
++            reg = <0x0 0xCB000000 0x0 0x05000000>;  /* 80 MB */
++            no-map;
++        };
++        
++        oalsramS_allocator_memory: oalsramS@0x3E800000 {
++            reg = <0x0 0x3E800000 0x0 0x00300000>;  /* 3 MB */
++            no-map;
++        };
++        
++        oalsramM_allocator_memory: oalsramM@0x3EB00000 {
++            reg = <0x0 0x3EB00000 0x0 0x00100000>;  /* 1 MB */
++            no-map;
++        };
++
++	};
++
++	nxpresmem: themem@C4F00000 {
++		status = "okay";
++		compatible = "nxp,resmem";
++		memory-region = <&resmem>;
++		interrupts = <0 0 4>;
+ 	};
+ 
+ 	timer {
+@@ -465,6 +499,61 @@
+ 				vref = <1800>;
+ 				status = "okay";
+ 			};
++            
++            oalmem0: oalmem0@8B000000 {
++                compatible = "fsl,s32v234-oal";               // OAL ALLOCATOR DEVICE
++                reg = <0x0 0x8B000000 0x0 0x05000000>;        // MEMORY RANGE
++                memory-region = <&oalddr0_allocator_memory>;  // MEMORY REGION TO USE (RESERVED MEMORY)
++                id = <0>;                                     // ID (FOR ALLOCATORY USE - MUST MATCH WITH MEM REGION ID)
++                align = <0x1000>;                             // DEFAULT ALIGNMENT
++                autobalance;                                  // PRESENT IF AUTOBALANCE IS NEEDED (ONE AUTO BALANCE REGION)
++            };
++            
++            oalmem1: oalmem1@CB000000 {
++                compatible = "fsl,s32v234-oal";               // OAL ALLOCATOR DEVICE
++                reg = <0x0 0xCB000000 0x0 0x05000000>;        // MEMORY RANGE
++                memory-region = <&oalddr1_allocator_memory>;  // MEMORY REGION TO USE (RESERVED MEMORY)
++                id = <1>;                                     // ID (FOR ALLOCATORY USE - MUST MATCH WITH MEM REGION ID)
++                align = <0x1000>;                             // DEFAULT ALIGNMENT
++                autobalance;                                  // PRESENT IF AUTOBALANCE IS NEEDED (ONE AUTO BALANCE REGION)
++            };
++            
++            oalsramS: oalsramS@3E800000 {
++                compatible = "fsl,s32v234-oal";
++                reg = <0x0 0x3E800000 0x0 0x00300000>;
++                memory-region = <&oalsramS_allocator_memory>;
++                id = <2>;
++                align = <0x8>;                             
++                init;
++            };
++            
++            oalsramM: oalsramM@3EB00000 {
++                compatible = "fsl,s32v234-oal";
++                reg = <0x0 0x3EB00000 0x0 0x00100000>;
++                memory-region = <&oalsramM_allocator_memory>;
++                id = <3>;
++                align = <0x8>;                             
++                init;                             
++            };
++            
++            // 1 = low-to-high edge triggered
++            // 2 = high-to-low edge triggered
++            // 4 = active high level-sensitive
++            // 8 = active low level-sensiti
++            apex0: apex0@0x74000000 {
++                compatible = "nxp,s32v234-apex";
++                reg = <0x0 0x74000000 0x0 0x00100000>;
++                id = <0>;
++                interrupts = <0 109 4>;
++            };
++            
++            apex1: apex1@0x78000000 {
++                compatible = "nxp,s32v234-apex";
++                reg = <0x0 0x78000000 0x0 0x00100000>;
++                id = <1>;
++                interrupts = <0 110 4>;
++            };
++        
+ 		};
+ 
+ 	};

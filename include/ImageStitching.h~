@@ -1,0 +1,104 @@
+#ifndef _IMAGESTITCHING_H_
+
+#define _IMAGESTITCHING_H_
+
+#define Uint32  unsigned int
+#define Uint16  unsigned short
+#define Uint8   unsigned char
+#define S08 char
+#define S32 int
+#define U08 unsigned S08
+#define U16 unsigned short
+#define U32 unsigned int
+typedef unsigned char BYTE;
+typedef unsigned short WORD;
+typedef unsigned long DWORD;
+
+#define IMG_WIDTH         1280	
+#define IMG_HEIGHT        1080
+
+#define SIG_WIDTH          960
+#define SIG_HEIGHT         800
+
+#define SVM_WIDTH          832		
+#define	SVM_HEIGHT         1024	
+#define TOP_LEFT_HEIGHT    352
+#define TOP_LEFT_WIDTH     352
+#define BACK_RIGHT_HEIGHT  352
+#define BACK_RIGHT_WIDTH   352
+
+#define FRONT_LEFT			(0u)
+#define FRONT_RIGHT			(1u)
+#define BACK_LEFT			(2u)
+#define BACK_RIGHT			(3u)
+
+#define FRONT_CCD			(0u)
+#define BACK_CCD			(1u)
+#define LEFT_CCD			(2u)
+#define RIGHT_CCD			(3u)
+
+#define FRONT_ROW_START		(0u)
+#define FRONT_ROW_END		(TOP_LEFT_HEIGHT)//352
+#define FRONT_COL_START		(TOP_LEFT_WIDTH)//352
+#define FRONT_COL_END		(SVM_WIDTH-BACK_RIGHT_WIDTH)//832-352
+
+#define BACK_ROW_START		(SVM_HEIGHT-BACK_RIGHT_HEIGHT)//1024-352
+#define BACK_ROW_END		(SVM_HEIGHT)//1024
+#define BACK_COL_START		(TOP_LEFT_WIDTH)//352
+#define BACK_COL_END		(SVM_WIDTH-BACK_RIGHT_WIDTH)//832-352
+
+#define LEFT_ROW_START		(TOP_LEFT_HEIGHT)//3//352
+#define LEFT_ROW_END		(SVM_HEIGHT-BACK_RIGHT_HEIGHT)//1024-352
+#define LEFT_COL_START		(0u)
+#define LEFT_COL_END		(TOP_LEFT_WIDTH)//352
+
+#define RIGHT_ROW_START		(TOP_LEFT_HEIGHT)//352
+#define RIGHT_ROW_END		(SVM_HEIGHT-BACK_RIGHT_HEIGHT)//1024-352
+#define RIGHT_COL_START		(SVM_WIDTH-BACK_RIGHT_WIDTH)//832-352
+#define RIGHT_COL_END		(SVM_WIDTH)//832
+
+int blockLumaAvg[4];
+int blockLumaCnt[4];
+int blockLumaSum[4];
+
+#define BACK_COEF				(256)
+#define FORWARD		(0u)
+#define REVERSE		(1u)
+
+
+/************************************************************************/
+unsigned int *CAPTURE_MEM_FRONT_cpy[IMG_HEIGHT]; 
+unsigned int *CAPTURE_MEM_BACK_cpy[IMG_HEIGHT];
+unsigned int *CAPTURE_MEM_LEFT_cpy[IMG_HEIGHT];
+unsigned int *CAPTURE_MEM_RIGHT_cpy[IMG_HEIGHT];
+
+unsigned short Lut_front[SVM_WIDTH  * TOP_LEFT_HEIGHT * 4]; 
+unsigned short Lut_back[SVM_WIDTH * BACK_RIGHT_HEIGHT * 4];
+unsigned short Lut_left[SVM_HEIGHT * TOP_LEFT_WIDTH * 4];
+unsigned short Lut_right[SVM_HEIGHT * BACK_RIGHT_WIDTH * 4];
+
+unsigned short Lut_front_u1[SIG_WIDTH  * SIG_HEIGHT * 4]; 
+unsigned short Lut_back_u1[SIG_WIDTH  * SIG_HEIGHT * 4];
+unsigned short Lut_left_u1[SIG_WIDTH  * SIG_HEIGHT * 4];
+unsigned short Lut_right_u1[SIG_WIDTH  * SIG_HEIGHT * 4];
+
+unsigned char  SVM_BUFFER[SVM_WIDTH * SVM_HEIGHT * 2]; 
+unsigned char  SINGLE_BUFFER[SIG_WIDTH * SIG_HEIGHT * 2];
+/****************************************************************************/
+#ifdef __cplusplus
+extern "C" {
+#endif
+void stitching_block(void);
+
+void stitchPart(Uint32 **rawDataAddr, Uint16 ccdNum, Uint16 rowStart, Uint16 rowEnd, Uint16 colStart, Uint16 colEnd);
+
+void stitchFusion(Uint32 **rawDataAddrFB, Uint32 **rawDataAddrLR, int fusionBlock, Uint16 rowStart, Uint16 rowEnd, Uint16 colStart, Uint16 colEnd);
+
+void Resize_Interpolation_SingleView(unsigned short *resize_lut, unsigned int **remap_lut, unsigned char * dout, int Nwidth, int Nheight);
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

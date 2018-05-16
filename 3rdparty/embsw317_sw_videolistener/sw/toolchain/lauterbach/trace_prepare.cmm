@@ -1,0 +1,45 @@
+ETM.OFF
+ITM.OFF
+;HTM.OFF
+
+Data.Set a:0x4006C3DC %Long 0x00200701    ; Trace Port Clock      ( MSCR[103] )   OBE | DSE=b111 | MUX_MODE=b0001
+Data.Set a:0x4006C28C %Long 0x00200702    ; Trace Port Control    ( MSCR[19]  )   OBE | DSE=b111 | MUX_MODE=b0010
+Data.Set a:0x4006C3E0 %Long 0x00200701    ; Trace Port Data 0     ( MSCR[104] )   OBE | DSE=b111 | MUX_MODE=b0001
+Data.Set a:0x4006C3E4 %Long 0x00200701    ; Trace Port Data 1     ( MSCR[105] )   OBE | DSE=b111 | MUX_MODE=b0001
+Data.Set a:0x4006C3E8 %Long 0x00200701    ; Trace Port Data 2     ( MSCR[106] )   OBE | DSE=b111 | MUX_MODE=b0001
+Data.Set a:0x4006C3EC %Long 0x00200701    ; Trace Port Data 3     ( MSCR[107] )   OBE | DSE=b111 | MUX_MODE=b0001
+Data.Set a:0x4006C3F0 %Long 0x00200701    ; Trace Port Data 4     ( MSCR[108] )   OBE | DSE=b111 | MUX_MODE=b0001
+Data.Set a:0x4006C3F4 %Long 0x00200701    ; Trace Port Data 5     ( MSCR[109] )   OBE | DSE=b111 | MUX_MODE=b0001
+Data.Set a:0x4006C3F8 %Long 0x00200701    ; Trace Port Data 6     ( MSCR[110] )   OBE | DSE=b111 | MUX_MODE=b0001
+Data.Set a:0x4006C3FC %Long 0x00200701    ; Trace Port Data 7     ( MSCR[111] )   OBE | DSE=b111 | MUX_MODE=b0001
+Data.Set a:0x4006C400 %Long 0x00200701    ; Trace Port Data 8     ( MSCR[112] )   OBE | DSE=b111 | MUX_MODE=b0001
+Data.Set a:0x4006C404 %Long 0x00200701    ; Trace Port Data 9     ( MSCR[113] )   OBE | DSE=b111 | MUX_MODE=b0001
+Data.Set a:0x4006C408 %Long 0x00200701    ; Trace Port Data 10    ( MSCR[114] )   OBE | DSE=b111 | MUX_MODE=b0001
+Data.Set a:0x4006C40C %Long 0x00200701    ; Trace Port Data 11    ( MSCR[115] )   OBE | DSE=b111 | MUX_MODE=b0001
+Data.Set a:0x4006C410 %Long 0x00200701    ; Trace Port Data 12    ( MSCR[116] )   OBE | DSE=b111 | MUX_MODE=b0001
+Data.Set a:0x4006C414 %Long 0x00200701    ; Trace Port Data 13    ( MSCR[117] )   OBE | DSE=b111 | MUX_MODE=b0001
+Data.Set a:0x4006C418 %Long 0x00200701    ; Trace Port Data 14    ( MSCR[118] )   OBE | DSE=b111 | MUX_MODE=b0001
+Data.Set a:0x4006C41C %Long 0x00200701    ; Trace Port Data 15    ( MSCR[119] )   OBE | DSE=b111 | MUX_MODE=b0001
+
+;   Trace clock enable, SWO clock enable
+Data.Set EDBG:0x40000504 %LONG 0yxxxxxxxxxxxxxxxxxxxxx11xxxxxxxxx
+
+TPIU.PortSize 16; 8
+TPIU.PortMode Continuous
+
+;HTM.ON
+ITM.ON
+ETM.ON
+
+;ETM.PortSize 16
+;ETM.PortMode Normal
+;ETM.HalfRate OFF
+;ETM.DataTrace Both
+;ETM.ON
+
+Analyzer.THreshold VCC
+Analyzer.TERMination ON
+Analyzer.AutoFocus
+Analyzer.TestFocus
+
+ETM.STALL ON    ; Trace is not longer real-time

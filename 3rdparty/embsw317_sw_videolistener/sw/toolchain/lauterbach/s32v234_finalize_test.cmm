@@ -1,0 +1,89 @@
+entry &status &trace
+
+&myII=0x0
+&stop=var.value(u32TestAssertIdx)
+&tc=""
+&tcdesc=""
+&flowerr=FALSE()
+&fifoerr=FALSE()
+
+OPEN #1 testresults.dat /Create
+
+while "&myII"<"&stop"
+(
+    if ("&tc"!=var.string(arTestResults[&myII].au8TestId))
+    (
+        &tc=var.string(arTestResults[&myII].au8TestId)
+        &tcdesc="&tc"+"_desc"
+        WRITE #1 "TC: " "&tc, " var.string(&tcdesc)
+    )
+    
+    WRITE #1 var.string(arTestResults[&myII].au8Status) \
+	", " var.string(arTestResults[&myII].au8TestId) \
+            ", " var.string(arTestResults[&myII].au8TestDescription)
+    &myII=&myII+0x1
+)
+
+if ("&trace"=="1")
+(
+    ;   Dump results
+    
+    trace.flowprocess
+    
+    analyzer.find FLOWERROR
+    if (FOUND())
+    (
+        print "Flow error(s) detected. Analysis may be inaccurate."
+        &flowerr=TRUE()
+    )
+    
+    analyzer.find FIFOFULL
+    if (FOUND())
+    (
+        print "Trace FIFO overflow detected."
+        &fifoerr=TRUE()
+    )
+    
+    coverage.init
+    coverage.add
+    
+    coverage.save ccov_result
+    coverage.export.ListModule full_coverage.xml
+    coverage.export.ListGroup full_coverage.xml /Append
+    coverage.export.ListFunc full_coverage.xml /Append
+    coverage.export.ListLine full_coverage.xml /Append
+)
+
+if (0x0==var.value(bTestFinished))
+(
+    print "Test did not finish correctly"
+    WRITE #1 "NOTR: INTERNAL ERROR"
+)
+
+if ("&status"=="timeout")
+(
+    print "Timed-out."
+    WRITE #1 "NOTR: TIME-OUT"
+)
+
+WRITE #1 "TC: RUNTIME_ERROR_CHECK, Test environment runtime error(s) detection."
+
+if (&flowerr)
+(
+    WRITE #1 "WARNING: FLOWERR"
+)
+
+if (&fifoerr)
+(
+    WRITE #1 "WARNING: FIFOERR"
+)
+
+if ("&status"=="success")
+(
+    print "Test finished."
+)
+
+
+CLOSE #1
+intercom.executenowait 10000 quit
+quit

@@ -1,0 +1,252 @@
+diff -ur opencv_orig/cmake/templates/cvconfig.h.in opencv_src/cmake/templates/cvconfig.h.in
+--- opencv_orig/cmake/templates/cvconfig.h.in	2015-12-18 16:02:16.000000000 +0100
++++ opencv_src/cmake/templates/cvconfig.h.in	2016-06-01 11:27:39.016999999 +0200
+@@ -144,7 +144,7 @@
+ #cmakedefine HAVE_PTHREADS
+ 
+ /* parallel_for with pthreads */
+-#cmakedefine HAVE_PTHREADS_PF
++//#cmakedefine HAVE_PTHREADS_PF
+ 
+ /* Qt support */
+ #cmakedefine HAVE_QT
+diff -ur opencv_orig/modules/core/include/opencv2/core/cvdef.h opencv_src/modules/core/include/opencv2/core/cvdef.h
+--- opencv_orig/modules/core/include/opencv2/core/cvdef.h	2015-12-18 16:02:16.000000000 +0100
++++ opencv_src/modules/core/include/opencv2/core/cvdef.h	2016-06-01 11:27:39.016999999 +0200
+@@ -473,7 +473,8 @@
+ #  include <intrin.h>
+ #  define CV_XADD(addr, delta) (int)_InterlockedExchangeAdd((long volatile*)addr, delta)
+ #else
+-   CV_INLINE CV_XADD(int* addr, int delta) { int tmp = *addr; *addr += delta; return tmp; }
++   CV_INLINE int CV_XADD(int* addr, int delta) { int tmp = *addr; *addr += delta; return tmp; }
++   CV_INLINE unsigned int CV_XADD(unsigned int* addr, unsigned int delta) { unsigned int tmp = *addr; *addr += delta; return tmp; }
+ #endif
+ 
+ 
+diff -ur opencv_orig/modules/core/include/opencv2/core/persistence.hpp opencv_src/modules/core/include/opencv2/core/persistence.hpp
+--- opencv_orig/modules/core/include/opencv2/core/persistence.hpp	2015-12-18 16:02:16.000000000 +0100
++++ opencv_src/modules/core/include/opencv2/core/persistence.hpp	2016-06-01 11:27:39.016999999 +0200
+@@ -648,6 +648,9 @@
+ 
+ //! @} core_xml
+ 
++template<typename _Tp> static inline 
++FileNodeIterator& operator >> (FileNodeIterator& it, _Tp& value);
++
+ /////////////////// XML & YAML I/O implementation //////////////////
+ 
+ //! @relates cv::FileStorage
+diff -ur opencv_orig/modules/core/src/system.cpp opencv_src/modules/core/src/system.cpp
+--- opencv_orig/modules/core/src/system.cpp	2015-12-18 16:02:16.000000000 +0100
++++ opencv_src/modules/core/src/system.cpp	2016-06-01 11:27:39.016999999 +0200
+@@ -412,6 +412,8 @@
+     return (int64)tp.tv_sec*1000000000 + tp.tv_nsec;
+ #elif defined __MACH__ && defined __APPLE__
+     return (int64)mach_absolute_time();
++#elif defined __INTEGRITY__
++    return 0;
+ #else
+     struct timeval tv;
+     struct timezone tz;
+@@ -596,10 +598,9 @@
+         fname = fname + "__opencv_temp.XXXXXX";
+     }
+ 
+-    const int fd = mkstemp((char*)fname.c_str());
+-    if (fd == -1) return String();
+-
+-    close(fd);
++    const int fd = 0; //mkstemp((char*)fname.c_str());
++    if(fd == -1) return "";
++    fclose(fd);
+     remove(fname.c_str());
+ # endif
+ 
+diff -ur opencv_orig/modules/imgcodecs/src/rgbe.cpp opencv_src/modules/imgcodecs/src/rgbe.cpp
+--- opencv_orig/modules/imgcodecs/src/rgbe.cpp	2015-12-18 16:02:16.000000000 +0100
++++ opencv_src/modules/imgcodecs/src/rgbe.cpp	2016-06-01 11:27:39.016999999 +0200
+@@ -44,7 +44,7 @@
+ #include "rgbe.hpp"
+ #include <math.h>
+ #if !defined(__APPLE__)
+-#include <malloc.h>
++//#include <malloc.h>
+ #endif
+ #include <string.h>
+ #include <ctype.h>
+diff -ur opencv_orig/modules/photo/src/fast_nlmeans_denoising_invoker_commons.hpp opencv_src/modules/photo/src/fast_nlmeans_denoising_invoker_commons.hpp
+--- opencv_orig/modules/photo/src/fast_nlmeans_denoising_invoker_commons.hpp	2015-12-18 16:02:16.000000000 +0100
++++ opencv_src/modules/photo/src/fast_nlmeans_denoising_invoker_commons.hpp	2016-06-01 11:27:39.021002000 +0200
+@@ -135,7 +135,7 @@
+         static inline WT f(double dist, const float *h, WT fixed_point_mult)
+         {
+             double w = std::exp(-dist*dist / (h[0]*h[0] * pixelInfo<T>::channels));
+-            if (std::isnan(w)) w = 1.0; // Handle h = 0.0
++            if (isnan(w)) w = 1.0; // Handle h = 0.0
+ 
+             static const double WEIGHT_THRESHOLD = 0.001;
+             WT weight = (WT)cvRound(fixed_point_mult * w);
+@@ -257,7 +257,7 @@
+         static inline WT f(double dist, const float *h, WT fixed_point_mult)
+         {
+             double w = std::exp(-dist / (h[0]*h[0] * pixelInfo<T>::channels));
+-            if (std::isnan(w)) w = 1.0; // Handle h = 0.0
++            if (isnan(w)) w = 1.0; // Handle h = 0.0
+ 
+             static const double WEIGHT_THRESHOLD = 0.001;
+             WT weight = (WT)cvRound(fixed_point_mult * w);
+diff -ur opencv_orig/modules/shape/src/sc_dis.cpp opencv_src/modules/shape/src/sc_dis.cpp
+--- opencv_orig/modules/shape/src/sc_dis.cpp	2015-12-18 16:02:16.000000000 +0100
++++ opencv_src/modules/shape/src/sc_dis.cpp	2016-06-01 11:27:39.021002000 +0200
+@@ -381,7 +381,7 @@
+ 
+     for (int i=0; i<nRadialBins; i++)
+     {
+-        double val = std::pow(10,logmin+accdelta);
++        double val = std::pow(10.0,logmin+accdelta);
+         vecSpaces.push_back(val);
+         accdelta += delta;
+     }
+diff -ur opencv_orig/modules/videoio/src/cap_mjpeg_decoder.cpp opencv_src/modules/videoio/src/cap_mjpeg_decoder.cpp
+--- opencv_orig/modules/videoio/src/cap_mjpeg_decoder.cpp	2015-12-18 16:02:16.000000000 +0100
++++ opencv_src/modules/videoio/src/cap_mjpeg_decoder.cpp	2016-06-01 11:27:39.021002000 +0200
+@@ -790,7 +790,8 @@
+     result.reserve(chunk.m_size);
+     result.resize(chunk.m_size);
+ 
+-    m_file_stream.read(result.data(), chunk.m_size);
++    if (chunk.m_size > 0)
++      m_file_stream.read(&result[0], chunk.m_size);
+ 
+     return result;
+ }
+diff -ur opencv_orig/3rdparty/libjasper/jasper/jas_config.h opencv_src/3rdparty/libjasper/jasper/jas_config.h
+--- opencv_orig/3rdparty/libjasper/jasper/jas_config.h	2015-12-18 16:02:16.000000000 +0100
++++ opencv_src/3rdparty/libjasper/jasper/jas_config.h	2016-06-01 11:27:39.021002000 +0200
+@@ -89,7 +89,7 @@
+ #define HAVE_UNISTD_H 1
+ 
+ /* Have variable length arrays */
+-#define HAVE_VLA 1
++/*#define HAVE_VLA 1*/
+ 
+ /* Define to 1 if you have the `vprintf' function. */
+ #define HAVE_VPRINTF 1
+@@ -149,7 +149,7 @@
+ /* #undef ssize_t */
+ 
+ /* Define to `unsigned char' if <sys/types.h> does not define. */
+-#define uchar unsigned char
++/*#define uchar unsigned char*/
+ 
+ /* Define to `unsigned int' if <sys/types.h> does not define. */
+ /* #undef uint */
+diff -ur opencv_orig/3rdparty/libtiff/tif_unix.c opencv_src/3rdparty/libtiff/tif_unix.c
+--- opencv_orig/3rdparty/libtiff/tif_unix.c	2015-12-18 16:02:16.000000000 +0100
++++ opencv_src/3rdparty/libtiff/tif_unix.c	2016-06-01 11:57:04.187143999 +0200
+@@ -28,7 +28,6 @@
+  * TIFF Library UNIX-specific Routines. These are should also work with the
+  * Windows Common RunTime Library.
+  */
+-
+ #include "tif_config.h"
+ 
+ #ifdef HAVE_SYS_TYPES_H
+@@ -55,6 +54,10 @@
+ 
+ #include "tiffiop.h"
+ 
++#ifdef HAVE_MMAP
++#undef HAVE_MMAP
++#endif
++
+ static tmsize_t
+ _tiffReadProc(thandle_t fd, void* buf, tmsize_t size)
+ {
+diff -ur opencv_orig/3rdparty/libwebp/dsp/dec.c opencv_src/3rdparty/libwebp/dsp/dec.c
+--- opencv_orig/3rdparty/libwebp/dsp/dec.c	2015-12-18 16:02:16.000000000 +0100
++++ opencv_src/3rdparty/libwebp/dsp/dec.c	2016-06-01 11:27:39.021002000 +0200
+@@ -254,13 +254,15 @@
+ 
+ static void VE4(uint8_t *dst) {    // vertical
+   const uint8_t* top = dst - BPS;
+-  const uint8_t vals[4] = {
+-    AVG3(top[-1], top[0], top[1]),
+-    AVG3(top[ 0], top[1], top[2]),
+-    AVG3(top[ 1], top[2], top[3]),
+-    AVG3(top[ 2], top[3], top[4])
+-  };
++  uint8_t vals[4];
+   int i;
++  
++  vals[0] = AVG3(top[-1], top[0], top[1]);
++  vals[1] = AVG3(top[ 0], top[1], top[2]);
++  vals[2] = AVG3(top[ 1], top[2], top[3]);
++  vals[3] = AVG3(top[ 2], top[3], top[4]);
++  
++  
+   for (i = 0; i < 4; ++i) {
+     memcpy(dst + i * BPS, vals, sizeof(vals));
+   }
+diff -ur opencv_orig/3rdparty/libwebp/dsp/enc.c opencv_src/3rdparty/libwebp/dsp/enc.c
+--- opencv_orig/3rdparty/libwebp/dsp/enc.c	2015-12-18 16:02:16.000000000 +0100
++++ opencv_src/3rdparty/libwebp/dsp/enc.c	2016-06-01 11:27:39.021002000 +0200
+@@ -346,13 +346,13 @@
+ #define AVG2(a, b) (((a) + (b) + 1) >> 1)
+ 
+ static void VE4(uint8_t* dst, const uint8_t* top) {    // vertical
+-  const uint8_t vals[4] = {
+-    AVG3(top[-1], top[0], top[1]),
+-    AVG3(top[ 0], top[1], top[2]),
+-    AVG3(top[ 1], top[2], top[3]),
+-    AVG3(top[ 2], top[3], top[4])
+-  };
++  uint8_t vals[4];
+   int i;
++  vals[0] = AVG3(top[-1], top[0], top[1]);
++  vals[0] = AVG3(top[ 0], top[1], top[2]);
++  vals[0] = AVG3(top[ 1], top[2], top[3]);
++  vals[0] = AVG3(top[ 2], top[3], top[4]);
++  
+   for (i = 0; i < 4; ++i) {
+     memcpy(dst + i * BPS, vals, 4);
+   }
+diff -ur opencv_orig/3rdparty/libwebp/mux/muxedit.c opencv_src/3rdparty/libwebp/mux/muxedit.c
+--- opencv_orig/3rdparty/libwebp/mux/muxedit.c	2015-12-18 16:02:16.000000000 +0100
++++ opencv_src/3rdparty/libwebp/mux/muxedit.c	2016-06-01 11:27:39.021002000 +0200
+@@ -91,7 +91,9 @@
+   if (idx == IDX_UNKNOWN && data->size > TAG_SIZE) {
+     // For raw-data unknown chunk, the first four bytes should be the tag to be
+     // used for the chunk.
+-    const WebPData tmp = { data->bytes + TAG_SIZE, data->size - TAG_SIZE };
++    WebPData tmp;
++    tmp.bytes = data->bytes + TAG_SIZE;
++    tmp.size = data->size - TAG_SIZE;
+     err = ChunkAssignData(&chunk, &tmp, copy_data, GetLE32(data->bytes + 0));
+     if (err == WEBP_MUX_OK)
+       err = ChunkSetNth(&chunk, &mux->unknown_, nth);
+@@ -104,7 +106,9 @@
+                                 const uint8_t* data, size_t size,
+                                 int copy_data) {
+   const CHUNK_INDEX idx = ChunkGetIndexFromTag(tag);
+-  const WebPData chunk_data = { data, size };
++  WebPData chunk_data;
++  chunk_data.bytes = data;
++  chunk_data.size = size;
+   assert(mux != NULL);
+   assert(size <= MAX_CHUNK_PAYLOAD);
+   assert(idx != IDX_NIL);
+diff -ur opencv_orig/3rdparty/libwebp/mux/muxread.c opencv_src/3rdparty/libwebp/mux/muxread.c
+--- opencv_orig/3rdparty/libwebp/mux/muxread.c	2015-12-18 16:02:16.000000000 +0100
++++ opencv_src/3rdparty/libwebp/mux/muxread.c	2016-06-01 11:27:39.021002000 +0200
+@@ -93,7 +93,9 @@
+   {
+     const size_t hdr_size = (chunk->tag_ == kChunks[IDX_ANMF].tag) ?
+         ANMF_CHUNK_SIZE : FRGM_CHUNK_SIZE;
+-    const WebPData temp = { bytes, hdr_size };
++    WebPData temp;
++    temp.bytes = bytes;
++    temp.size = hdr_size;
+     // Each of ANMF and FRGM chunk contain a header at the beginning. So, its
+     // size should at least be 'hdr_size'.
+     if (size < hdr_size) goto Fail;

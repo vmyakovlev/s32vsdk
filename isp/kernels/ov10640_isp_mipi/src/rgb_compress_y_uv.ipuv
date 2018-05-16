@@ -1,0 +1,75 @@
+# for IPUV
+# input shift: 4
+# x-counter shift: 4
+# out counter shift 4
+# function:
+# compress RGB according to the compression factor and convert YRB to YUV
+# in0  :  R
+# in1  :  G // not connected
+# in2  :  B
+# in4  :  Y
+# in3  :  comression factor in (8.8)
+# in4  :  Y
+# out0 :  compressed Y
+# out1 :  compressed UV horizontally subsampled 13 bit signed
+#
+# Parameters
+# gpr0 : conversion coeffcient in 3.13 (B-Y)*gpr0->U * saturation
+# gpr1 : conversion coeffcient in 3.13 (R-Y)*gpr1->V * saturation 
+
+.global rgb_compress_y_uv_start
+rgb_compress_y_uv_start:
+  // to 15 bits!
+
+  // coefficents to be set via app
+  //mov gpr0,16154  //(B-Y)*gpr0->U :  32768 * 0,493 / 8 (/2: via shr16)
+  //mov gpr1,28737  //(R-Y)*gpr1->V :  32768 * 0,877 / 8 (/2: via shr16)
+  //mov gpr2,0x8000 // U and V offset for 0 level... not used for signed
+  //mov gpr3,0x200  // factor for UV compression in 7.9 (saturation)
+  //mov gpr8-11   // effective compression factor for UV
+  // gpr4: do not use as gloable parameter
+  mov gpr5,0x4    // shift by 4 bit
+  mov gpr6,0x1    // shift by 1 bit
+  mov gpr7,0x7fff // max unsigned value
+ 
+  done rgb_compress_y_uv_loop,i
+
+rgb_compress_y_uv_loop:	
+
+  // do tone mapping
+  mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (9<<4) /*shr*/)
+  mulh vh24,vh20,vh15   // compress Y -> 15 bit
+  mulh vh4 ,vh0 ,vh15   // compress R -> 15 bit
+  //mulh vh9 ,vh5 ,vh15   // compress G -> 15 bit
+  mulh vh14,vh10,vh15   // compress B -> 15 bit
+  asl  vout1,vh24 ,gpr6 // make y 16 bit   
+  min  vh4 ,vh4 ,gpr7   // limit R
+  //min  vh9 ,vh9, gpr7   // limit G
+  min  vh14,vh14,gpr7   // limit B
+
+  // do YGB->YUV including saturation
+  mov confalu,(1 /*signed*/ | (1<<1) /*saturate*/ | (16<<4) /*shr*/)
+  sub  vh4 ,vh4 ,vh24   // R - Y
+  sub  vh14,vh14,vh24   // B - Y
+  mulh vh4 ,vh4 ,gpr1   // V signed -> +-14 bit
+  mulh vh14,vh14,gpr0   // U signed -> +-14 bit
+  // subsample UV
+  add vv6,vv7,vv6       // UV0 = UV0,UV1 -> +-15 bit
+  add vv4,vv5,vv4       // UV2 = UV2,UV3 -> +-15 bit
+
+  mov confalu,(1 /*signed*/ | (1<<1) /*saturate*/ | (9<<4) /*shr*/)
+  mov maskv,0xa         // 0b1010
+  mov vh4,vh13          // interleave U and V
+  mov maskv,0xf         // 0b1111
+
+  // add offset to make UV unsigned
+  //mov confalu,(1 /*signed*/ | (0<<1) /*no saturate*/ | (9<<4) /*shr*/)
+  //add vh4,0x1000
+
+rgb_compress_y_uv_out:	
+  dvot vh4,rgb_compress_y_uv_loop,ixo
+	
+
+  //halt
+.global rgb_compress_y_uv_end
+rgb_compress_y_uv_end:

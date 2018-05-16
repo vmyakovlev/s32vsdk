@@ -1,0 +1,118 @@
+// for IPUS with Histogram engine
+// function:
+// - black level correction
+// - historgam for exposure control and white balancing
+// - channel gain
+// - hdr combination
+// inputs:
+// - line0 long exposure, bayer pattern, top left is R
+// - line1 short exposure, bayer-pattern, top left is R
+// output:
+// combined exposure
+// histogram out:
+//   0- 63: R  long
+//  64-127: GR long
+// 128-191: GB short
+// 192-155: B  long
+// parameters:
+// gpr0		R black  offset: default 0xf08 
+// gpr1		Gr black offset: default 0xf08
+// gpr2		Gb black offset: default 0xf08
+// gpr3		B black  offset: default 0xf08
+// 
+// gain factors
+// gpr4		R  gain default: 400 (Sony cam), 590 (Sony EVB), 
+// gpr5		Gr gain	default: 256  
+// gpr6		Gb gain	default: 256  
+// gpr7		B  gain	default: 490 (Sony cam), 402 (Sony EVB), 
+// 
+// knee point from 0 - 256
+// gpr8		factor for line 0 (long exposure)
+// gpr9		factor for line 1 (short exposure)
+
+// used registers:
+// gpr10        min of gr short
+// gpr12        histogram input shift (10 bit)
+// gpr13        histogram offset (blue line: 128)
+
+.global exposure_tonehdr_start
+exposure_tonehdr_start:
+
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ ) 
+	// alpha values for HDR combination
+	//mov gpr9,256
+	//sub gpr9,gpr9,gpr8
+	// parameters for histogram bin computation
+        mov gpr12,10             # ina(15:0)  >> 10 for histogram (64 bins per component)
+        mov gpr13,128            # offset bin for odd lines
+
+  
+        done exposure_tonehdr_d1_2,i
+exposure_tonehdr_d1_2:
+	// check even or odd line
+        lsl zero,ypos,15
+        mov lock,0
+        bne exposure_tonehdr_oddline1
+
+
+  
+exposure_tonehdr_evenline1:
+        mov confhist,((10 <<8) | 64)
+exposure_tonehdr_loop0_0:  //R
+        sub ina0,ina0,gpr0       # black correction
+        mulh ina1,ina0,gpr4      # channel gain
+        sub ina3,ina3,gpr0       # black correction
+        mulh ina4,ina3,gpr4      # channel gain
+
+        mulh sacc0,ina1,gpr8     # hdr knee point
+        mulh acc0,ina4,gpr9      # hdr kneeq
+
+        lsr hbinincl,ina0,gpr12  # long exposure_tonehdr histogram (0-63)
+        dout acc0,exposure_tonehdr_loop0_1,ixo
+
+exposure_tonehdr_loop0_1:  //GR
+	//min gpr14,gpr14,ina0
+        sub ina0,ina0,gpr1       # black correction
+        sub ina3,ina3,gpr1       # black correction
+        mulh ina1,ina0,gpr5      # channel gain
+        mulh ina4,ina3,gpr5      # channel gain
+
+        mulh sacc0,ina1,gpr8     # hdr knee point
+        mulh acc0,ina4,gpr9      # hdr kneeq
+
+        mov hbininch,ina0        # long exposure_tonehdr histogram
+        dout acc0,exposure_tonehdr_loop0_0,ixo
+
+exposure_tonehdr_oddline1:
+        mov confhist,((10 <<8) | 192)
+
+exposure_tonehdr_loop1_0:  // GB
+	//min gpr15,gpr15,ina0
+        sub ina0,ina0,gpr2       # black correction
+        mulh ina1,ina0,gpr6      # channel gain
+        sub ina3,ina3,gpr2       # black correction
+        mulh ina4,ina3,gpr6      # channel gain
+
+        lsr ina3,ina3,gpr12      # scale for 64 bins
+
+        mulh sacc0,ina1,gpr8     # hdr knee point
+        mulh acc0,ina4,gpr9      # hdr kneeq
+
+        add hbinincl,ina3,gpr13  # long exposure_tonehdr histogram
+        dout acc0,exposure_tonehdr_loop1_1,ixo
+
+exposure_tonehdr_loop1_1: //B
+        sub ina0,ina0,gpr3       # black correction
+        mulh ina1,ina0,gpr7      # channel gain
+        sub ina3,ina3,gpr3       # black correction
+        mulh ina4,ina3,gpr7      # channel gain
+
+        mulh sacc0,ina1,gpr8     # hdr knee point
+        mulh acc0,ina4,gpr9      # hdr kneeq
+
+        mov hbininch,ina0        # long exposure_tonehdr histogram
+        dout acc0,exposure_tonehdr_loop1_0,ixo
+  
+//        halt
+.global exposure_tonehdr_end
+exposure_tonehdr_end:

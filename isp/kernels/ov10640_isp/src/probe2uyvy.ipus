@@ -1,0 +1,62 @@
+#.org    0x00
+#Enigne: IPUS
+#function: probe one channel and convert to uyvy display
+#          capture min and max value
+#step_x, step_in, step_out=1
+#no neighborhood used
+#input:
+#line0: Y 16 bit
+#output:
+#line0: Y 16 bit
+#parameters:
+#gpr0, min
+#gpr1, max
+#gpr2, line min
+#gpr3, line max
+#gpr12, chroma = 0x8000
+#gpr13, maximum value 0xffff: (unsigned) 0x7fff: unsigned ;
+#gpr14, offset value
+#gpr15, gain value
+
+.global probe2uyvy_start
+
+probe2uyvy_start:
+	add gpr15,gpr15,zero
+	bne probe2uyvy_initstat
+	mov gpr12,0x8000
+	mov gpr13,0xffff
+	mov gpr14,0x0000
+	mov gpr15,0x100
+        mov confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ ) 
+probe2uyvy_initstat:
+        min gpr0,gpr0,gpr2
+        max gpr1,gpr1,gpr3
+        //min gpr4,gpr4,gpr6
+        //max gpr5,gpr5,gpr7
+        //min gpr8,gpr2,gpr10
+        //max gpr9,gpr9,gpr11
+	//mov gpr2,gpr13
+	//xor gpr3,gpr2,one
+	//mov gpr6,gpr13
+	//xor gpr7,gpr6,one
+	//mov gpr10,gpr13
+	//xor gpr11,gpr10,one
+        done probe2uyvy_d1,i
+probe2uyvy_d1:
+
+probe2uyvy_loop:
+	min  gpr2,gpr2,ina0
+	max  gpr3,gpr3,ina0
+	mulh ina0,ina0,gpr15
+	add  ina0,ina0,gpr14
+	//min  gpr6,gpr6,ina3
+	//max  gpr7,gpr7,ina3
+	//min  gpr10,gpr10,ina6
+	//max  gpr11,gpr11,ina6
+	dout gpr12,probe2uyvy_y,o
+probe2uyvy_y:
+	dout ina0,probe2uyvy_loop,ixo
+//      halt
+
+.global probe2uyvy_end
+probe2uyvy_end:

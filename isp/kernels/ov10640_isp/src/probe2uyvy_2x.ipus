@@ -1,0 +1,60 @@
+#Enigne: IPUS
+#function: probe one channel and convert to uyvy display
+#          capture min and max value
+#step_x, step_in, step_out=1
+#x-size, number of valid output pixels
+#
+#no neighborhood used
+#input:
+#line0: Y 16 bit
+#output:
+#line0: Y 16 bit
+#parameters:
+#gpr0, min
+#gpr1, max
+#gpr2, line min
+#gpr3, line max
+#gpr11, skip between lines
+#gpr12, chroma = 0x8000
+#gpr13, maximum value 0xffff: (unsigned) 0x7fff: unsigned ;
+#gpr14, offset value
+#gpr15, gain value
+
+.global probe2uyvy_2x_start
+
+probe2uyvy_2x_start:
+	add gpr15,gpr15,zero
+	bne probe2uyvy_2x_initstat
+	mov gpr12,0x8000
+	mov gpr13,0xffff
+	mov gpr14,0x0000
+	mov gpr15,0x100
+        mov confalu,(0 /* unsigned*/ | (0 << 1) /* no saturate*/ | (8<<4) /* shr =8*/ ) 
+probe2uyvy_2x_initstat:
+        min gpr0,gpr0,gpr2
+        max gpr1,gpr1,gpr3
+	mov gpr2,gpr13
+	xor gpr3,gpr2,one
+        done probe2uyvy_2x_d1,i
+probe2uyvy_2x_d1:
+
+probe2uyvy_2x_preloop:
+	mov loopcnt,1280
+probe2uyvy_2x_loop:
+	min  gpr2,gpr2,ina0
+	max  gpr3,gpr3,ina0
+	mulh ina0,ina0,gpr15
+	add  ina0,ina0,gpr14
+	dout gpr12,probe2uyvy_2x_y,o
+probe2uyvy_2x_y:
+	ldot ina0,probe2uyvy_2x_loop,ixo
+	mov loopcnt,gpr11
+probe2uyvy_2x_skip:
+	sub zero,zero,gpr11
+	beq probe2uyvy_2x_preloop
+	ldon probe2uyvy_2x_skip,i
+	bal probe2uyvy_2x_preloop
+//      halt
+
+.global probe2uyvy_2x_end
+probe2uyvy_2x_end:

@@ -1,0 +1,19 @@
+20171207
+main.cpp  当前在修改的程序;
+main(4cam).cpp: 实现4通道高清相机的循环显示;
+main(4pic).cpp:实现4张高清图片显示1920*1080
+main(1206bak).cpp:实现以上功能,使用的*.dtb 文件为
+/home/henry/25/S32DS/s32v234_sdk/demos/avb/avb_bsp_prebuild
+路径下的 s32v234-evbbcm.dtb 改名  s32v234-evb.dtb
+Image 16MB
+
+bakmain.cpp 是第一次整理后的code,且验证没有问题.(4pic and 4 cam all ok)
+20171208:main (1208UI).cpp 实现基本UI配置; 
+20171208:main(1212uiok).cpp front and back is video and single view is video 
+20171214:main(1214uipicok).cpp 实现图片加载ＵＩ,1280*720
+ 20171223：main (复件20171223).cpp　实现前单视图转换；
+
+main (复件).cppv4t20180205 :田字格视频输出。
+main (复件).cppcap20180209 :４路视频拍照功能
+main (复件).cppcapzhengli20180211:４路视频拍照功能,并将代码整理；saveframe（），函数移动到　ImageStitching.c　中，函数参数也做了调整；
+main (复件).cpp20180211: 代码整理完成，实现０，１，２，３，５　切换；

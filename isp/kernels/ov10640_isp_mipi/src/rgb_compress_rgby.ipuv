@@ -1,0 +1,51 @@
+# for IPUV
+# input shift: 4
+# x-counter shift: 4
+# out counter shift 3 (x4)
+# function:
+# compress RGBY according to the compression factor
+# in0  :  R
+# in1  :  G
+# in2  :  B
+# in3  :  comression factor in (8.8)
+# in4  :  Y
+# out0 :  B compressed
+# out1 :  G compressed
+# out2 :  R compressed
+# out3 :  Y compressed
+
+        
+.global rgb_compress_rgby_start
+rgb_compress_rgby_start:
+  mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (8<<4) /*shr*/)
+
+  mov  gpr0, 0xffff
+  mov  gpr1, 0xf8f8
+
+  done rgb_compress_rgby_loop,i
+
+rgb_compress_rgby_loop:	
+
+  //mulh vh4,vh20,zero	// Y
+  mulh vh4 ,vh20,vh15	// Y
+  //mov vh4, gpr1 	// Y
+  //mov  vh9,vh4
+  //mov  vh14,vh4
+  //mov  vh19,vh4
+  mulh vh9 ,vh10,vh15	// B
+  mulh vh14,vh5, vh15	// G
+  mulh vh19,vh0, vh15	// R
+
+rgb_compress_rgby_out0:	
+  dvot vv7,rgb_compress_rgby_out1,o
+rgb_compress_rgby_out1:	
+  dvot vv6,rgb_compress_rgby_out2,o
+rgb_compress_rgby_out2:	
+  dvot vv5,rgb_compress_rgby_out3,o
+rgb_compress_rgby_out3:	
+  dvot vv4,rgb_compress_rgby_loop,ixo
+
+
+  //halt
+.global rgb_compress_rgby_end
+rgb_compress_rgby_end:

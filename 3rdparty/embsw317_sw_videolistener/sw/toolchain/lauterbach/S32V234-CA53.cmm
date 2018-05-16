@@ -1,0 +1,42 @@
+LOCAL &err
+LOCAL &totalFailures
+
+ON ERROR GOSUB my_error_handler
+&err=0.
+&totalFailures=0.
+
+repeat
+(
+    &err=0.
+    //Of course missing is the sequence to wakeup the A53 cluster.
+    SYStem.RESet
+    SYStem.CPU S32V
+    CORE.ASSIGN 1.       // starting only with one core first
+    Trace.DISable        // Maybe required
+    SYStem.up
+)
+while &err!=0.
+
+IF RUN()
+    Break.direct
+
+mode.hll
+setup.var %hex
+b.d
+
+ENDDO
+
+my_error_handler:
+    beep 2.
+    print %ERROR
+    //dialog.message "[S32V234-CA53] Error handler"
+    &err=&err+1.
+    &totalFailures=&totalFailures+1.
+    if &totalFailures>10.
+    (
+        //  TODO: Do a log entry
+        ;quit
+        enddo
+    )
+    wait 1.s
+    return

@@ -1,0 +1,37 @@
+;This configuration file is generated with T32Start2
+;===================================================
+
+;Environment Variables
+OS=
+ID=T32_1000004
+;TMP=C:\Users\js\AppData\Local\Temp
+;SYS=C:\T32
+;HELP=C:\T32\pdf
+
+; Standard License File (license.t32) used
+
+;T32 API Access
+; not used
+
+;T32 Intercom
+IC=NETASSIST
+PORT=10001
+PACKLEN=1024
+
+;T32 GDB
+; not used
+
+
+;Connection to Host
+PBI=
+USB
+CORE=2
+
+;Screen Settings
+SCREEN=
+FONT=DEC
+FONT=SMALL
+HEADER=TRACE32 PowerView for CA53
+
+;Printer Settings:
+;PRINTER=WINDOWS

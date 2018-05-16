@@ -1,0 +1,22 @@
+// IPUS kernel
+// INPUT:
+// INA0: starting with R: even lines rgrgrg, odd lines gbgbgb
+// OUTPUT:
+// OUT0: bgr,bgr,bgr (interleaved)
+// no subsampling
+// REGISTERS:
+// SET BY SEQUENCER
+// SET BY KERNEL
+
+.global copy_replicate3x_start
+copy_replicate3x_start:
+        //mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (14<<4) /*shr*/)
+        done copy_replicate3x_loop1,i    // load first pixel
+
+copy_replicate3x_loop1:	dout ina0,copy_replicate3x_pixr,o
+copy_replicate3x_pixr:	dout ina0,copy_replicate3x_pixb,o
+copy_replicate3x_pixb:	dout ina0,copy_replicate3x_loop1,ixo
+
+        //halt
+.global copy_replicate3x_end
+copy_replicate3x_end:

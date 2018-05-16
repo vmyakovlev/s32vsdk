@@ -1,0 +1,37 @@
+//kernel for IPUV
+//shift_in, shift_x, shift_out needs to be set to 4
+//xsize is the number of input pixels
+//input:
+//2 lines with full resolution
+//output:	
+//1 line with half resolution
+//registers:
+//set from application: none
+//set from kernel:
+//gpr0    shift by 2 bits
+
+.global scale2by1_11_ipuv_start
+scale2by1_11_ipuv_start:
+        mov  confalu, (0 /*unsigned*/ | (1<<1) /*saturate*/)
+        done scale2by1_11_ipuv_d0,i  // move in 4 pixels
+scale2by1_11_ipuv_d0:
+	mov gpr0,2
+
+scale2by1_11_ipuv_loop:
+	lsr vsacc0,vh0,gpr0
+	lsr vacc0,vh1,gpr0
+	lsr vacc0,vh5,gpr0
+	lsr vacc0,vh6,gpr0
+	mov out3,acc3
+	mov out2,acc1
+        done scale2by1_11_ipuv_odd,ix  // move in 4 pixels
+scale2by1_11_ipuv_odd:
+	lsr vsacc0,vh0,gpr0
+	lsr vacc0,vh1,gpr0
+	lsr vacc0,vh5,gpr0
+	lsr vacc0,vh6,gpr0
+	mov out1,acc3
+	mov out0,acc1
+        done scale2by1_11_ipuv_loop,ixo // move in next 4 and store 4 results
+.global scale2by1_11_ipuv_end
+scale2by1_11_ipuv_end:

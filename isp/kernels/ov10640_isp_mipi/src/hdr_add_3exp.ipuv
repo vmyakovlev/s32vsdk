@@ -1,0 +1,46 @@
+// IPUV
+// set shift_in/x/out to 4 pixels
+// in0  :  L
+// in0  :  S
+// in1  :  VS
+// out0 :  HDR combined
+
+// sum = 16
+
+// Parameters:
+// gpr4,5,6: used by alternative kernel
+// gpr12   : maximum ypos (debugging)
+// gpr13   : maximum ypos by alternative kernel (debugging)
+// gpr14   : shift right for L (assumption: 64x or 256x)
+// gpr15   : shift right for S (assumption:  8x or  16x)
+// gpr16   : not used
+// gpr17   : not used
+// gpr18   : not used
+// gpr19   : not used
+// gpr20   : shift right for S (assumption:  8x or  16x)
+
+// Variables:
+
+// instruction format
+// instr dest,op0,op1
+// instr dest,im16
+
+.global hdr_add_3exp_start
+hdr_add_3exp_start:
+  
+	max gpr12,gpr12,ypos       // check for last line (debugging)
+
+	// load first pixel
+	done hdr_add_3exp_loop, i // first input 4 pixels
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (0<<4) /* 16.0 multiplication*/ )
+
+hdr_add_3exp_loop:
+	// mix exposures
+	lsr vsacc0,vh0 ,gpr14     
+	lsr  vacc0,vh5 ,gpr15     
+	lsr  vacc0,vh10,gpr20     
+	dvot vacc0,hdr_add_3exp_loop,ixo
+        //halt
+
+.global hdr_add_3exp_end
+hdr_add_3exp_end:

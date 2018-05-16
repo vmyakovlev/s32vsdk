@@ -1,0 +1,5 @@
+;
+;   This script is called automatically by the T32 A53 instance.
+;
+
+cd.do load_a5_app.cmm "___ELF_FILE___" "___DEBUG___" "___TRACE___" "___MERGE___"

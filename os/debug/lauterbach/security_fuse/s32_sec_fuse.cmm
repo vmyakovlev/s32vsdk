@@ -1,0 +1,34 @@
+; Run on s32v234 M4 core!
+
+RESet
+ 
+SYStem.CPU S32V-CM4
+SYStem.Option ResBreak off
+SYStem.CONFIG DEBUGPORTTYPE JTAG
+SYStem.Option EnReset OFF
+
+SYStem.up
+
+D.S SD:0x40003008 %LE %Long 0x00100000    ;DMA_0.TCD[0].NBYTES.MLNO.R = 1024*1024;
+D.S SD:0x40003016 %LE %Word 0x0001		;DMA_0.TCD[0].DOFF.B.DOFF = 1;
+D.S SD:0x40003000 %LE %Long 0x00000000	;DMA_0.TCD[0].SADDR.R = 0x3F000010;
+D.S SD:0x40003004 %LE %Word 0x0000		;DMA_0.TCD[0].SOFF.B.SOFF = 0;
+D.S SD:0x40003006 %LE %Word 0x0300		;DMA_0.TCD[0].ATTR.B.SSIZE = 3;
+D.S SD:0x4000300C %LE %Long 0x00000000	;DMA_0.TCD[0].SLAST.R = 0;
+D.S SD:0x40003010 %LE %Long 0x3E800000	;DMA_0.TCD[0].DADDR.R = 0x3EF00000;
+D.S SD:0x40003014 %LE %Word 0x0008		;DMA_0.TCD[0].CITER.ELINKNO.B.CITER = 8;
+D.S SD:0x40003006 %LE %Word 0x0303		;DMA_0.TCD[0].ATTR.B.DSIZE = 3;
+D.S SD:0x40003018 %LE %Long 0xFFF00000	;DMA_0.TCD[0].DLASTSGA.R = -DMA_0.TCD[0].NBYTES.MLNO.R;
+D.S SD:0x4000301C %LE %Word 0x0001		;DMA_0.TCD[0].CSR.B.START = 1;
+
+d.load.elf ocotp_m4_sram.elf
+
+b.s sys_init
+go
+
+r.s pc main
+go
+
+area.view
+print "Cycle power on board"
+print "Check 0x7c01a000 being able to read/write"

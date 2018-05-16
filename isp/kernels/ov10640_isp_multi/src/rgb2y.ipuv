@@ -1,0 +1,43 @@
+#Engine: IPUS2, IPUS3 (LUT)
+#Function:
+#LUT with 12 bit in 16 out
+# extract max and min
+#turn on off via GPR0
+#
+#step_x, step_in, step_out=1
+# no neighborhood used
+#input:
+#line0: R 16 bit
+#line0: G 16 bit
+#line0: B 16 bit
+#output:
+#line0: Y 16 bit
+#
+# parameters:
+# gpr0-gpr2: conversion parameters
+
+.global rgb2y_start
+rgb2y_start:
+  // scaled to 32768 = 15 bits to allow to deal with overflows
+  // Y= 0,299xR + 0,587xG + 0,114xB
+  // scaled to 32768 = 15 bits to allow to deal with overflows
+  // Y= 0,299xR + 0,587xG + 0,114xB
+  mov gpr0,9797   //R*gpr0->Y     :  32768 * 0,299
+  mov gpr1,19234  //G*gpr1->Y     :  32768 * 0,587
+  mov gpr2,3735   //B*gpr2->Y     :  32768 * 0,114
+  mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (15<<4) /*shr*/)
+  done rgb2y_loop,i
+
+rgb2y_loop:	
+
+  //Y
+  mulh vsacc0,vh0,gpr0  // R->Y
+  mulh vacc0,vh5,gpr1   // G->Y
+  mulh vacc0,vh10,gpr2  // B->Y
+  //mov vout0,vacc0
+
+  dvot vacc0,rgb2y_loop,ixo
+
+  //halt
+.global rgb2y_end
+rgb2y_end:

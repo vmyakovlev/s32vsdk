@@ -1,0 +1,49 @@
+//IPUS0/1/2/3
+// input: single line starting top left with B
+// output: histogram
+
+.global exposure_start
+exposure_start:
+
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ )
+	mov loopcnt,1292
+exposure_skip:	ldon exposure_skip,i
+  
+        done exposure_d1_2,i
+exposure_d1_2:
+        lsl zero,ypos,15
+        mov lock,0
+        bne exposure_oddline1
+
+
+  
+exposure_evenline1:
+        mov confhist,((10 <<8) | 64)
+        mov gpr12,10             # ina(15:0)  >> 10 for histogram  hbinl
+        mov gpr13,0
+exposure_loop0_0:  //B
+        lsr hbinincl,ina0,gpr12  # b exposure histogram (0-63)
+        done exposure_loop0_1,ix
+
+exposure_loop0_1:  //GB
+        mov hbininch,ina0        # gb exposure histogram
+        done exposure_loop0_0,ix
+
+exposure_oddline1:
+        mov confhist,((10 <<8) | 192)
+        mov gpr12,10             # ina(15:0)  >> 10 for histogram  hbinincl (64 bins per component)
+        mov gpr13,128            # offset bin for odd lines
+
+exposure_loop1_0:  // GR
+        lsr ina1,ina0,gpr12      # scale for 64 bins
+        add hbinincl,ina1,gpr13  # long exposure_tonehdr3x histogram
+        done exposure_loop1_1,ix
+
+exposure_loop1_1: //R
+        mov hbininch,ina0        # long exposure_tonehdr3x histogram
+
+        done exposure_loop1_0,ix
+  
+//        halt
+.global exposure_end
+exposure_end:

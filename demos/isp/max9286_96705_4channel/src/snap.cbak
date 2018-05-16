@@ -1,0 +1,26 @@
+static int saveframe(char *str, void *p, int length, int is_oneframe)
+{
+	FILE *fd;
+
+	if (is_oneframe) {
+		fd = fopen(str, "wb");
+	}
+	else {
+		fd = fopen(str, "a");
+	}
+
+	if (!fd) {
+		printf("Open file error\n");
+		return -1;
+	}
+	if (fwrite(p, 1, length, fd)) {
+		printf("Write file successfully\n");
+		fclose(fd);
+		return 0;
+	}
+	else {
+		printf("Write file fail\n");
+		fclose(fd);
+		return -1;
+	}
+}

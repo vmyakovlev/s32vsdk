@@ -1,0 +1,112 @@
+
+	TITLE "S32V Cortex-M4"
+
+	RESet
+	SYStem.RESet
+	SYStem.CPU S32V-CM4
+	SYStem.CONFIG.CORE 1. 1.
+	SYStem.CONFIG.DEBUGPORTTYPE JTAG
+	
+	ETM.OFF
+	ITM.OFF
+	HTM.OFF
+	
+	SYStem.Option.ResBreak OFF      // Does not have yet an effect, because reset is not yet connected
+	
+	SYStem.Up
+	
+	// Init ECC memory using the DMA (to get 64 bit accesses)
+	Data.Set SD:0x40003008 %Long 0x00100000      ; DMA_0.TCD[0].NBYTES.MLNO.R = 1024*1024;
+	Data.Set SD:0x40003016 %Word 0x0001          ; DMA_0.TCD[0].DOFF.B.DOFF = 1;
+	Data.Set SD:0x40003000 %Long 0x00000000      ; DMA_0.TCD[0].SADDR.R = 0x3F000010;
+	Data.Set SD:0x40003004 %Word 0x0000          ; DMA_0.TCD[0].SOFF.B.SOFF = 0;
+	Data.Set SD:0x40003006 %Word 0x0300          ; DMA_0.TCD[0].ATTR.B.SSIZE = 3;
+	Data.Set SD:0x4000300C %Long 0x00000000      ; DMA_0.TCD[0].SLAST.R = 0;
+	Data.Set SD:0x40003010 %Long 0x3E800000      ; DMA_0.TCD[0].DADDR.R = 0x3EF00000;
+	Data.Set SD:0x40003014 %Word 0x0008          ; DMA_0.TCD[0].CITER.ELINKNO.B.CITER = 8;
+	Data.Set SD:0x40003006 %Word 0x0303          ; DMA_0.TCD[0].ATTR.B.DSIZE = 3;
+	Data.Set SD:0x40003018 %Long 0xFFF00000      ; DMA_0.TCD[0].DLASTSGA.R = -DMA_0.TCD[0].NBYTES.MLNO.R;
+	Data.Set SD:0x4000301C %Word 0x0001          ; DMA_0.TCD[0].CSR.B.START = 1;
+	
+	; Init SRAM (32KB)
+	Data.Set SD:0x3E000000++07FFF %Long 0x00000000
+	
+	; Enable CA53 subsystem by a Freescale magic binary
+	; Data.LOAD.Elf helper_bins/sample_mc_m4_sram.elf
+	; Go.direct user_isr_test_cases
+	; WAIT !RUN() 3s
+	; IF RUN()
+	; 	Break.direct
+	
+	; Load ieve
+	;Data.LOAD.Elf sieve_thumb_ii_v7.elf 0x3E000000 /RelPATH
+	
+	; enable trace clock and select bus 
+	Data.Set EDBG:0x40000504 %LONG 0yxxxxxxxxxxxxxxxxxxxxx11xxxxxxxxx
+	
+	IF Analyzer()
+	(
+		;clock
+		 Data.Set 0x4006C3DC %Long 0x200701  ; PG7 ; clock
+		
+		;control
+		Data.Set 0x4006C28C %Long 0x200702  ; PG7 ;control
+		
+		; setting the pin multiplexing for external trace
+		Data.Set 0x4006C3E0 %Long 0x200701  ; PG8 
+		Data.Set 0x4006C3E4 %Long 0x200701  ; PG9
+		Data.Set 0x4006C3E8 %Long 0x200701  ; PG10
+		Data.Set 0x4006C3EC %Long 0x200701  ; PG11
+		Data.Set 0x4006C3F0 %Long 0x200701  ; PG12
+		Data.Set 0x4006C3F4 %Long 0x200701  ; PG13
+		Data.Set 0x4006C3F8 %Long 0x200701  ; PG14
+		Data.Set 0x4006C3FC %Long 0x200701  ; PG15
+		Data.Set 0x4006C400 %Long 0x200701  ; PH0
+		Data.Set 0x4006C404 %Long 0x200701  ; PH1
+		Data.Set 0x4006C408 %Long 0x200701  ; PH2
+		Data.Set 0x4006C40C %Long 0x200701  ; PH3
+		Data.Set 0x4006C410 %Long 0x200701  ; PH4
+		Data.Set 0x4006C414 %Long 0x200701  ; PH5
+		Data.Set 0x4006C418 %Long 0x200701  ; PH6
+		Data.Set 0x4006C41C %Long 0x200701  ; PH7
+		
+		;Disable the Effect of SWO clock on TPIU
+		Data.Set APB:0x80011EF0 %Long 0x1
+		Data.Set APB:0x80011F00 %Long 0x1
+	
+		Trace.METHOD Analyzer
+		TPIU.PortSize 8            ; 16 bit setup not yet working
+		TPIU.PortMode Continuous
+		HTM.ON
+		ETM.ON
+		ITM.ON
+		
+		Analyzer.AutoFocus
+		
+		; Using fix AF setting (which are a sum of loe speed and high speed trace port settings
+		; Analyzer.TERMination ON
+		; Analyzer.THreshold 1.24 1.02
+		; Analyzer.SAMPLE    TP0    +0.624
+		; Analyzer.SAMPLE    TP1    +0.546
+		; Analyzer.SAMPLE    TP2    +0.468
+		; Analyzer.SAMPLE    TP3    +0.546
+		; Analyzer.SAMPLE    TP4    +0.624
+		; Analyzer.SAMPLE    TP5    +0.390
+		; Analyzer.SAMPLE    TP6    +0.546
+		; Analyzer.SAMPLE    TP7    +0.546
+		
+		Trace.AutoInit ON
+	)
+	ELSE
+	(
+		; Only ETM
+		ETMTrace.METHOD Onchip
+		ETMTrace.TraceCONNECT ETF1
+		ETM.ON
+	)
+	
+	List.auto
+	Trace.List
+	
+	ENDDO
+	

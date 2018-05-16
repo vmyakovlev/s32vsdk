@@ -1,0 +1,30 @@
+;This configuration file is generated with T32Start2
+;===================================================
+
+;Environment Variables
+OS=
+ID=T32_1000003
+
+
+; Standard License File (license.t32) used
+
+;T32 API Access
+; not used
+
+;T32 Intercom
+IC=NETASSIST
+PORT=10000
+PACKLEN=1024
+
+;Connection to Host
+PBI=
+USB
+CORE=1
+
+;Screen Settings
+SCREEN=
+FONT=DEC
+FONT=SMALL
+HEADER=TRACE32 PowerView for CM4
+
+

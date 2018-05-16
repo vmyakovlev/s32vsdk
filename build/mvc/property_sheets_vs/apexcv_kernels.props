@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="property_sheets_vs" />
+  <PropertyGroup Label="UserMacros">
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(KernelDirectory)\apexcv_base_arithmetic\src;$(KernelDirectory)\apexcv_base_color_conversion\src;$(KernelDirectory)\apexcv_base_image_filters\src;$(KernelDirectory)\apexcv_base_histogram\src;$(KernelDirectory)\apexcv_base_histogram_equalization\src;$(KernelDirectory)\apexcv_base_integral_image\src;$(KernelDirectory)\apexcv_base_interpolation\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="APULibInstall">
+      <Value>$(APULibInstall)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,41 @@
+#Engine: IPUS2, IPUS3 (LUT)
+#Function:
+#LUT with 12 bit in 16 out
+# extract max and min
+#turn on off via GPR0
+#
+#step_x, step_in, step_out=1
+# no neighborhood used
+#input:
+#line0: Y 16 bit
+#output:
+#line0: Y 16 bit
+#
+#parameters:
+#gpr15: swap endianess
+
+.global lut4k_start
+lut4k_start:
+//        mov lock,0
+//        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ ) 
+	sub zero,zero,gpr15  // check if endianess swap should be enabled
+        done lut4k_d1,i
+lut4k_d1:
+	bne lut4k_swp_loop
+
+lut4k_loop:
+        lsr  luta,ina0,4      // 16bit to 12bit
+	dout lut,lut4k_loop,ixo
+//      halt
+
+lut4k_swp_loop:
+	lsl gpr0,ina0,8
+	lsr gpr1,ina0,8
+	or  ina0,gpr0,gpr1
+
+        lsr  luta,ina0,4      // 16bit to 12bit
+	dout lut,lut4k_swp_loop,ixo
+//      halt
+
+.global lut4k_end
+lut4k_end:

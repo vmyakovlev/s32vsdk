@@ -1,0 +1,52 @@
+# IPUS
+# set shift_in/x/out to 4 pixels
+# in0  :  Y
+# in1  :  Y
+# in2  :  Y
+# out0 :  Y denoised / or original
+
+# sum = 16
+
+# GPR7       threshold
+# GPR12      0: mark edge pixels black 0xffff: normal mode.
+# GPR13      maximum ypos
+
+.global denoise_median_start
+denoise_median_start:
+        //mov gpr7,0x0300  // threshold
+  
+        mov confalu,(0 /*unsigned*/ | (0<<1) /*saturate*/ | (4<<4) /*shr*/)
+        mov confsort,(1 /*ina*/ | (0<<2) /*use mask*/ | (0<<3) /*unsigned*/)
+	max gpr13,gpr13,ypos
+
+        done denoise_median_d1,i
+denoise_median_d1:
+        mov maskv,0x1ef        // 0b111 101 111
+        done denoise_median_d2,i
+denoise_median_d2:
+        done denoise_median_loop,i
+denoise_median_loop:
+
+        // compare difference with threshold
+	//and gpr9,ina4,gpr12  // to view edge pixels
+	mov gpr10,median
+        abd gpr8,gpr10,ina4
+
+	done denoise_median_check_thr,i  // to reduce stalls
+denoise_median_check_thr:
+        sub gpr8,gpr8,gpr7
+	// nop  //stall before branch
+
+	// select filtered if lower than threshold
+	and gpr9,ina5,gpr12  // to view edge pixels
+        bcc denoise_median_above_thr    // carry cleared
+        dout gpr10,denoise_median_loop,xo
+
+denoise_median_above_thr:
+	// keep input signal when higher than threshold
+	dout gpr9,denoise_median_loop,xo
+	//dout ina5,denoise_median_loop,xo
+
+        //halt
+.global denoise_median_end
+denoise_median_end:

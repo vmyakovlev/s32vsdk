@@ -1,0 +1,69 @@
+#Enigne: IPUS
+#function: probe one channel and convert to rgb display
+#          capture min and max value
+#step_x, step_in, step_out=1
+#no neighborhood used
+#input:
+#line0: Y 16 bit even line
+#line1: Y 16 bit odd  line
+#output:
+#line0: BGR 16 bit even line
+#line0: BGR 16 bit odd  line
+#parameters:
+#gpr0, min
+#gpr1, max
+#gpr2, line min
+#gpr3, line max
+#gpr13, maximum value 0xffff: (unsigned) 0x7fff: unsigned ;
+#gpr14, offsel value
+#gpr15, gain value
+
+.global probe2bgr_2x_start
+
+probe2bgr_2x_start:
+	add gpr15,gpr15,zero
+	bne probe2bgr_2x_initstat
+	//mov gpr12,0x8000
+	//mov gpr13,0x7fff
+	//mov gpr14,0x8000
+	mov gpr15,0x100
+        mov confalu,(1 /* signed*/ | (0 << 1) /* no saturate*/ | (8<<4) /* shr =8*/ ) 
+probe2bgr_2x_initstat:
+       //min gpr0,gpr0,gpr2
+       //max gpr1,gpr1,gpr3
+       //min gpr4,gpr4,gpr6
+       //max gpr5,gpr5,gpr7
+       //min gpr8,gpr2,gpr10
+       //max gpr9,gpr9,gpr11
+       //mov gpr2,gpr13
+       //xor gpr3,gpr2,one
+       //mov gpr6,gpr13
+       //xor gpr7,gpr6,one
+       //mov gpr10,gpr13
+       //xor gpr11,gpr10,one
+        done probe2bgr_2x_d1,i
+probe2bgr_2x_d1:
+
+probe2bgr_2x_loop:
+	mov out1,ina0
+	//min  gpr2,gpr2,ina0
+	//max  gpr3,gpr3,ina0
+	//mulh ina0,ina0,gpr15
+	//mulh ina1,ina1,gpr15
+	//add  ina0,ina0,gpr14
+	//min  gpr6,gpr6,ina3
+	//max  gpr7,gpr7,ina3
+	//min  gpr10,gpr10,ina6
+	//max  gpr11,gpr11,ina6
+	//dout gpr12,probe2bgr_2x_y,o
+	//dout gpr12,probe2bgr_2x_y,o
+probe2bgr_2x_b:
+	dout ina0,probe2bgr_2x_g,o
+probe2bgr_2x_g:
+	done probe2bgr_2x_r,o
+probe2bgr_2x_r:
+	done probe2bgr_2x_loop,ixo
+//      halt
+
+.global probe2bgr_2x_end
+probe2bgr_2x_end:

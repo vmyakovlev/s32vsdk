@@ -1,0 +1,78 @@
+# any IPUS engine
+# function:
+# converts yuv444 planar to uyvy and applies LUT to Y, U and V
+# input is signed (UV are 0 centric)
+# in0  :  Y 15 bit	
+# in1  :  U 15 bit signed
+# in2  :  V 15 bit signed
+# LUT is 4K
+# out0 :  Y, U, Y, V 16 bit unsigned
+# parameters:
+# gpr15: offest for U and V == 0x8000
+# parameters:
+# gpr0: lut[ina0<<3]
+# gpr1: lut[ina1<<3]
+# gpr2: y*lut[ina0<<3]
+# gpr3: y*lut[ina1<<3]
+# out0: u*lut[]
+# gpr4: v*lut[]
+
+.global lut4k_yuv444touyvy_start
+lut4k_yuv444touyvy_start: //0
+//        mov confalu,(1 /*signed*/ | (1<<1) /*saturate*/ | (8<<4) /*shr*/)
+        done lut4k_yuv444touyvy_d1,i
+lut4k_yuv444touyvy_d1:
+	mov gpr15,0x8000
+        done lut4k_yuv444touyvy_loop,i
+
+lut4k_yuv444touyvy_loop: // 3
+        mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (8<<4) /*shr*/)
+	//max ina1,ina1,zero // make positive!
+	lsr luta,ina1,3    // 15bit -> 12 bit
+	mov gpr1,lut      // read 16 bit value from LUT
+	mulh gpr3,ina1,gpr1
+
+	//max ina0,ina0,zero
+	lsr luta,ina0,3   // 15 bit -> 12 bit
+	mov gpr0,lut      // read 16 bit value from LUT
+	mulh gpr2,ina0,gpr0
+
+
+        sub zero,ina0,ina1    // ina1(y0) <= ina0(y1)
+        mov confalu,(1 /*signed*/ | (1<<1) /*saturate*/ | (8<<4) /*shr*/)
+        bge lut4k_yuv444touyvy_take_second
+
+lut4k_yuv444touyvy_take_first:  // 13
+	mulh out0,ina4,gpr1
+	mulh gpr4,ina7,gpr1
+        mov confalu,(1 /*signed*/ | (0<<1) /*no saturate*/ | (8<<4) /*shr*/)
+	add  out0,out0,gpr15
+	add  gpr4,gpr4,gpr15
+
+        done lut4k_yuv444touyvy_take_first1,xo        // u1
+lut4k_yuv444touyvy_take_first1:
+        dout gpr3,lut4k_yuv444touyvy_take_first2,xo   // y0
+lut4k_yuv444touyvy_take_first2:
+        dout gpr4,lut4k_yuv444touyvy_take_first3,ixo  // v1
+lut4k_yuv444touyvy_take_first3:
+        dout gpr2,lut4k_yuv444touyvy_loop,ixo         // y1
+
+
+lut4k_yuv444touyvy_take_second: //23
+	mulh out0,ina3,gpr0
+	mulh gpr4,ina6,gpr0
+        mov confalu,(1 /*signed*/ | (0<<1) /*no saturate*/ | (8<<4) /*shr*/)
+	add  out0,out0,gpr15
+	add  gpr4,gpr4,gpr15
+	
+        done lut4k_yuv444touyvy_take_first1,xo        // u0
+lut4k_yuv444touyvy_take_second1:
+        dout gpr3,lut4k_yuv444touyvy_take_second2,xo  // y0
+lut4k_yuv444touyvy_take_second2:
+        dout gpr4,lut4k_yuv444touyvy_take_second3,ixo // v0
+lut4k_yuv444touyvy_take_second3:
+        dout gpr2,lut4k_yuv444touyvy_loop,ixo         // y1
+
+        //halt
+.global lut4k_yuv444touyvy_end  //32
+lut4k_yuv444touyvy_end:

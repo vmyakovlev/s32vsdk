@@ -1,0 +1,37 @@
+# IPUS
+# Function:
+# median filter:
+#    median = middle value of the sorted input values
+# set shift_in/x to 1 pixels
+# set shift_out to 1 pixels
+# input to line 0,1,2
+# out0 : copied input value
+
+.global median_start
+median_start:
+	// configure sorting tree
+        mov confsort,(1 /*ina*/ | (1<<2) /*no mask*/)    | (0<<3) /*unsigned*/)
+
+	// shift in first 3 columns, no output
+        done median_in1,i    // load first pixel
+median_in1:
+	done median_in2,i    // load first pixel
+median_in2:
+	done median_loop,i    // load first pixel
+
+
+//// median_copyloop:
+//        mov loopcnt,640    // copy first 640 pixels from input
+//// do copy in left half of the line/image
+//        ldot ina4,median_copyloop,ixo
+//// add a black line between left and right half	
+//        dout zero,generic_select,ixo
+
+median_loop:
+	// compute median and move it out with the done (aka dout)
+	// get the next input pixels
+        dout median,median_loop,ixo
+
+	halt
+.global median_end
+median_end:

@@ -1,0 +1,59 @@
+&LINUX_S32V234_DIR=os.env(LINUX_S32V234_DIR)
+//Of course missing is the sequence to wakeup the A53 cluster.
+
+RESET
+SYStem.CPU S32V
+
+// Linux
+//SYStem.Option DACR ON ; give Debugger global write permissions
+//TrOnchip.Set DABORT OFF ; used by Linux for page miss!
+//TrOnchip.Set PABORT OFF ; used by Linux for page miss!
+//TrOnchip.Set UNDEF OFF ; my be used by Linux for FPU detection
+
+CORE.ASSIGN 1.,2.,3.,4.       // starting only with one core first
+Trace.DISable        // Maybe required
+
+// Linux
+SYStem.Option MMUSPACES ON
+sYmbol.RESet 
+
+
+SYStem.Option.ResBreak OFF
+SYStem.Option.WaitReset 1s
+SYStem.Mode.Attach
+
+IF RUN()
+    Break.direct
+
+// Linux
+SETUP.IMASKASM ON ;lock interrupts while stepping
+
+Data.LOAD.ELF &LINUX_S32V234_DIR/vmlinux /NOCODE /strippart "linux" /sourcepath "&LINUX_S32V234_DIR"
+
+; Declare the MMU format to the debugger
+ ; - table format is "LINUX"
+ ; - table base address is at label "swapper_pg_dir"
+ ; - kernel address translation
+ ; Map the virtual kernel symbols to physical addresses to give 
+ ; the debugger access to it before CPU MMU is initialized
+
+ print "initializing debugger MMU..."
+;MMU.FORMAT LINUX swapper_pg_dir 0xFFFFFFC000000000--0xFFFFFFDF00000000 0x00000000C3000000
+ MMU.FORMAT LINUX swapper_pg_dir 0xFFFFFF8000000000--0xFFFFFF9F00000000 0x0000000080080000
+ 
+ ; prepare debugger translation 
+ TRANSLATION.COMMON 0xFFFFFFBF00000000--0xffffffffffffffff            ; common area for kernel and processes
+ TRANSLATION.TableWalk ON   ; debugger uses a table walk to decode virtual addresses
+ TRANSlation.ON             ; switch on debugger(!) address translation 
+
+; Initialize Linux Awareness
+; Note that the Linux awareness needs the kernel symbols to work
+ 
+PRINT "initializing multitask support..."
+TASK.CONFIG ~~/demo/arm64/kernel/linux/linux-3.x/linux3.t32       ; loads Linux awareness (linux.t32)
+MENU.ReProgram ~~/demo/arm64/kernel/linux/linux-3.x/linux.men     ; loads Linux menu (linux.men)
+sYmbol.Autoload.CHECKLINUX "do ~~/demo/arm64/kernel/linux/linux-3.x/autoload.cmm "
+
+go
+
+ENDDO

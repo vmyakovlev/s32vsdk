@@ -1,0 +1,595 @@
+==============================================================================
+
+  Copyright (c) 2017 NXP
+  ALL RIGHTS RESERVED.
+
+==============================================================================
+
+  CONTENT
+    Release Notes for Vision SDK for S32V234
+    Change log
+
+==============================================================================
+
+------------------------------------------------------------------------------
+2017-07-28 BLN_VISION_SDK_RTM_1.0.0
+------------------------------------------------------------------------------
+
+  - Supported compilers:
+    o NXP APU Compiler upgraded to v1.0 b448
+    o GNU GCC for Windows upgraded to 6.2.0 (Rev2, Built by MSYS2 project) - Mingw-w64
+    
+  - Updated ISP demos:
+    o isp_ov10640_default demo was added.
+    o Restructured code of ISP demos to follow common template. 
+    o ISP Graph projects migrated to DesignStudio format, legacy projects got removed
+    
+  - OAL internal mutex changed to uninterruptible. The use of OAL memory allocation inside interrupt handler is strongly not recommended - deadlock possibility.
+
+  - APEX-CV update includes:
+    o Introduced new apexcv base and pro applications, which are better suited to understanding typical use cases for apexcv components.
+    o Changed member function naming convention to use Upper CamelCase.
+    o Changed the order of the parameters of quite of few functions.
+    o Consolidated directory and filenames for consistency.
+    o Functions now return standardized error codes
+    o Classes can select which APEX core to run onto, at runtime
+    o Pro (released with source code): 
+      * HistogramEqualization is now part of APEX-CV Pro, was in APEX-CV Base
+      * Hog has new functions GetBlockHistograms and GetDescriptors to return raw HoG features
+      * GFTT_corners/Harris_corners now supports box filter size 7, 5 and 3.
+      * GFTT_corners/Harris_corners when using NXP APU compiler, will only function on S32V234 chip version 2.0+
+      * Meaningful performance improvement in aggcf_pd
+   o Base (released with source code): 
+      * split apexcv base kernels into their respective modules.
+      * Arithmetic module, New Class: ThresholdRange
+      * Color conversion module, new Classes: ExtractChannel, InsertChannel, SplitChannel, MergeChannel for 2,3 and 4 channel support
+   o New Module DNN (released in binary only)
+      * New Class: apexdnn_sn
+
+
+Known issues:
+    o VSDK Installer might fail to run and shows the message: 'Windows error 2 occurred while loading the Java VM'
+      * Please run the installer with the LAX_VM variable pointing to your Java installation.
+    o VSDK Uninstaller hangs up. Workaround: please manually remove the VSDK 
+      installation folder.
+    o APEX Graph compilation might fail to generate the _db.h file and ends with the Error 127.
+      * Please check whether Windows system directories (usually System32, SysWOW64, Windows) contain libstdc++-6.dll and delete/rename it while you are using VSDK.
+    o The build might fail with message: "arm-none-linux-gnueabi-g++: command not found".
+      * Please delete/rename the CROSS_COMPILE environment variable. You might have this variable set if you were using previous versions of VSDK.
+    o Under standalone environment, in case of SCH-29288 REV B1 EVB is used, 
+      display issues can be observed:
+      * LVDS display shows: image tearing, shivering or disappearing.
+      * HDMI display shows: vertical and/or horizontal patterns laid over the
+        displayed image.      
+    o SW reset of Sequencer FW does not behave as expected. Workaround: HW reset 
+      through calls to SEQ_Reset() followed by SEQ_Booot() should be used 
+      instead of seq_swreset() from Sequencer driver user API.
+    o For proper restart of isp_ov10640_default application under Linux, reboot
+      of the board is required.
+    o On Linux isp_ov10640_quad demo application may log I2C transaction issues 
+      during the demo startup.
+
+------------------------------------------------------------------------------
+2017-05-12 BLN_HF1_VISION_SDK_EAR_0.9.7
+------------------------------------------------------------------------------
+
+  - APEX drivers:
+    o Added APEX interrupt support for Linux and standalone targets
+
+  - ACF:
+    o Updated to take advantage of interrupt support (i.e. Wait() is now
+      interrupt based)
+
+------------------------------------------------------------------------------
+2017-04-14 BLN_VISION_SDK_EAR_0.9.7
+------------------------------------------------------------------------------
+
+  - UMat introduced as the main VSDK image container
+    o DataDescriptor deprecated, not supported anymore
+    o vsdk::UMat I/O in ACF, DCU, SDI
+    
+  - OAL update:
+    o settings now in devicetree file
+    o support of multiple memory banks
+    o SRAM allocation moved to OAL allocator as well. sram.ko deprecated and no
+      longer to be insmoded.
+  
+  - Webserver functionality introduced
+    o Data sharing from applications via websocket
+    o Data visualization via web browser
+    o Demo in apex_isp_ldw_cv
+
+  - Linux updated to BSP 12
+  
+  - Added support for Linux clock gating support in relevant ISP drivers. 
+    Requires Linux BSP 12.
+  
+  - Updated ISP demos:
+    o demos renamed to mention type of camera required. E.g.:
+      isp_csi_dcu -> isp_sonyimx224_csi_dcu.
+    o removed from release:
+      * isp_generic, 
+      * isp_h264dec_4stream, 
+      * isp_jpeg_single_stream,
+      * isp_yuv_grey_pyramid.
+    o isp_sonyimx224_default (originally isp_sony_dualexp) - includes HDR, AEC, 
+      white balancing - runs at 30 fps.
+    o ISP codec related demos code restructured. 
+  
+  - APEX-CV update that includes:
+    o Pro: 
+      * Aggregated channel 
+      * feature based pedestrian detection
+      * ORB
+      * Laplacian pyramid
+    o Base: 
+      * Thresholding
+      * Table Lookup
+      * Histogram
+      * Channel extract
+      * Channel combine
+  
+  - Demo app update:
+    o Pedestrian detection using AggCF which yields much better detection performance;
+    o Image classifier demo based on squeezenet v1.0
+  
+  - APU kernel file naming convention update;
+  
+  - Supported compilers:
+    o Linaro Toolchain:
+      * Linaro 4.9-2015.05 Aarch64-Elf
+      * Linaro 4.9-2015.05 Aarch64-Linux-GNU
+      * Linaro 4.9-2015.05 ARM-EABI
+    o Synopsys ipp-APU2:
+      * L-2016.09-2
+    o NXP APU Compiler:
+      * v1.0 b439
+    o GNU GCC:
+      * 5.3.0 (GCC) - Windows MSYS2
+      * 4.9.2 (Debian 4.9.2-10) - Linux (3.16.0-4-amd64 #1 SMP Debian)
+    o Microsoft Visual Studio:
+      * 2013
+
+Errata:
+  - Following demos doesnt support NXP compiler (compilation doesnt work):
+    o apexcv_pro_orb
+    o apexcv_pro_ tmo
+    o feature_tracking
+    o apexcv_pro_ gfft_corners
+    o apexcv_pro_ canny
+    o apexcv_pro_ accgf 
+  - apex_isp_fast9 shows issues when run on standalone, linux version is ok
+  - apex_isp_face_detection_cv doesn't detect faces when on standalone-optimized build
+  
+------------------------------------------------------------------------------
+2016-10-28 BLN_VISION_SDK_EAR_0.9.6
+------------------------------------------------------------------------------
+
+  - INTEGRITY support removed
+  - NXP APU compiler version b373 used
+    - nxp build available on all kernels, demos and APEXCV Base library.
+    - APEXCV Pro library NXP build not supported yet.
+  - APU_COMP variable added that select NXP or TCT precompiled headers ("make APU_COMP=tct" or "make APU_COMP=nxp")
+  - Standalone startup code for M4 moved from SRAM to TCM
+  - Bug fix for APEX-CV base histogram
+
+
+------------------------------------------------------------------------------
+2016-09-30 BLN_VISION_SDK_EAR_0.9.5
+------------------------------------------------------------------------------
+
+  - Public headers moved into common directory (s32v234_sdk/include)
+  
+  - Added NXP APU compiler to all kernels
+  - Supplied ARM compiler upgraded to Linaro 15.05
+  
+  - ACF update
+  
+  - Demos added:
+    o LDW 2 Demo - based on lane signal analysis
+    o Blockmatching disparity computation
+    o Optimized LDW
+    o Pedestrian detection based on HoG and SVM
+   
+  - APEX-CV pro: LBP, ToneMap 
+  
+  - Emulation:
+    o Simplified emulation macros for graphs and kernel metadata definitions
+  
+  - ISP drivers:
+    o Viu driver is no longer part of Linux BSP 9.0 and was moved among ISP 
+      drivers to VisionSDK.
+  
+  - Documentation added:
+    o Generic Camera driver User Guide
+    o VIU driver User Guide
+        
+Errata
+  - isp_generic demo in SA optimized version throws runtime exceptions.
+  - neon_fftw_cv in SA optimized version shows unexpected behavior
+  - OAL_MemoryFlushAndInvalidateAll is NOT thread safe
+
+------------------------------------------------------------------------------
+2016-08-09 BLN_VISION_SDK_EAR_0.9.4
+------------------------------------------------------------------------------
+
+  - OAL Driver update & fixed
+  - Linux kernel, u-boot and rootfs updated to BSP8
+    o Differences between original BSP8 and vSDK Linux kernel & u-boot:
+      - u-boot/include/configs/s32v234_common.h
+          Added "mem=0x15000000 memmap=0xB000000$0xC5000000" into all setenv bootargs commands in order to ensure OAL space allocation.
+      - root file system
+          Installed following kernel modules:
+              insmod /s32v234/oal_cma.ko
+              insmod /s32v234/sram.ko
+              insmod /s32v234/csi.ko
+              insmod /s32v234/cam.ko
+              insmod /s32v234/seq.ko
+              insmod /s32v234/fdma.ko
+              insmod /s32v234/h264enc.ko
+              insmod /s32v234/h264dcd.ko
+              insmod /s32v234/fsl_jpegdcd.ko
+      - Copied OpenCV and FFTW libs into /lib
+  - ISP updated
+    o Bug fixes
+    o New nodes for JPEG and H264 decoder
+  - JPEG decoder 4-stream support
+  - H264 decoder 4-stream support
+  - Update to OpenCV 3.1
+  - ISP driver refactoring
+     o Generic camera driver introduced
+     
+Erratum
+  - isp_h264dec_4stream, h264_encoder_cv demo signals buffer overrun and triggers segmentation 
+    fault in optimized build. 
+  - isp_viu_dcu demo cannot be reexecuted w/o EVB reset.
+  - apex_isp_face_detection_cv (Linux-build) does not detect faces
+  - apexcv built for Linux fails in following tests:
+    o test_abs
+    o test_add
+  - neon_fftw_cv (baremetal) cannot be executed in optimized mode
+  - qspi_readwrite demo misses the cmm file to be executed via Lauterbach debugger
+
+
+  
+------------------------------------------------------------------------------
+2016-05-06 BLN_VISION_SDK_EAR_0.9.3
+------------------------------------------------------------------------------
+
+  - APEX Driver update
+    o Driver fully thread safe
+  
+  - APEX Compiler update (L-2016.03)
+    o Download at http://compass.freescale.net/livelink/livelink?func=ll&objid=234973759&objaction=browse 
+
+  - Build system updates:
+    o APEX build moved to separate folder (out of tree build)
+    o APEX_PREBUILD flag deprecated, default is build without APEX
+    o APEX build is manual, using pre-build files automatically
+    o Removed all imlicit libs linked in in Standalone
+  
+  - Linux BSP updated (BSP 7)
+  
+  - OAL Update
+    o oal.h redone and updated
+    o New memory allocator used
+
+  - ISP driver support added
+    o VIU
+    o h264 encoder
+    o jpeg decoder
+    
+  - Camera support added
+    o Omnivision Ov10635 for VIU interface
+    o Maxim Serializer/Deserializer quad camera setup with Omnivision Ov10640
+    
+  - SDI Update
+    o SDI now replaces FrameInputISP object API
+    o All demos except GDC ported to use SDI library as image input
+    
+  - New sensor support
+    
+  - Optimized build added for Linux and Standalone (-o suffix)
+  
+  - SDK directory structure changes:
+    o Added one level to demos directory
+    o libs/x86 and libs/apu merged with libs/arm 
+    o one level removed from libs directory
+  
+  - APEXCV Update
+    o updated to version 3.0
+    o performance improvement on base
+    o new apexcv pro features like: FAST, Sparse Optical Flow (LK)
+    
+  - Demos added:
+    o apex_isp_fast9 - simple combination of ISP and APEX
+    o apexcv_box_generic
+    o apexcv_pro_harris_corners
+    o apexcv_pro_image_pyramid_multi
+    o apexcv_pro_lkpyramid
+    o apexcv_pro_lktracker
+    o feature_tracking
+    o pedestrian_detection
+    o isp_stereo_apexbm
+    o isp_stereo_calib
+    o isp_generic
+    o isp_jpeg
+    o isp_rgb_yuv_gs8
+    o isp_sony_dualexp
+    o isp_viu_dcu
+    o isp_yuv_grey_pyramid
+    o h264_encoder_cv
+    o memory_test
+    
+  - Documentation added
+    o ISP driver SW User Guides (SRAM Manager, FDMA, Sequencer, MipiCsi)
+    o SDI User Guide document added
+    o FrameOutput User Guide
+    o FrameInputISP User Guide
+    
+------------------------------------------------------------------------------
+2016-01-29 BLN_VISION_SDK_EAR_0.9.1
+------------------------------------------------------------------------------
+
+  - APEX Driver update
+  - OAL allocator fix (cache invalidation problems)
+  - ApexCV demos functional under Linux + Standalone
+  - INTEGRITY build available
+  - Linux BSP update to v5.1 (includes support for ISP on PCIe board)
+  - Fixed Sequencer clock frequency in U-boot 
+    (isp_chroma_key demo works also in Linux)
+
+------------------------------------------------------------------------------
+2015-12-07 BLN_VISION_SDK_EAR_0.9.0
+------------------------------------------------------------------------------
+
+  - ACF updated to version 1.9.0
+    o APEX Driver update
+    
+  - ApexCV Base and Pro libraries updated to 1.9.0
+    o Build for Linux and Standalone
+    
+  - ApexCV Base and Pro demos added for standalone:
+    o apexcv_pro_affine
+    o apexcv_pro_canny
+    o apexcv_pro_gftt
+    o apexcv_pro_hog
+    
+  - DCU output switched to double buffered HD resolution on both Linux and 
+    Standalone
+  - ISP Chroma Key preprocessed in HD resolution
+    
+Erratum
+  - Sequencer signals error in ISP_CHROMA_KEY on Linux.
+  - In case pure Linux BSP 5 U-boot is used (not the one from VSDK), demos with 
+    DCU output exhibit kernel crashes between board reboots.
+  - ISP demos not supported on PCIe board (xrdc config not in U-boot)
+  - ApexCV demos exhibit cache problems on Linux (not the ApexCV library)
+  
+------------------------------------------------------------------------------
+2015-11-09 BLN_VISION_SDK_EAR_0.8.2
+------------------------------------------------------------------------------
+
+  - ApexCV Base library added + test application
+	o Test app: demos/apexcv
+  - ApexCV Pro library added + test applications
+    o Test app: 
+	  demos/apexcv_pro_blockmatching
+	  demos/apexcv_pro_brief
+	  demos/apexcv_pro_harris
+	  demos/apexcv_pro_hough
+	  demos/apexcv_pro_image_pyramid
+	  demos/apexcv_pro_remap
+	  demos/apexcv_pro_resize
+	o ISP for Linux including drivers, libraries & demos
+  
+Erratum
+ - neon_fftw_cv demo needs FFTW 3.3.4 library, which is not part of the 
+   package. There is a prepared build for FFTW 3.3.4 after downloading it by
+   user.
+ - graphics output in Linux is only single buffered. Image tearing can be 
+   observed with moving objects in the scene.
+      
+------------------------------------------------------------------------------
+2015-10-09 BLN_VISION_SDK_EAR_0.8.1
+------------------------------------------------------------------------------
+  - INTEGRITY build added
+    o Makefile build available with or without APEX build
+	o MULTI project build available without APEX build
+	o Following demos ported to INTEGRITY:
+	  - apex_add
+	  - apex_downsample_upsample_cv
+	  - apex_emulation_test
+	  - apex_face_detection_cv
+	  - apex_fast9_cv
+	  - apex_gauss5x5_cv
+	  - apex_histogram_cv
+	  - apex_indirect_input_cv
+	  - apex_integral_image_cv
+	  - apex_orb_cv
+	  - apex_roi_cv
+	  - apexcl_bitonic_sort
+	  - apexcl_conformance_intops
+	  - apexcl_floyd_warshall
+	  - apexcl_median
+	  - apexcl_memory_model
+	  - hello
+	o Following armv8 NEON demos added:
+	  - neon_fftw_cv
+	  - neon_eigen_add
+  - update to ACF 1.8.3
+  - Update of VisionSDK_UserGuide.pdf
+
+------------------------------------------------------------------------------
+2015-08-19 BLN_VISION_SDK_EAR_0.8.0
+------------------------------------------------------------------------------
+  - First Linux release
+  - Added pre-built Linux contents (SD card load)
+	o u-boot elf file
+	o Linux kernel image
+	o root file system with libs and demos
+  - Following demos ported to Linux
+    o apex_add
+    o apex_dma
+    o apex_downsample_upsample_cv
+    o apex_face_detection_cv
+    o apex_fast9_cv
+    o apex_gauss5x5_cv
+    o apex_histogram_cv
+    o apex_indirect_input.cv
+    o apex_integral_image_cv
+    o apex_orb_cv
+    o apex_roi_cv
+  - Fixed standalone startup C++ global constructors init	
+  - Update of S32V234-EVB_SetupGuide.pdf
+  - Update of VisionSDK_UserGuide.pdf
+
+------------------------------------------------------------------------------
+2015-07-27 BLN_VISION_SDK_EAR_0.7.1
+------------------------------------------------------------------------------
+  - Interrupt service routine fix (stack error)
+  
+------------------------------------------------------------------------------
+2015-07-17 BLN_VISION_SDK_EAR_0.7.0
+------------------------------------------------------------------------------
+  - First Silicon release
+  - Working examples for S32V234 EVB (Standalone)
+  - Enabled build without APEX compiler (pre-build kernels for demos) (make APEX_PREBUILD=1 allsub)
+  - Added following demos:
+    o isp_chroma_key
+	o isp_csi_dcu
+	o isp_gpr
+	o isp_mipi_raw
+	o neon_gauss3x3_cv
+  - Sequencer graphs cross-build ONLY for Linux x64 OS
+  - Restructured APEX demos - deleted duplicate examples
+  - Removed support for ZC702 (Linux + Standalone)
+  - Added Lauterbach T32 script for running & debug of the demos
+  - Added S32V234-EVB_SetupGuide.pdf
+  - Update of VisionSDK_UserGuide.pdf
+  
+
+------------------------------------------------------------------------------
+2015-05-12 BLN_VISION_SDK_EAR_0.6.0
+------------------------------------------------------------------------------
+  - Device renamed to S32V234
+  - Library directory structure changed (added one level of classification)
+  - Directory structure cleanup
+  - New build trees:
+    - ZYNQ Standalone (no OS)
+	- S32V234 Standalone (no OS)
+	- S32V234 Linux
+  - New pre-build content:
+    - ZYNQ Standalone (no OS)
+	- S32V234 Standalone (no OS)
+  - Added new debugger script (Lauterbach) for ZYNQ Standalone
+  - Added cached/non-cached framebuffer switch into hdmi driver (default is cached/fast))
+  - Added ISP bitfile for proFPGA board
+  - New demo - APEX IRQ for ZYNQ Standalone
+  - VisionSDK_UserGuide documentation separated:
+    - VisionSDK_UserGuide describes SDK build & run in non-specific board configuration
+	- ZC702_InstallGuide describes ZYNQ ZC702 setup, installation & ZYNQ related OS build
+  
+  Errata:
+    - Resizer with HRSZ and FAST9 demos cause only left-half of image
+      being output on INTEGRITY OS.
+	- ORB demo for ZYNQ Standalone generates slightly different image than Linux version
+      possibly due to different handling by OpenCV (output is generated by OCV)
+  
+
+------------------------------------------------------------------------------
+2015-01-19 BLN_VISION_SDK_EAR_0.5.0
+------------------------------------------------------------------------------
+  - ACF updated
+    - Added functions for fast sequential processing without APEX init
+    - APU anx auxiliary x86 libraries merged for all build trees - common build
+    - Added full ROI support
+  - OpenCL updated
+    -Integer conformance tests at 100% pass
+  - APEX Driver updated
+    - DMEM FIFO configuration methods
+    - Data dump debug function
+    - Data trace debug function
+  - Large code revision with cleaning the build
+  - Added V4L camera grabbing library for fast camera input
+  - Added fast ARM NEON optimized functions for camera I/O
+  - Cleaned build tree files
+  - Build for INTEGRITY merged into one directory (common for MULTI and Makefile)
+    - Makefile for ACF called from MULTI automatically
+  - Added ROI functionality
+  - Added following demos:
+    - ROI functionality demo
+    - V4L Camera in/out
+    - OpenCL Integer operations conformance tests
+    - APEX Safety add
+  - OpenCV library updated to version 2.4.10
+  
+  Erratum:
+    - Resizer with HRSZ and FAST9 demos cause only left-half of image
+      being output on INTEGRITY OS.
+
+------------------------------------------------------------------------------
+2014-11-11 BLN_VISION_SDK_EAR_0.4.1
+------------------------------------------------------------------------------
+ - Emulation library update
+ - Fixed indirect inputs problem on profpga
+ - Updated built content to APEX 13R9
+ - Updated ACF
+ - OpenCV rebuilt to newer version
+ - INTEGRITY MULTI and makefile projects checked
+ - Framebuffer output speeded up by applying NEON optimization
+ - Removed all environment variable dependencies - all set in PATH
+
+------------------------------------------------------------------------------
+2014-10-03 BLN_VISION_SDK_EAR_0.4.0
+------------------------------------------------------------------------------
+ - Updated ACF and APEX Driver version
+ - APEX Kernel drectory restructured
+ - Changed build tree to allow independent APU programs & OpenCL
+ - Modified ZYNQ image in order to support HDMI output
+ - Added Linux image support for USB camera
+ - Added OpenCL support
+ - Added HDMI framebuffer driver
+ - Added FFMPEG for Integrity
+ - Added horizontal resizer support
+ - Added build tree for bare metal applications
+ - Added following demos:
+   - FAST9 RGB demos
+   - Lane Departure Warning
+   - USB camera and HDMI output demo
+   - ORB Homography 
+   
+
+------------------------------------------------------------------------------
+2014-04-30 BLN_VISION_SDK_EAR_0.3.0
+------------------------------------------------------------------------------
+- Added support for dual APEX
+- Updated built contents (mainly new bitfiles for ProFPGA and ZYNQ boards)
+- Changed /os/ directory structure to separate ARM and ARM64 tree
+- Added i.MX VS4 VLAB Linux support 
+  (Linux kernel/rootfs/u-boot, python scripts, build and install instructions)
+- Added INTEGRITY build chain using Makefile
+- Fixed SD-card mount on ZYNQ Linux with mounted NFS root file system
+- Fixed Resource Manager init function (must be added in application startup)
+- Added following demos:
+  - OCV Grab Image using ffmpeg
+  - Downsample/Upsample
+  - Rotate 180 deg.
+  - Image Histogram
+  - Parallel image addition
+  - ORB Image matching in video (dual APEX support)
+  
+
+------------------------------------------------------------------------------
+2014-03-28 BLN_VISION_SDK_EAR_0.2.0
+------------------------------------------------------------------------------
+- Added support for latest CogniVue ACF features (release Feb19, 2014)
+- Added sources of CGV libs to repo (not part of SDK)
+- Completed support for INTEGRITY OS on FPGA platform (OpenCV libs, 
+  boot components, example kernel and APEX driver projects)
+- renamed top level SDK folder
+- restructured libs folder, included ARM, APU and x86 libs
+- moved "kernels" into libs/apu/kernels
+- prepared build system for ARM v8 (64-bit architecture)
+- summed area table (integral image) example added
+- Cygwin package excluded from the SDK installer

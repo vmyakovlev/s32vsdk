@@ -1,0 +1,24 @@
+# for IPUV
+# set shift_in/x/out to 4 pixels
+# in0  :  BayerPattern (broken OVT 12bit mode)
+# out0 :  BayerPattern (fixed)
+# parameters
+# gpr16       : shift for making brighter
+# used registers
+# gpr0 -gpr3 : intermediate results
+# gpr4       : shift down by 1
+
+.global copyIPUV_start
+copyIPUV_start:
+  mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/) | (16<<4) /*shr*/)
+  done copyIPUV_loop,i
+	
+copyIPUV_loop:	
+
+  mov  vout0,vh0
+  mov  vout1,vout0
+  done copyIPUV_loop,ixo
+
+  //halt
+.global copyIPUV_end
+copyIPUV_end:

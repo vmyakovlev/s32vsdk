@@ -1,0 +1,78 @@
+// IPUS1/2/4/5
+// Debayering filter for even and odd lines
+// geometry reduced by 1 line and 1 pixel
+// 3 input lines top right starting with R
+// 2 lines out
+//   out 0: green  
+//   out 1: red
+//   out 2: blue
+// r and b swapped in case of OV Sensor
+// registers:
+// parameter:
+// gpr14:  select bits to for even/oddline selection 
+// gpr15:  to select even (0x0) or odd (0x1) start line 
+// intermediate results:
+// -
+
+//.org    0x00
+.global debayer_start
+debayer_start:
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ ) 
+        mov confaddt,(0/*w*/) | (0 /*apply mask*/<<2) | (0 /* unsigned*/<<3) | (0/* shift right*/ <<5) | (64 /* factor*/ <<9)
+
+	mov loopcnt,3
+debayer_in:
+        ldon debayer_in,i
+	and out0,ypos,gpr14
+	xor out0,out0,gpr15
+        lsl gpr13,out0,15
+	mov loopcnt,1280
+        bne debayer_redline0
+
+debayer_blueline0:  // R or B
+	mov maskv,0b111111111    // for shift
+	lsr w,ina,2
+	mov maskv,0b101000101    // for r
+        mov out2,ina4            // b value
+	mov out1,sum             // r value
+	mov maskv,0b010101010    // for green
+	//dout ina4,debayer_redline1,ixo
+	ldot sum,debayer_blueline1,ixo
+debayer_blueline1:
+	lsr sacc0,ina1,1         // r
+	lsr sacc1,ina3,1         // b
+	lsr acc0 ,ina7,1         // r
+	lsr acc1 ,ina5,1         // b
+	mov out1,acc0            // r
+	mov out2,acc1            // b
+	ldot ina4,debayer_blueline0,ixo
+
+	
+	mov loopcnt,8
+	bal debayer_in
+
+debayer_redline0:
+	mov maskv,0b111111111    // shift down 
+	lsr sacc1,ina1,1         // b
+	lsr sacc0,ina3,1         // r
+	lsr acc1, ina7,1         // b
+	lsr acc0, ina5,1         // r
+	mov out2,acc1            // b
+	mov out1,acc0            // r
+	ldot ina4,debayer_redline1,ixo
+
+debayer_redline1:
+	lsr w,ina,2
+	mov maskv,0b101000101    // for b
+        mov out1,ina4            // r value
+	mov out2,sum             // b value
+	mov maskv,0b010101010    // for green
+	//dout ina4,debayer_blueline0,ixo
+	ldot sum,debayer_redline0,ixo
+
+	mov loopcnt,8
+	bal debayer_in
+
+//        halt
+.global debayer_end	
+debayer_end:

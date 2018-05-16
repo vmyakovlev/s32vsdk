@@ -1,0 +1,29 @@
+MENU.RP
+(
+    ADD
+    MENU
+    (
+        POPUP "TEST DEBUG MENU"
+        (
+            MENUITEM "Reload/Restart/Redebug"
+                (
+                    store current_debug.tmp Break Win
+                    do s32v234_startup.cmm
+                    do current_debug.tmp
+                )
+            MENUITEM "Load latest debug setup"
+                (
+                    if File.Exist(current_debug.tmp)
+                    (
+                        do current_debug.tmp
+                    )
+                    else
+                    (
+                        print "No recent debug settings found."
+                    )
+                )
+            SEPARATOR
+            MENUITEM "Quit" "quit"
+        ) 
+    )
+)

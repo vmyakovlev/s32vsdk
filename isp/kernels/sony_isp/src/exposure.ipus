@@ -1,0 +1,84 @@
+// for IPUS with Histogram engine
+// 2 channels in: line0 long exposure, line1 short exposure, bayer-pattern, top left is R
+// 2 channel out: out0  long exposure, out1  short expsoure
+// histogram out:
+//   0- 63: R  long
+//  64-127: GR long
+// 128-191: GB short
+// 192-155: B  long
+// parameters:
+// gpr0		R black  offset: default 0xf08 
+// gpr1		Gr black offset: default 0xf08
+// gpr2		Gb black offset: default 0xf08
+// gpr3		B black  offset: default 0xf08
+// 
+// gain factors
+// gpr4		R  gain default: 400 (Sony cam), 590 (Sony EVB), 
+// gpr5		Gr gain	default: 256  
+// gpr6		Gb gain	default: 256  
+// gpr7		B  gain	default: 490 (Sony cam), 402 (Sony EVB), 
+
+// used registers:
+// gpr10        histogram input shift (10 bit)
+// gpr11        histogram offset (blue line: 128)
+
+.global exposure_start
+exposure_start:
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ ) 
+	// parameters for histogram bin computation
+        mov gpr10,10             # ina(15:0)  >> 10 for histogram  hbinincl (64 bins per component)
+        mov gpr11,128            # offset bin for odd lines
+  
+        done exposure_d1_2,i
+exposure_d1_2:
+	// check even or odd line
+        lsl zero,ypos,15
+        mov lock,0
+        bne exposure_oddline1
+
+
+exposure_oddline1:
+        mov confhist,((10 <<8) | 192)
+exposure_loop1_0:
+        sub ina0,ina0,gpr2       # black correction
+        mulh out0,ina0,gpr6      # channel gain
+        sub ina3,ina3,gpr2       # black correction
+        mulh out1,ina3,gpr6      # channel gain
+
+        lsr ina3,ina3,gpr10      # scale for 64 bins
+        add hbinincl,ina3,gpr11  # long exposure histogram
+        done exposure_loop1_1,ixo
+
+exposure_loop1_1: //B
+        sub ina0,ina0,gpr3       # black correction
+        mulh out0,ina0,gpr7      # channel gain
+        sub ina3,ina3,gpr3       # black correction
+        mulh out1,ina3,gpr7      # channel gain
+
+        mov hbininch,ina3        # long exposure histogram
+        done exposure_loop1_0,ixo
+  
+  
+exposure_evenline1:
+        mov confhist,((10 <<8) | 64)
+exposure_loop0_0:  //R
+        sub ina0,ina0,gpr0       # black correction
+        mulh out0,ina0,gpr4      # channel gain
+        sub ina3,ina3,gpr0       # black correction
+        mulh out1,ina3,gpr4      # channel gain
+
+        lsr hbinincl,ina3,gpr10  # long exposure histogram (0-63)
+        done exposure_loop0_1,ixo
+
+exposure_loop0_1:
+        sub ina0,ina0,gpr1       # black correction
+        mulh out0,ina0,gpr5      # channel gain
+        sub ina3,ina3,gpr1       # black correction
+        mulh out1,ina3,gpr5      # channel gain
+
+        mov hbininch,ina3        # long exposure histogram
+        done exposure_loop0_0,ixo
+
+//        halt
+.global exposure_end
+exposure_end:

@@ -1,0 +1,42 @@
+#.org    0x00
+#Engine: IPUS2, IPUS3 (LUT)
+#Function:
+#LUT with 12 bit in 16 out
+#
+#step_x, step_in, step_out=1
+# no neighborhood used
+#input:
+#line0: Y 16 bit
+#output:
+#line0: Y 16 bit
+#
+# parameters:
+# gpr0    shifted down input
+# gpr13   maximum ypos
+# gpr14   Shift value
+# gpr15   LUT offset
+
+.global lut4k_start
+
+lut4k_start:
+//        mov lock,0
+//        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* 8.8*/ ) 
+	//mov out0,0     // initialize for first pixels becasue of delayed mult
+        done lut4k_d1,i
+lut4k_d1:
+	max  gpr13,gpr13,ypos
+        done lut4k_d2,i
+lut4k_d2:
+        lsr  gpr0,ina1,gpr14  // 16bit to 11bit
+
+lut4k_loop:
+	add  luta,gpr0,gpr15  // add lut offset to 11bit
+        //lsr  hbinincl,ina1,8  // 16bit to 8bit
+        lsr  gpr0,ina0,gpr14  // 16bit to 11bit
+	//nop
+	// stall  two cycles from luta->lut
+	dout lut,lut4k_loop,ixo
+//      halt
+
+.global lut4k_end
+lut4k_end:

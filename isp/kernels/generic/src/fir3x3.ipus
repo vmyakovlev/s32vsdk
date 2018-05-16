@@ -1,0 +1,52 @@
+// IPUS
+// Function: FIR filter
+// shift x/in/out = 1	
+// set shift_in/x/out to 1 pixels
+// in0  :  Y line 0
+// in1  :  Y line 1
+// in2  :  Y line 2
+// registers used
+// gaussian taps gpr0 - gpr2
+// 1 2 1
+// 2 4 2
+// 1 2 1
+//
+// sum = 256
+//
+// gpr6 threshold
+  
+.global fir3x3_start
+fir3x3_start:
+	// set FIR coefficients
+        mov gpr0,0x100
+        mov gpr1,0x200
+        mov gpr2,0x400
+
+	// configure ALU
+        mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (12<<4) /*shr*/)
+
+	// load in first data (8 columns)
+        done fir3x3_d1,i
+fir3x3_d1:
+        done fir3x3_loop,i
+
+	// pixel loop do 
+fir3x3_loop:
+        // FIR
+        mulh sacc0,ina0,gpr0   // inital value in accumumlator (vSacc)
+        mulh  acc0,ina2,gpr0
+        mulh  acc0,ina6,gpr0
+        mulh  acc0,ina8,gpr0
+        mulh  acc0,ina1,gpr1
+        mulh  acc0,ina3,gpr1
+        mulh  acc0,ina5,gpr1
+        mulh  acc0,ina7,gpr1
+        mulh  acc0,ina4,gpr2
+
+        dout  acc0,fir3x3_loop,ixo
+        //mov vout0,vacc0
+        //done fir3x3_loop,ixo
+
+        //halt
+.global fir3x3_end
+fir3x3_end:

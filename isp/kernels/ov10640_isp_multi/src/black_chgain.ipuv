@@ -1,0 +1,82 @@
+# for IPUV
+# set shift_in/x/out to 4 pixels
+# in0  :  BayerPattern (broken OVT 12bit mode)
+# out0 :  BayerPattern (fixed)
+# parameters
+# gpr16       : shift for making brighter
+# used registers
+# gpr0 -gpr3 : intermediate results
+# gpr4       : shift down by 1
+// parameters:
+// gpr0		R black  offset: default 0xf08 
+// gpr1		Gr black offset: default 0xf08
+// gpr2		Gb black offset: default 0xf08
+// gpr3		B black  offset: default 0xf08
+// 
+// gain factors
+// gpr4		R  gain default: 400 (Sony cam), 590 (Sony EVB), 
+// gpr5		Gr gain	default: 256  
+// gpr6		Gb gain	default: 256  
+// gpr7		B  gain	default: 490 (Sony cam), 402 (Sony EVB), 
+
+
+.global black_chgain_start
+black_chgain_start:
+
+//defaults
+////vgpr0
+//  mov gpr0,0xf08 //R
+//  mov gpr1,0xf08 //GR
+//  mov gpr2,0xf08 //R
+//  mov gpr3,0xf08 //GR
+////vgpr1  
+//  mov gpr4,0xf08 //GB
+//  mov gpr5,0xf08 //B
+//  mov gpr6,0xf08 //GB
+//  mov gpr7,0xf08 //B 
+
+//gain factors 
+////vgpr2
+//  mov gpr8,400	//R
+//  mov gpr9,256	//GR
+//  mov gpr10,400	//R
+//  mov gpr11,256	//GR
+////vgpr3  
+//  mov gpr12,256	//GB
+//  mov gpr13,490 //B
+//  mov gpr14,256 //GB
+//  mov gpr15,490 //B
+  
+ // mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/) | (16<<4) /*shr*/)
+  mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/) | (8<<4) /*shr*/)
+       
+       done black_chgain_d1_2,i
+black_chgain_d1_2:
+	// check even or odd line
+        lsl zero,ypos,15
+        mov lock,0
+        bne black_chgain_oddline1
+	
+black_chgain_evenline1:
+
+black_chgain_loop0_0:  //R & GR
+        sub vh0,vh0,vgpr0       # black correction
+        mulh vout1 ,vh0,vgpr2      # channel gain // this will output to vout1
+        dvot vout1,black_chgain_loop0_0, ixo   # this will output to vout0
+
+black_chgain_oddline1:        
+black_chgain_loop1_0:  // GB & B
+        sub vh0,vh0,vgpr1       # black correction
+        mulh vout1 ,vh0,vgpr3      # channel gain // this will output to vout1
+        dvot vout1,black_chgain_loop1_0, ixo   # this will output to vout0
+
+//        halt	
+	
+	
+
+.global black_chgain_end
+black_chgain_end:
+
+
+  
+       

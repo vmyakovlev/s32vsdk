@@ -1,0 +1,2 @@
+/home/henry/25/S32DS/s32v234_sdk/libs/isp/fdma/kernel/build-v234ce-gnu-linux-d/fdma.ko
+/home/henry/25/S32DS/s32v234_sdk/libs/isp/fdma/kernel/build-v234ce-gnu-linux-d/../src/fdma_core.o /home/henry/25/S32DS/s32v234_sdk/libs/isp/fdma/kernel/build-v234ce-gnu-linux-d/../src/fdma_ioctl.o /home/henry/25/S32DS/s32v234_sdk/libs/isp/fdma/kernel/build-v234ce-gnu-linux-d/../src/fdma_func.o /home/henry/25/S32DS/s32v234_sdk/libs/isp/fdma/kernel/build-v234ce-gnu-linux-d/../../../../utils/log/src/vdb_log.o

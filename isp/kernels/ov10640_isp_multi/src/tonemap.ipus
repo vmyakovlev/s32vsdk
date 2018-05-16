@@ -1,0 +1,34 @@
+//IPUS2
+// input: 3 exposures: ina0 long, ina1 short, ina2 very short
+// output: 4 exposures: out0 combined, out1 long, out2 short, out3 veryshort
+// parameters
+// gpr0: alpha long (8.8 fixed point factors)
+// gpr1: alpha short
+// gpr2: alpha very short
+
+
+
+.global tonemap_start
+tonemap_start:
+
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ )
+
+        done tonemap_loop,i
+
+tonemap_loop:
+tonemap_long:
+	mulh sacc0,ina0,gpr0
+	mov  out1,ina0
+	done tonemap_short,i
+tonemap_short:
+	mulh acc0,ina0,gpr1
+	mov  out2,ina0
+	done tonemap_vshort,i
+tonemap_vshort:
+	mulh acc0,ina0,gpr2
+	mov  out3,ina0
+        dout acc0,tonemap_loop,ixo
+  
+        halt
+.global tonemap_end
+tonemap_end:

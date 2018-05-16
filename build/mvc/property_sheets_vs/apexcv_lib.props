@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="property_sheets_vs" />
+  <PropertyGroup Label="UserMacros">
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(S32V234_SDK_ROOT)\libs\apexcv_base\arithmetic\include;$(S32V234_SDK_ROOT)\libs\apexcv_base\arithmetic\graphs;$(S32V234_SDK_ROOT)\libs\apexcv_base\interpolation\graphs;$(S32V234_SDK_ROOT)\libs\apexcv_base\interpolation\include;$(S32V234_SDK_ROOT)\libs\apexcv_base\color_conversion\graphs;$(S32V234_SDK_ROOT)\libs\apexcv_base\color_conversion\include;$(S32V234_SDK_ROOT)\libs\apexcv_base\histogram\graphs;$(S32V234_SDK_ROOT)\libs\apexcv_base\histogram\include;$(S32V234_SDK_ROOT)\libs\apexcv_base\integral_image\graphs;$(S32V234_SDK_ROOT)\libs\apexcv_base\integral_image\include;$(S32V234_SDK_ROOT)\libs\apexcv_base\image_filters\graphs;$(S32V234_SDK_ROOT)\libs\apexcv_base\image_filters\include;$(S32V234_SDK_ROOT)\libs\apexcv_base\apexcv_core\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="APULibInstall">
+      <Value>$(APULibInstall)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

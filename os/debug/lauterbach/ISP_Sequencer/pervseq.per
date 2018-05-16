@@ -1,0 +1,98 @@
+; $Id: per_vseq.per 2014-12-03 21:52:08Z servera $
+; @Copyright: (c) 2014-2015 Freescale Halbleiter GmbH
+; --------------------------------------------------------------------------------
+; @Title: IPU On-Chip Peripherals
+; @Props: Released
+; @Author: SH
+; @Changelog: 2008-02-29 MPO
+; @Manufacturer: FSL.
+; @Doc: VSEQ-BlockGuide
+; @Core: VSEQ
+; --------------------------------------------------------------------------------
+
+; whats that for?
+config 16. 8.
+
+width 0xf
+
+tree.open "VSEQ"
+ base d:0x40000000
+
+tree.open "Event Ctl"
+; textline ""
+
+group.long 0x2000++0x03
+ textline "Engine Type Done"
+  bitfld.long 0x00 0.      " IPUS ,pending IPUS Event" "-,1"
+  bitfld.long 0x00 1.      " IPUV ,pending IPUS Event" "-,1"
+  bitfld.long 0x00 2.      " OTHR ,pending Other Event" "-,1"
+ textline ""
+
+group.long 0x2004++0x03 "IPUS "
+ textline ""
+  decmask.long.byte 0x00  0.--3. 1 " MaxCnt (2), Maximum IPUS Done Counter Value (should be 2)"
+group.long 0x2038++0x03 "IPUV "
+ textline ""
+  decmask.long.byte 0x00  0.--3. 1 " MaxCnt (2), Maximum IPUV Done Counter Value (should be 2)"
+group.long 0x2094++0x03 "FDMA  "
+ textline ""
+  bitfld.longbyte 0x00 0.--4.      "MaxCnt (16) ,Maximum number of counted done from FastDMA"
+
+
+
+group.long 0x2007++0x0f "IPUS Done "
+ textline ""
+  bitfld.long.byte 0x0C 0.--7.      "Status Bits ,Done 1 bit per engine"
+  decmask.long.byte 0x08 0.--6.     " Enc , Engine Number for 1 engine with Done"
+  bitfld.long.byte 0x04 0.--7.      " Clear Bits ,Done 1 bit per engine"
+  decmask.long.byte 0x00 0.--6.     " Enc , Engine Number for 1 engine with Done"
+
+group.long 0x2038++0x03 "IPUV "
+  copy
+
+group.long 0x203C++0x0f "IPUV Done "
+  copy
+
+group.long 0x206C++0x0b "OTHR Done "
+ textline ""
+  bitfld.long.byte 0x08 0.--7.      "Status Bits          ,Done 1 bit per engine"
+;  decmask.long.byte 0x08 0.--6.    " Enc , Engine Number for 1 engine with Done"
+  bitfld.long.byte 0x04 0.--7.      " Clear Bits ,Done 1 bit per engine"
+  decmask.long.byte 0x00 0.--6.     " Enc , Engine Number for 1 engine with Done"
+ textline ""
+
+group.long 0x2018++0x1f "IPUS Free "
+ textline ""
+  bitfld.long.byte 0x18 0.--7.      "Free Bits ,Free Engine: 1 bit per engine"
+  decmask.long.byte 0x14 0.--6.     " Enc , First Free Engine Number"
+  bitfld.long.byte 0x1c 0.--7.      " Free Buf Bits ,Free Buffer: 1 bit per engine"
+  bitfld.long.byte 0x10 0.--7.      " Usable Mask,Usable Engines: 1 bit per engine"
+  bitfld.long.byte 0x04 0.--7.      " Trig Bits ,Trigger Engine: 1 bit per engine"
+  decmask.long.byte 0x00 0.--6.     " Enc , Trigger Engine Number"
+  bitfld.long.byte 0x0c 0.--7.      " Clear Bits ,Clear Engine: 1 bit per engine"
+  decmask.long.byte 0x08 0.--6.     " Enc , Clear Engine Number"
+
+group.long 0x204C++0x1f "IPUV Free "
+ copy
+
+group.long 0x2078++0x17 "OTHR Free "
+ textline ""
+  bitfld.long.byte 0x10 0.--7.      "Free Bits          ,Free Engine: 1 bit per engine"
+  bitfld.long.byte 0x14 0.--7.      " Free Buf Bits          ,Free Buffer: 1 bit per engine"
+  bitfld.long.byte 0x04 0.--7.      " Trig Bits ,Trigger Engine: 1 bit per engine"
+  decmask.long.byte 0x00 0.--6.     " Enc , Trigger Engine Number"
+  bitfld.long.byte 0x0c 0.--7.      " Clear Bits ,Clear Engine: 1 bit per engine"
+  decmask.long.byte 0x08 0.--6.     " Enc , Clear Engine Number"
+
+
+group.long 0x2098++0x07 "SW "
+ textline ""
+  bitfld.long.byte 0x00 0.--8.      "Trigger ,SW Event 0-7 (written by Sequencer)"
+  bitfld.long.byte 0x04 0.--8.      " Clear   ,SW Event Clear 0-8 (written by Host)"
+
+
+;Event Ctl
+tree.end  
+
+; VSEQ
+tree.end

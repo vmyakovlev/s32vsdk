@@ -1,0 +1,24 @@
+// IPUS kernel
+// function:
+// convert y  to uyvy (u=v=128)
+// INPUT:
+// INA0: Y
+// OUTPUT:
+// OUT0: uyvy (interleaved)
+// no subsampling
+// REGISTERS:
+// Parameters:
+// Use by Kernel:
+
+.global ytouyvy_start
+ytouyvy_start:
+	mov gpr0,0x8000   // 128 constant for u and v
+        //mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (14<<4) /*shr*/)
+        done ytouyvy_pixuv,i    // load first pixel
+
+ytouyvy_pixuv:	dout gpr0,ytouyvy_pixy,o
+ytouyvy_pixy:	dout ina0,ytouyvy_pixuv,ixo
+
+        //halt
+.global ytouyvy_end
+ytouyvy_end:

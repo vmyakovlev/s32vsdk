@@ -1,0 +1,123 @@
+# For IPUS4/5
+# simple BR debayer
+# linea0: b1,1 b1,1 b3,1 b3,1 ...
+# linea1: r2,2 r2,2 r4,2 r4,2 ...
+# linea2: b1,3 b1,3 b3,3 b3,3 ...
+
+# lineb0: g1,1 g2,1 g3,1 g4,1 ...
+# lineb1: g1,2 g2,2 g3,2 g4,2 ...
+# lineb2: g1,3 g2,3 g3,3 g4,3 ...
+
+# out0 r >>
+# out1 b >>
+# out2 g
+.global debayer_br_advanced_start
+debayer_br_advanced_start:
+        mov  confalu,(1 /* signed*/ | (0 << 1) /* no saturate*/ | (16<<4) /* shr =0*/ ) 
+        //mov confsgn,1            # signed
+        //mov confsat,0            # saturation off
+        mov confaddt,(0/*w*/) | (0/*apply mask*/<<2) | (1 /* signed*/<<3) | (1 /* keep higher*/<<4) | (4/* shift right -6*/ <<5) | (64 /* factor*/ <<9)
+        //mov confthres,0          # kill values < 0
+        //mov maskv,0x1ff
+        //mov 1                  # to W
+        //mov maskv,0x145        # 101 000 101
+        //mov 2                  # to W
+        //swp
+        done debayer_br_advanced_d0,i
+debayer_br_advanced_d0:
+        done debayer_br_advanced_d1,i
+debayer_br_advanced_d1:
+        and ypos,1               # check for even lines (B first)
+        done debayer_br_advanced_d2,i
+debayer_br_advanced_d2:
+
+        beq debayer_br_advanced_bluefirst
+// 7instructions
+
+//debayer_br_advanced_loop:
+//        dout ina4,debayer_br_advanced_loop,ixo
+
+debayer_br_advanced_readfirst:
+debayer_br_advanced_loop10: // R2,2 first
+        mov maskv,0x1ff
+
+        //sub ina,inb
+        //lsr w4,inb4,2
+
+        lsr w,inb,3
+	mov out2,inb4
+        swp
+        lsr w,ina,3
+        sub w,w,ww
+        lsr w4,inb4,2
+
+  
+        mov maskv,0x038          # 000111000
+        //max out1,scaled,zero     # B2,3 clip lower boundary w/ threshold 
+        //asl out1,out1,1
+        asl out1,threshold,1     # B2,3 clip lower boundary w/ threshold 
+
+        mov maskv,0x092          # 010010010
+        //max out0,scaled,zero     # R2,3 clip lower boundary w/ threshold 
+        //asl out0,out0,1
+        asl out0,threshold,1     # R2,3 clip lower boundary w/ threshold 
+
+        done debayer_br_advanced_loop11,ixo
+debayer_br_advanced_loop11:  // B1,1 First
+        mov maskv,0x155
+        lsr w,inb,4
+	mov out2,inb4
+        swp
+        lsr w,ina,4
+        sub w,w,ww
+        lsr w4,inb4,2 
+
+        lsr out1,ina4,1          # B3,3
+        //max out0,scaled,zero     # R3,3
+        //asl out0,out0,1          # R3,3
+        asl out0,threshold,1     # R3,3
+
+        done debayer_br_advanced_loop10,ixo
+//20 instruction
+
+debayer_br_advanced_bluefirst:
+debayer_br_advanced_loop00:  // B1,1 First
+        mov maskv,0x155
+        lsr w,inb,4
+	mov out2,inb4
+        swp
+        lsr w,ina,4
+        sub w,w,ww
+        lsr w4,inb4,2
+
+        lsr out0,ina4,1          # R2,2
+        //max out1,scaled,zero     # B2,2
+        //asl out1,out1,1          # B2,2
+        asl out1,threshold,1     # B2,2
+
+        done debayer_br_advanced_loop01,ixo
+debayer_br_advanced_loop01:
+        mov maskv,0x1ff
+        lsr w,inb,3
+	mov out2,inb4
+        swp
+        lsr w,ina,3
+        sub w,w,ww
+        lsr w4,inb4,2 
+
+        mov maskv,0x038          # 000111000
+        //max out0,scaled,zero     # R3,2 clip lower boundary w/ threshold 
+        //asl out0,out0,1          # R3,2 clip lower boundary w/ threshold 
+        asl out0,threshold,1     # R3,2 clip lower boundary w/ threshold 
+
+        mov maskv,0x092          # 010010010
+        //max out1,scaled,zero     # B3,2 clip lower boundary w/ threshold 
+        //asl out1,out1,1          # B3,2 clip lower boundary w/ threshold 
+        asl out1,threshold,1     # B3,2 clip lower boundary w/ threshold 
+
+        done debayer_br_advanced_loop00,ixo
+//20 instructions
+  
+        //halt
+.global debayer_br_advanced_end
+debayer_br_advanced_end:

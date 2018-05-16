@@ -1,0 +1,19 @@
+#.org    0x00
+.global yuyv_to_uyvy_ipus_start
+
+yuyv_to_uyvy_ipus_start:
+
+        done yuyv_to_uyvy_in_d0_3_6,i    // load first pixel
+yuyv_to_uyvy_in_d0_3_6:
+		done yuyv_to_uyvy_in_d1_4_7,i
+yuyv_to_uyvy_in_d1_4_7:
+		mov out2, ina6
+		mov out1, ina3 
+		dout ina0,yuyv_to_uyvy_out_d0_3_6,xo
+yuyv_to_uyvy_out_d0_3_6:
+		mov out2, ina7
+		mov out1, ina4
+		dout ina1,yuyv_to_uyvy_in_d0_3_6,ixo
+        halt
+.global yuyv_to_uyvy_ipus_end
+yuyv_to_uyvy_ipus_end:

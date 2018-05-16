@@ -1,0 +1,5 @@
+#ifndef kmem_SYM_H
+#define kmem_SYM_H
+#define YUV42210bit_to_8bit_ipus_start 0x0000000000000000
+#define YUV42210bit_to_8bit_ipus_end 0x0000000000000014
+#endif

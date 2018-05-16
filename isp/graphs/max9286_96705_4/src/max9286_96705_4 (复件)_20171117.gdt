@@ -1,0 +1,392 @@
+// ISP Graph "max9286_06705_4"
+Import "../../../inc/ipus_mem_map.h";
+Import "../../../inc/ipuv_mem_map.h";
+Import "../../../inc/mipi_mem_map.h";
+	Node MIPI_port_A {
+		MIPICSI0,
+		MAX9286_96705,
+		0
+	};
+	MIPI_port_A.inputLines = //720
+720;
+	MIPI_port_A.cameras = //4
+4;
+MIPI_port_A.out[0].pixelType = GENERIC_16;
+MIPI_port_A.out[0].pixelsToTransfer = //10240
+10240;
+MIPI_port_A.out[0].offset = //0
+0;
+
+
+Node YUV41110bit_to_8bit {
+	SCALAR,
+	1,
+	//720
+720
+};
+Param YUV41110bit_to_8bit {
+    { D_IPUS_SYN_HOST_XCFG_OFF, (2560<< 16) | 0x1 },
+    { D_IPUS_SYN_HOST_INACFG_OFF, 0x00000700 },
+    { D_IPUS_SYN_HOST_OUTCFG_OFF, 0x00000700 },
+    { D_IPUS_SYN_S_CH0_CFG_OUT_OFF, 0x10000000 },
+    { D_IPUS_SYN_S_CH1_CFG_OUT_OFF, 0x10000000 },
+    { D_IPUS_SYN_S_CH2_CFG_OUT_OFF, 0x10000000 },
+    { D_IPUS_SYN_S_CH0_CFG_INA_OFF, 0x00150000 },
+    { D_IPUS_SYN_S_CH1_CFG_INA_OFF, 0x00150000 },
+    { D_IPUS_SYN_S_CH2_CFG_INA_OFF, 0x00150000 },
+
+};
+
+
+	Load YUV41110bit_to_8bit {
+	yuyv_to_uyvy_ipus
+	};
+
+
+YUV41110bit_to_8bit.out[0].pixelType = GENERIC_8;
+YUV41110bit_to_8bit.out[0].offset = //0
+0;
+YUV41110bit_to_8bit.out[1].pixelType = GENERIC_8;
+YUV41110bit_to_8bit.out[1].offset = //0
+0;
+YUV41110bit_to_8bit.out[2].pixelType = GENERIC_8;
+YUV41110bit_to_8bit.out[2].offset = //0
+0;
+
+
+Node YUV42210bit_to_8bit_ipus2 {
+	SCALAR,
+	0,
+	//720
+720
+};
+Param YUV42210bit_to_8bit_ipus2 {
+    { D_IPUS_SYN_HOST_XCFG_OFF, (2560<< 16) | 0x1 },
+    { D_IPUS_SYN_HOST_INACFG_OFF, 0x00000100 },
+    { D_IPUS_SYN_HOST_OUTCFG_OFF, 0x00000100 },
+    { D_IPUS_SYN_S_CH0_CFG_OUT_OFF, 0x10000000 },
+    { D_IPUS_SYN_S_CH0_CFG_INA_OFF, 0x00150000 },
+
+};
+
+
+	Load YUV42210bit_to_8bit_ipus2 {
+	yuyv_to_uyvy_ipus
+	};
+
+
+YUV42210bit_to_8bit_ipus2.out[0].pixelType = GENERIC_8;
+YUV42210bit_to_8bit_ipus2.out[0].offset = //0
+0;
+
+		Node FastDMA {
+			FDMA,
+			0
+		};
+	
+
+		
+		
+		Buffer MIPI_port_A_Buffer_0 {
+			MIPI_port_A.out[0],
+	GENERIC_16,
+	//10240
+10240,
+	//150
+150,
+	//20480
+20480,
+	1
+		};
+		
+		MIPI_port_A_Buffer_0.readPixels = //10240
+10240;
+		
+	Input YUV41110bit_to_8bit_A_0 = YUV41110bit_to_8bit.A[0];
+	  YUV41110bit_to_8bit_A_0.firstLine = //0
+0;
+	  YUV41110bit_to_8bit_A_0.pixels = //2560
+2560;
+	  YUV41110bit_to_8bit_A_0.lineSkip = //0
+0;
+	  YUV41110bit_to_8bit_A_0.increment = 1;
+	  YUV41110bit_to_8bit_A_0.pixelSkip = //0
+0;
+	  YUV41110bit_to_8bit_A_0.type = GENERIC_16;
+		
+		
+Connect {
+  MIPI_port_A_Buffer_0, 
+  YUV41110bit_to_8bit_A_0,
+  //1
+1};
+	Input YUV41110bit_to_8bit_A_1 = YUV41110bit_to_8bit.A[1];
+	  YUV41110bit_to_8bit_A_1.firstLine = //0
+0;
+	  YUV41110bit_to_8bit_A_1.pixels = //2560
+2560;
+	  YUV41110bit_to_8bit_A_1.lineSkip = //0
+0;
+	  YUV41110bit_to_8bit_A_1.increment = 1;
+	  YUV41110bit_to_8bit_A_1.pixelSkip = //2560
+2560;
+	  YUV41110bit_to_8bit_A_1.type = GENERIC_16;
+		
+		
+Connect {
+  MIPI_port_A_Buffer_0, 
+  YUV41110bit_to_8bit_A_1,
+  //1
+1};
+	Input YUV41110bit_to_8bit_A_2 = YUV41110bit_to_8bit.A[2];
+	  YUV41110bit_to_8bit_A_2.firstLine = //0
+0;
+	  YUV41110bit_to_8bit_A_2.pixels = //2560
+2560;
+	  YUV41110bit_to_8bit_A_2.lineSkip = //0
+0;
+	  YUV41110bit_to_8bit_A_2.increment = 1;
+	  YUV41110bit_to_8bit_A_2.pixelSkip = //5120
+5120;
+	  YUV41110bit_to_8bit_A_2.type = GENERIC_16;
+		
+		
+Connect {
+  MIPI_port_A_Buffer_0, 
+  YUV41110bit_to_8bit_A_2,
+  //1
+1};
+	Input YUV42210bit_to_8bit_ipus2_A_0 = YUV42210bit_to_8bit_ipus2.A[0];
+	  YUV42210bit_to_8bit_ipus2_A_0.firstLine = //0
+0;
+	  YUV42210bit_to_8bit_ipus2_A_0.pixels = //2560
+2560;
+	  YUV42210bit_to_8bit_ipus2_A_0.lineSkip = //0
+0;
+	  YUV42210bit_to_8bit_ipus2_A_0.increment = 1;
+	  YUV42210bit_to_8bit_ipus2_A_0.pixelSkip = //7680
+7680;
+	  YUV42210bit_to_8bit_ipus2_A_0.type = GENERIC_16;
+		
+		
+Connect {
+  MIPI_port_A_Buffer_0, 
+  YUV42210bit_to_8bit_ipus2_A_0,
+  //1
+1};
+		
+
+		
+		
+
+		
+		
+		Buffer YUV41110bit_to_8bit_Buffer_0 {
+			YUV41110bit_to_8bit.out[0],
+	GENERIC_8,
+	//2560
+2560,
+	//16
+16,
+	//2560
+2560,
+	1
+		};
+		
+		YUV41110bit_to_8bit_Buffer_0.readPixels = //2560
+2560;
+		
+		
+			Input FastDMA_Out = FastDMA.A[0];
+			  FastDMA_Out.firstLine = //0
+0;
+			  FastDMA_Out.increment = 1;
+			
+			Connect {
+				YUV41110bit_to_8bit_Buffer_0,
+				FastDMA_Out,
+				//1
+1};
+
+	DDRBuffer FastDMA_Buffer_0 {
+		FastDMA.out[0],
+	GENERIC_8,
+	//2560
+2560,
+	//720
+720,
+	//2560
+2560,
+	1
+	};
+		
+	Connect { FastDMA_Buffer_0, DDR, 0 };
+	
+		
+		
+
+		
+		
+
+		
+		
+
+		
+		
+		Buffer YUV41110bit_to_8bit_Buffer_1 {
+			YUV41110bit_to_8bit.out[1],
+	GENERIC_8,
+	//2560
+2560,
+	//16
+16,
+	//2560
+2560,
+	1
+		};
+		
+		YUV41110bit_to_8bit_Buffer_1.readPixels = //2560
+2560;
+		
+		
+			Input FastDMA_Out1 = FastDMA.A[1];
+			  FastDMA_Out1.firstLine = //0
+0;
+			  FastDMA_Out1.increment = 1;
+			
+			Connect {
+				YUV41110bit_to_8bit_Buffer_1,
+				FastDMA_Out1,
+				//1
+1};
+
+	DDRBuffer FastDMA_Buffer_1 {
+		FastDMA.out[1],
+	GENERIC_8,
+	//2560
+2560,
+	//720
+720,
+	//2560
+2560,
+	1
+	};
+		
+	Connect { FastDMA_Buffer_1, DDR, 0 };
+	
+		
+		
+
+		
+		
+
+		
+		
+
+		
+		
+		Buffer YUV41110bit_to_8bit_Buffer_2 {
+			YUV41110bit_to_8bit.out[2],
+	GENERIC_8,
+	//2560
+2560,
+	//16
+16,
+	//2560
+2560,
+	1
+		};
+		
+		YUV41110bit_to_8bit_Buffer_2.readPixels = //2560
+2560;
+		
+		
+			Input FastDMA_Out2 = FastDMA.A[2];
+			  FastDMA_Out2.firstLine = //0
+0;
+			  FastDMA_Out2.increment = 1;
+			
+			Connect {
+				YUV41110bit_to_8bit_Buffer_2,
+				FastDMA_Out2,
+				//1
+1};
+
+	DDRBuffer FastDMA_Buffer_2 {
+		FastDMA.out[2],
+	GENERIC_8,
+	//2560
+2560,
+	//720
+720,
+	//2560
+2560,
+	1
+	};
+		
+	Connect { FastDMA_Buffer_2, DDR, 0 };
+	
+		
+		
+
+		
+		
+
+		
+		
+	
+	
+
+		
+		
+		Buffer YUV42210bit_to_8bit_ipus2_Buffer_0 {
+			YUV42210bit_to_8bit_ipus2.out[0],
+	GENERIC_8,
+	//2560
+2560,
+	//16
+16,
+	//2560
+2560,
+	1
+		};
+		
+		YUV42210bit_to_8bit_ipus2_Buffer_0.readPixels = //2560
+2560;
+		
+		
+			Input FastDMA_Out3 = FastDMA.A[3];
+			  FastDMA_Out3.firstLine = //0
+0;
+			  FastDMA_Out3.increment = 1;
+			
+			Connect {
+				YUV42210bit_to_8bit_ipus2_Buffer_0,
+				FastDMA_Out3,
+				//1
+1};
+
+	DDRBuffer FastDMA_Buffer_3 {
+		FastDMA.out[3],
+	GENERIC_8,
+	//2560
+2560,
+	//720
+720,
+	//2560
+2560,
+	1
+	};
+		
+	Connect { FastDMA_Buffer_3, DDR, 0 };
+	
+		
+		
+
+		
+		
+
+		
+		
+	
+	

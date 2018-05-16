@@ -1,0 +1,28 @@
+# for IPUV1
+# function:
+# swap endianess
+# shift by 4 pixels at input and output
+# inputs:
+# line 0: one endian
+# output:
+# line 0: other endian
+# parameters:
+# gpr15: 8
+
+.global endian_ipuv_start
+endian_ipuv_start:
+  mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (15<<4) /*shr*/)
+  mov gpr15,8
+  or  gpr14,gpr14,gpr14	
+  done endian_ipuv_d1,i
+
+endian_ipuv_d1:
+endian_ipuv_loop:	
+  lsl vgpr0,vh0,gpr15
+  lsr vgpr1,vh0,gpr15
+  or  vout0,vgpr0,vgpr1
+  done endian_ipuv_loop,ixo
+
+  //halt
+.global endian_ipuv_end
+endian_ipuv_end:

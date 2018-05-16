@@ -1,0 +1,41 @@
+# IPUS
+# Histogram:
+# copy pixel data:
+#    out = in
+# create hsitogram:
+#    hist[in]++
+# set shift_in/x to 1 pixels
+# set shift_out to 1 pixels
+# input to line 0,1,2
+# out0 : copied input value
+
+.global histogram_start
+histogram_start:
+	// configure ALU
+        mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (14<<4) /*shr*/)
+
+	// configure Histogram engine
+        mov confhist,(0 /*offset*/ | (8<<8) /*shr*/)
+
+	// shift in first 3 columns, no output
+	// in that case we could go with 1x1 input but we stay on 3x3
+        done histogram_in1,i    // load first pixel
+histogram_in1:
+	done histogram_in2,i    // load first pixel
+histogram_in2:
+	done histogram_loop,i   // load first pixel
+
+histogram_loop:
+	// incrment histogram value:
+	// hist[ina4>>8]++
+        lsr hbinincl,ina4,8
+	// alternative doing the shift in accelerator	
+        //mov histinch,ina4
+
+ 	// now we are done and we can write the output and
+	// get the next input pixels
+	dout ina4,histogram_loop,ixo
+
+	halt
+.global histogram_end
+histogram_end:

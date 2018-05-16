@@ -1,0 +1,97 @@
+//IPUS
+// input: 2 exposures
+// line 0: l/s
+// line 1: vs
+// output: combined
+// parameters
+// gpr0         processed line length
+// gpr1         gap between lines
+// gpr12:       low transition pint
+
+// gpr13:       l/s vs vs selection point
+// gpr14:       shift right for vs --  select if vs available
+// gpr15:       shift right for long/short  -- ignored
+
+// instruction format:
+// inst outreg,inreg1,inreg2
+// inst outreg,inreg1,immediate
+// inst outreg,inreg1
+
+.global hdr_start
+hdr_start:
+
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ )
+	mov gpr13,(4000<<4)           // switch @ 4000      
+
+	add loopcnt,1            // fetch first pixel
+	add zero,gpr14,zero      // select the mode: 2 inputs vs one input
+
+hdr_linestart:
+        ldon hdr_linestart,i
+	mov loopcnt,gpr0         // line length
+	bne hdr_signle           // if seelcted branch to single input
+
+hdr_loop:
+	sub zero,ina0,gpr13      // if long/short < gpr13
+	bls hdr_ls
+	ldot ina3,hdr_loop,ixo   // output vs
+hdr_ls:
+	lsr ina0,ina0,gpr15      // map ls to its value range
+	ldot ina0,hdr_loop,ixo   // output ls
+
+hdr_lineend:
+	// in case of line reduction
+	//mov loopcnt,gpr1       // gaps between lines
+  	//bal hdr_linestart
+	
+	// last two regular pixels, store result for extension
+	sub zero,ina0,gpr13      // long/short is shifted down
+	mov gpr2,ina0            // output vs
+	bls hdr_gpr2out
+	mov gpr2,ina3            // output ls
+hdr_gpr2out:
+	dout gpr2,hdr_lineend1,ixo
+
+hdr_lineend1:
+	sub zero,ina0,gpr13      // long/short is shifted down
+	mov gpr3,ina0            // output vs
+	bls hdr_gpr3out
+	mov gpr3,ina3            // output ls
+hdr_gpr3out:
+	dout gpr3,hdr_lineend2,ixo
+
+hdr_lineend2:
+	dout gpr2,hdr_lineend3,xo
+hdr_lineend3:
+	dout gpr3,hdr_lineend4,xo
+hdr_lineend4:
+	dout gpr2,hdr_lineend5,xo
+hdr_lineend5:
+	dout gpr3,hdr_lineend6,xo
+hdr_lineend6:
+	
+	mov loopcnt,gpr0         // process last two pixels separety
+	bal hdr_loop
+
+hdr_signle:
+	ldot ina0,hdr_signle,ixo
+hdr_single_lineend:
+	dout ina0,hdr_single_lineend1,ixo
+hdr_single_lineend1:
+	mov gpr2,out0
+	dout ina0,hdr_single_lineend2,ixo
+hdr_single_lineend2:
+	mov gpr3,out0
+	dout gpr2,hdr_single_lineend3,xo
+hdr_single_lineend3:
+	dout gpr3,hdr_single_lineend4,xo
+hdr_single_lineend4:
+	dout gpr2,hdr_single_lineend5,xo
+hdr_single_lineend5:
+	dout gpr3,hdr_single_lineend6,xo
+hdr_single_lineend6:
+	mov loopcnt,gpr0         // process last two pixels separety
+	bal hdr_signle
+
+.global hdr_end
+hdr_end:

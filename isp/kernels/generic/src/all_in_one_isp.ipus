@@ -1,0 +1,75 @@
+// IPUS1/2/4/5
+// exposure histogram channel gain, debayering ...for even and odd lines
+// geometry reduced by 1 line and 1 pixel
+// 3 input lines top right starting with R
+// 2 lines out
+//   out 0: green  
+//   out 1: red
+//   out 2: blue
+// r and b swapped in case of OV Sensor
+// registers:
+// parameter:
+// gpr0 :  channel gain R
+// gpr1 :  channel gain G (not used)
+// gpr2 :  channel gain B
+// gpr14:  select bits to for even/oddline selection 
+// gpr15:  to select even (0x0) or odd (0x1) start line 
+// intermediate results:
+// -
+
+//.org    0x00
+.global all_in_one_isp_start
+all_in_one_isp_start:
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ ) 
+	mov loopcnt,3
+all_in_one_isp_in:
+        ldon all_in_one_isp_in,i
+        lsl zero,ypos,15
+        mov confaddt,(0/*w*/) | (0 /*apply mask*/<<2) | (0 /* unsigned*/<<3) | (0/* shift right*/ <<5) | (64 /* factor*/ <<9)
+        bne all_in_one_isp_redline
+
+all_in_one_isp_blueline :  // blue in the middle line 
+        mov confhist,((10 <<8) /* shift down (to 64 bins)*/ | 192 /* offset */)
+all_in_one_isp_bluepix0:  // R or B
+	mov maskv,0b111111111    // for shift
+	lsr w,ina,2
+	mov maskv,0b101000101    // for r
+        mulh out2,ina4,gpr2      // b value
+	mulh out1,sum,gpr0       // r value
+	mov maskv,0b010101010    // for green
+	mov hbininch,ina4        // move b to histogram
+	dout sum,all_in_one_isp_bluepix1,ixo
+all_in_one_isp_bluepix1:
+	lsr sacc0,ina1,1         // r
+	lsr sacc1,ina3,1         // b
+	lsr acc0 ,ina7,1         // r
+	lsr acc1 ,ina5,1         // b
+	mulh out1,acc0,gpr0      // r
+	mulh out2,acc1,gpr2      // b
+	dout ina4,all_in_one_isp_bluepix0,ixo
+
+all_in_one_isp_redline:
+        mov confhist,((10 <<8) /* shift down (to 64 bins)*/ | 64 /* offset */)
+all_in_one_isp_redpix0:
+	mov maskv,0b111111111    // shift down 
+	lsr sacc1,ina1,1         // b
+	lsr sacc0,ina3,1         // r
+	lsr acc1, ina7,1         // b
+	lsr acc0, ina5,1         // r
+	mulh out2,acc1,gpr2      // b
+	mulh out1,acc0,gpr0      // r
+	mov  hbininch,ina4       // mov g to histogram
+	dout ina4,all_in_one_isp_redpix1,ixo
+
+all_in_one_isp_redpix1:
+	lsr w,ina,2
+	mov maskv,0b101000101    // for b
+        mulh out1,ina4,gpr0      // r value
+	mulh out2,sum,gpr2       // b value
+	mov maskv,0b010101010    // for green
+	lsr hbinincl,ina4,10     // move r to histogram
+	dout sum,all_in_one_isp_redpix0,ixo
+
+//        halt
+.global all_in_one_isp_end	
+all_in_one_isp_end:

@@ -1,0 +1,41 @@
+// IPUS kernel
+// INPUT:
+// INA0_0: R
+// INA0_1: G
+// INA0_2: B
+// OUT0:   Y
+// no subsampling
+
+// REGISTERS:
+// SET BY SEQUENCER
+// SET BY KERNEL
+// GPR0 - GPR6 Matrix and Offset
+
+.global rgb2gs8_interleaved_start
+       
+rgb2gs8_interleaved_start:
+        // scaled to 32768 = 15 bits to allow to deal with overflows
+        // Y= 0,299xR + 0,587xG + 0,114xB
+        mov gpr0,9797   //R->Y :  32768 * 0,299
+        mov gpr1,19234  //G->Y :  32768 * 0,587
+        mov gpr2,3735   //B->Y :  32768 * 0,114
+  
+        mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (16<<4) /*shr*/)
+        done rgb2gs8_interleaved_r,i // get first R byte
+
+rgb2gs8_interleaved_r:    
+        //R->Y
+        mulh sacc0,ina0,gpr0  // R->Y
+        done rgb2gs8_interleaved_g,i
+rgb2gs8_interleaved_g:
+        //G->Y
+        mulh acc0,ina0,gpr1   // G->Y
+        done rgb2gs8_interleaved_b,i
+rgb2gs8_interleaved_b:
+        //B->Y
+        mulh acc0,ina0,gpr2  // B->Y
+        //lsl vout0,vacc0,gpr6  // Y 
+        dout ina0,rgb2gs8_interleaved_r,ixo
+
+.global rgb2gs8_interleaved_end
+rgb2gs8_interleaved_end:

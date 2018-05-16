@@ -1,0 +1,26 @@
+#.org    0x00
+#Eninge: IPUS2, IPUS3
+#step_x, step_in, step_out=1
+# no neighborhood used
+#input:
+#line0: Y 15 bit
+#output:
+#line0: Y 15 bit
+# parameters:
+.global asl_gpr1_start
+
+asl_gpr1_start:
+        mov lock,0
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ ) 
+        done asl_gpr1_d1,i
+asl_gpr1_d1:
+
+asl_gpr1_loop:
+	//max  gpr2,gpr2,ina0
+	//min  gpr3,gpr3,ina0
+        asl  ina0,ina0,gpr1   // shift up
+        dout ina0,asl_gpr1_loop,ixo
+
+
+.global asl_gpr1_end
+asl_gpr1_end:

@@ -1,0 +1,23 @@
+b55633@B55633-12 /cygdrive/c/WORK/GIT/embsw317_sw_videolistener/sw/kernel/sm_drv
+$ perl checkpatch/checkpatch.pl --terse --file --no-tree main.c
+No typos will be found - file '/cygdrive/c/WORK/GIT/embsw317_sw_videolistener/sw/kernel/sm_drv/checkpatch/spelling.txt': No such file or directory
+main.c:3: WARNING: line over 80 characters
+main.c:4: WARNING: line over 80 characters
+main.c:5: WARNING: line over 80 characters
+main.c:6: WARNING: line over 80 characters
+main.c:8: WARNING: line over 80 characters
+main.c:9: WARNING: line over 80 characters
+main.c:10: WARNING: line over 80 characters
+main.c:13: WARNING: line over 80 characters
+main.c:14: WARNING: line over 80 characters
+main.c:15: WARNING: line over 80 characters
+main.c:16: WARNING: line over 80 characters
+main.c:17: WARNING: line over 80 characters
+main.c:25: WARNING: line over 80 characters
+main.c:26: WARNING: line over 80 characters
+main.c:121: WARNING: Use of volatile is usually wrong: see Documentation/volatile-considered-harmful.txt
+main.c:129: WARNING: Use of volatile is usually wrong: see Documentation/volatile-considered-harmful.txt
+main.c:232: WARNING: Use of volatile is usually wrong: see Documentation/volatile-considered-harmful.txt
+main.c:847: WARNING: Prefer [subsystem eg: netdev]_err([subsystem]dev, ... then dev_err(dev, ... then pr_err(...  to printk(KERN_ERR ...
+main.c:854: WARNING: Prefer [subsystem eg: netdev]_err([subsystem]dev, ... then dev_err(dev, ... then pr_err(...  to printk(KERN_ERR ...
+total: 0 errors, 19 warnings, 1032 lines checked

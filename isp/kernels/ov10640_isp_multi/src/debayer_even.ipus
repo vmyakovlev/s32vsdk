@@ -1,0 +1,77 @@
+// IPUS1/2/4/5
+// geometry reduced by 1 line and 1 pixel
+// processing only even lines (blue lines)
+// 3 input lines top right starting with R
+// 2 lines out
+//   out 0: green  
+//   out 1: red
+//   out 2: blue
+// r and b swapped in case of OV Sensor
+	
+//.org    0x00
+.global debayer_even_start
+debayer_even_start:
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ ) 
+        mov confaddt,(0/*w*/) | (0 /*apply mask*/<<2) | (0 /* unsigned*/<<3) | (0/* shift right*/ <<5) | (64 /* factor*/ <<9)
+
+	mov loopcnt,3
+debayer_even_in:
+        ldon debayer_even_in,i
+//        lsl zero,ypos,15
+	mov loopcnt,1280
+//        bne debayer_even_redline0
+
+debayer_even_blueline0:  // R or B
+	//mov maskv,0b111111111    // for shift
+	lsr w,ina,2
+	mov maskv,0b101000101    // for r
+        mov out2,ina4            // b value
+	//nop  // maskv -> sum
+	lsr sacc0,ina0,1         // fill stall with operation A
+	mov out1,sum             // r value
+	mov maskv,0b010101010    // for green
+	//nop  // maskv -> sum
+	lsr sacc1,ina4,1         // fill stall with operation B
+	//nop  // maskv -> sum
+	lsr acc0,ina6,1         // fill stall with operation C
+	//dout ina4,debayer_even_redline1,ixo
+	ldot sum,debayer_even_blueline1,ixo
+debayer_even_blueline1:
+	mov maskv,0b111111111    // for shift
+	//lsr sacc0,ina1,1         // r  -> operation A moved to fill stall
+	//lsr sacc1,ina5,1         // b  -> operation B moved to fill stall
+	//lsr acc0 ,ina7,1         // r -> operation C moved to fill stall
+	lsr acc1 ,ina3,1         // b
+	mov out1,acc0            // r
+	mov out2,acc1            // b
+	ldot ina4,debayer_even_blueline0,ixo
+
+	
+	mov loopcnt,8
+	bal debayer_even_in
+
+//debayer_even_redline0:
+//	lsr sacc1,ina1,1         // b
+//	lsr sacc0,ina3,1         // r
+//	lsr acc1, ina7,1         // b
+//	lsr acc0, ina5,1         // r
+//	mov out2,acc1            // b
+//	mov out1,acc0            // r
+//	ldot ina4,debayer_even_redline1,ixo
+//
+//debayer_even_redline1:
+//	mov maskv,0b111111111    // shift down 
+//	lsr w,ina,2
+//	mov maskv,0b101000101    // for b
+//        mov out1,ina4            // r value
+//	mov out2,sum             // b value
+//	mov maskv,0b010101010    // for green
+//	//dout ina4,debayer_even_blueline0,ixo
+//	ldot sum,debayer_even_redline0,ixo
+//
+//	mov loopcnt,8
+//	bal debayer_even_in
+
+//        halt
+.global debayer_even_end	
+debayer_even_end:

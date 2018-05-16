@@ -1,0 +1,6 @@
+#!gbuild
+[Program]
+	-lsocket
+	-lnet
+	-livfs
+	-lnet_server_parent

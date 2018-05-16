@@ -1,0 +1,28 @@
+#.org    0x00
+.global split_3exp_ipus_start
+# requires 3 output so can only be ran on IPUS 1, 2, 4 and 5
+# input to line 0
+# in to LSB
+# out from LSB
+# out0 : copied input value
+
+split_3exp_ipus_start:
+        mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (14<<4) /*shr*/)
+	done split_3exp_ipus_loop, i
+	
+
+split_3exp_ipus_loop:
+	mov out0, ina0
+	done split_3exp_ipus_2nd, ix    
+
+split_3exp_ipus_2nd:
+	mov out1, ina0
+	done split_3exp_ipus_3rd, ix 
+
+split_3exp_ipus_3rd:
+	mov out2, ina0
+	done split_3exp_ipus_loop, ixo 
+
+        halt
+.global split_3exp_ipus_end
+split_3exp_ipus_end:

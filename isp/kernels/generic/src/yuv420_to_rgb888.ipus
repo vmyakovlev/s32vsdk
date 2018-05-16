@@ -1,0 +1,82 @@
+// IPUS kernel
+// INPUT:
+// INA0: line to be 2x upsampled in width and height
+// OUTPUT:
+// OUT0: first time upsampled line
+// OUT1: second time upsampled line
+// upsamplig by 2
+// REGISTERS:
+// SET BY SEQUENCER
+// SET BY KERNEL
+
+.global yuv420_to_rgb888_start
+yuv420_to_rgb888_start:
+        mov gpr0,18677   //V->R koef
+        mov gpr1,6471    //U->G koef
+        mov gpr2,9519    //V->G koef
+        mov gpr3,32768   //U->B koef
+        mov gpr4,146 //37352 //4669
+        mov gpr5,124 //31976 //3997
+        mov gpr6,260 //512 //64
+        
+        mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (14<<4) /*shr*/)
+        
+        done yuv420_to_rgb888_loop1,i    // load first pixel
+        
+yuv420_to_rgb888_loop1:	
+        //fixed color (white ff8080)
+        /*mov  ina0, 0xff
+        mov  ina3, 0xff
+        mov  inb0, 0x80
+        mov  inb3, 0x80*/
+        //fixed color (red 0000ff)
+        /*mov  ina0, 0x00
+        mov  ina3, 0x00
+        mov  inb0, 0x00
+        mov  inb3, 0xff*/
+        //fixed color (blue 00ff00)
+        /*mov  ina0, 0x00
+        mov  ina3, 0x00
+        mov  inb0, 0xff
+        mov  inb3, 0x00*/
+        //fixed color (green ff0000)
+        /*mov  ina0, 0xff
+        mov  ina3, 0xff
+        mov  inb0, 0x00
+        mov  inb3, 0x00*/
+             
+        mulh w0, inb0, gpr3       // U0 * 56 (U->B)
+        add  out0, ina0, w0 
+        add  out1, ina3, w0
+        sub  out0, out0, gpr6 
+        sub  out1, out1, gpr6
+        asl  out0, out0, 8
+        asl  out1, out1, 8
+        done yuv420_to_rgb888_g,o
+
+yuv420_to_rgb888_g:      
+        mulh w0, inb0, gpr1       // U0 * 0.395 (U->G)
+        mulh w1, inb3, gpr2       // V0 * 0.581 (V->G)
+        add  w0, w0, w1
+        
+        add  out0, ina0, gpr5
+        add  out1, ina3, gpr5
+        sub  out0, out0, w0
+        sub  out1, out1, w0
+        asl  out0, out0, 8
+        asl  out1, out1, 8
+        done yuv420_to_rgb888_b,o
+
+yuv420_to_rgb888_b:
+        mulh w0, inb3, gpr0        // V0 * 45 (V->R)
+        add  out0, ina0, w0
+        add  out1, ina3, w0
+        sub  out0, out0, gpr4
+        sub  out1, out1, gpr4
+        asl  out0, out0, 8
+        asl  out1, out1, 8
+        done yuv420_to_rgb888_loop1,ixo
+
+        //halt
+.global yuv420_to_rgb888_end
+yuv420_to_rgb888_end:

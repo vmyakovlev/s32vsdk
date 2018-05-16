@@ -1,0 +1,22 @@
+&S32V234_SDK_ROOT=os.env(S32V234_SDK_ROOT)
+&EVB_VERSION=os.env(S32V234_EVB_VERSION)
+IF STRing.LENgth("&EVB_VERSION")==0
+(
+    &EVB_VERSION=29288
+)
+
+INTERCOM.execute 10000 do &S32V234_SDK_ROOT/os/debug/lauterbach/S32V234-CM4.cmm
+INTERCOM.wait 10000
+IF &EVB_VERSION==28899
+    INTERCOM.execute 10000 data.load.elf &S32V234_SDK_ROOT/libs/startup/v234ce_m4_standalone/binary28899.elf
+IF &EVB_VERSION==29288
+    INTERCOM.execute 10000 data.load.elf &S32V234_SDK_ROOT/libs/startup/v234ce_m4_standalone/binary29288.elf
+INTERCOM.wait 10000
+INTERCOM.execute 10000 go
+INTERCOM.wait 10000
+INTERCOM.execute 10000 wait 1.s
+INTERCOM.wait 10000
+INTERCOM.execute 10000 Break.direct
+INTERCOM.wait 10000
+INTERCOM.execute 10000 sys.down
+INTERCOM.wait 10000

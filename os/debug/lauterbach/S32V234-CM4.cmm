@@ -1,0 +1,37 @@
+//Assuming the M4 is the master core and the A53 is started later you would need:
+RESet
+//SYStem.RESetOut
+
+SYStem.CPU S32V-CM0+
+SYStem.RESet
+SYStem.Down
+SYStem.CPU S32V-CM4
+SYStem.RESet
+SYStem.Down
+
+SYStem.CPU S32V-CM4
+SYStem.CONFIG.DEBUGPORTTYPE JTAG
+SYStem.Option.ResBreak OFF
+Trace.DISable    // Maybe required
+SYStem.JtagClock CTCK 40MHz
+
+SYStem.Up
+//break
+Data.Set ZSD:0x4004A004 %Long 0x00005AF0
+Data.Set ZSD:0x4004A004 %Long 0x0000A50F
+SYStem.Up
+//break
+
+//ECC init of SRAM with use eDMA TCD1
+data.set 0x40003020 %long 0x6230
+data.set 0x40003024 %long 0x03030000
+data.set 0x40003028 %long 0x00400000
+data.set 0x40003030 %long 0x3e800000
+data.set 0x40003034 %long 0x00010008
+data.set 0x4000303C %long 0x00010001
+WHILE (Data.word(ASD:0x4000303C)&0x0080)!=0x0080
+(
+)
+
+
+ENDDO

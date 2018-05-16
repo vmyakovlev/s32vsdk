@@ -1,0 +1,117 @@
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 00b9c6e..1ca578b 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -726,6 +726,17 @@ config ARCH_ROCKCHIP
+ 	select DM
+ 
+ endchoice
++config ARMV8_CUSTOM_SMVEC_EN
++	depends on TARGET_S32V234EVB || TARGET_S32V234FVB || TARGET_S32V234PCIE || TARGET_S32V234TMDP
++	bool "Support custom secure monitor vector on ARMv8"
++	default n
++	help
++	  Support of the secure monitor. The secure monitor can be entered from the Linux kernel
++	  if this is enabled. The access is otherwise locked and causes an exception.
++config ARMV8_CUSTOM_SMVEC
++	depends on ARMV8_CUSTOM_SMVEC_EN
++	hex "Custom vector address"
++	default 0xC4f00000
+ 
+ source "arch/arm/mach-at91/Kconfig"
+ 
+diff --git a/arch/arm/cpu/armv8/exceptions.S b/arch/arm/cpu/armv8/exceptions.S
+index c2030ed..de49fff 100644
+--- a/arch/arm/cpu/armv8/exceptions.S
++++ b/arch/arm/cpu/armv8/exceptions.S
+@@ -138,3 +138,14 @@ _do_fiq:
+ _do_error:
+ 	exception_entry
+ 	bl	do_error
++
++#ifdef CONFIG_ARMV8_CUSTOM_SMVEC
++ENTRY(install_sm_vectors)
++    stp x0, x1, [sp, #-16]!
++    ldr x0, =CONFIG_ARMV8_CUSTOM_SMVEC
++    msr vbar_el3, x0
++    ldp x0, x1, [sp], #16
++    ret
++ENDPROC(install_sm_vectors)
++#endif
++
+diff --git a/arch/arm/include/asm/macro.h b/arch/arm/include/asm/macro.h
+index 9bb0efa..df2bb19 100644
+--- a/arch/arm/include/asm/macro.h
++++ b/arch/arm/include/asm/macro.h
+@@ -138,7 +138,10 @@ lr	.req	x30
+ .macro armv8_switch_to_el2_m, xreg1
+ 	/* 64bit EL2 | HCE | SMD | RES1 (Bits[5:4]) | Non-secure EL0/EL1 */
+ 	mov	\xreg1, #0x5b1
+-	msr	scr_el3, \xreg1
++#ifdef CONFIG_ARMV8_CUSTOM_SMVEC
++	bic	\xreg1, \xreg1, #0x80 /* +SMC */
++#endif
++ 	msr	scr_el3, \xreg1
+ 	msr	cptr_el3, xzr		/* Disable coprocessor traps to EL3 */
+ 	mov	\xreg1, #0x33ff
+ 	msr	cptr_el2, \xreg1	/* Disable coprocessor traps to EL2 */
+@@ -159,7 +162,11 @@ lr	.req	x30
+ 	/* Return to the EL2_SP2 mode from EL3 */
+ 	mov	\xreg1, sp
+ 	msr	sp_el2, \xreg1		/* Migrate SP */
+-	mrs	\xreg1, vbar_el3
++#ifdef CONFIG_ARMV8_CUSTOM_SMVEC
++	ldr	\xreg1, =vectors
++#else
++ 	mrs	\xreg1, vbar_el3
++#endif
+ 	msr	vbar_el2, \xreg1	/* Migrate VBAR */
+ 	mov	\xreg1, #0x3c9
+ 	msr	spsr_el3, \xreg1	/* EL2_SP2 | D | A | I | F */
+diff --git a/arch/arm/include/asm/system.h b/arch/arm/include/asm/system.h
+index 71b3108..9e9144c 100644
+--- a/arch/arm/include/asm/system.h
++++ b/arch/arm/include/asm/system.h
+@@ -88,7 +88,10 @@ void protect_secure_region(void);
+ void smp_kick_all_cpus(void);
+ 
+ void flush_l3_cache(void);
+-
++#ifdef CONFIG_ARMV8_CUSTOM_SMVEC
++void install_sm_vectors(void);
++#endif
++ 
+ #endif	/* __ASSEMBLY__ */
+ 
+ #else /* CONFIG_ARM64 */
+diff --git a/arch/arm/lib/bootm.c b/arch/arm/lib/bootm.c
+index a477cae..da44490 100644
+--- a/arch/arm/lib/bootm.c
++++ b/arch/arm/lib/bootm.c
+@@ -276,7 +276,10 @@ static void boot_jump_linux(bootm_headers_t *images, int flag)
+ 	announce_and_cleanup(fake);
+ 
+ 	if (!fake) {
+-		do_nonsec_virt_switch();
++#ifdef CONFIG_ARMV8_CUSTOM_SMVEC
++		install_sm_vectors();
++#endif
++ 		do_nonsec_virt_switch();
+ 		kernel_entry(images->ft_addr, NULL, NULL, NULL);
+ 	}
+ #else
+diff --git a/include/configs/s32v.h b/include/configs/s32v.h
+old mode 100644
+new mode 100755
+index 7bb1f28..7520fdb
+--- a/include/configs/s32v.h
++++ b/include/configs/s32v.h
+@@ -222,7 +222,7 @@
+ 	"ipaddr=10.0.0.100\0" \
+ 	"serverip=10.0.0.1\0" \
+ 	"netmask=255.255.255.0\0" \
+-	"nfsbootargs=setenv bootargs console=${console},${baudrate} " \
++	"nfsbootargs=setenv bootargs console=${console},${baudrate} mem=0x15000000 memmap=0xb000000$0xc5000000 " \
+ 		"root=/dev/nfs rw " \
+ 		"ip=${ipaddr}:${serverip}::${netmask}::eth0:off " \
+ 		"nfsroot=${serverip}:/tftpboot/rfs,nolock \0" \

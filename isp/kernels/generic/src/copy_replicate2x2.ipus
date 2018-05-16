@@ -1,0 +1,28 @@
+// IPUS kernel
+// INPUT:
+// INA0: line to be 2x upsampled in width and height
+// OUTPUT:
+// OUT0: first time upsampled line
+// OUT1: second time upsampled line
+// upsamplig by 2
+// REGISTERS:
+// SET BY SEQUENCER
+// SET BY KERNEL
+
+.global copy_replicate2x2_start
+copy_replicate2x2_start:
+        //mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (14<<4) /*shr*/)
+        done copy_replicate2x2_loop1,i    // load first pixel
+
+copy_replicate2x2_loop1:	
+        mov  out1, 0xff00
+        mov  out0, 0xa000
+        done copy_replicate2x2_2nd_line,o
+copy_replicate2x2_2nd_line:        
+        mov  out1, 0xff00
+        mov  out0, 0xa000
+        done copy_replicate2x2_loop1,ixo
+
+        //halt
+.global copy_replicate2x2_end
+copy_replicate2x2_end:

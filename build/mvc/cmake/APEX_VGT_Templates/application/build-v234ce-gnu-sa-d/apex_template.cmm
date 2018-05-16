@@ -1,0 +1,13 @@
+    &S32V234_SDK_ROOT=os.env(S32V234_SDK_ROOT)
+
+do &S32V234_SDK_ROOT/os/debug/lauterbach/S32V234.cmm
+do &S32V234_SDK_ROOT/os/debug/lauterbach/S32V234-CA53.cmm
+data.load.elf apex_template.elf
+d.list
+
+y.spath.reset
+y.spath add &S32V234_SDK_ROOT/demos/apex_template/src/
+
+
+
+go main

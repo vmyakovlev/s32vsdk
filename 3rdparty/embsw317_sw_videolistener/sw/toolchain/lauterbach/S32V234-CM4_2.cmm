@@ -1,0 +1,68 @@
+//Assuming the M4 is the master core and the A53 is started later you would need:
+RESet
+SYStem.CPU S32V-CM4
+SYStem.CONFIG.DEBUGPORTTYPE JTAG
+SYStem.Option.ResBreak OFF
+Trace.DISable    // Maybe required
+SYStem.Up
+
+//ECC init of SRAM with use eDMA TCD1
+data.set 0x40003020 %long 0x6230
+data.set 0x40003024 %long 0x03030000
+data.set 0x40003028 %long 0x00400000
+data.set 0x40003030 %long 0x3e800000
+data.set 0x40003034 %long 0x00010008
+data.set 0x4000303C %long 0x00010001
+WHILE (Data.word(ASD:0x4000303C)&0x0080)!=0x0080
+(
+)
+
+
+;mode init
+
+; MC_ME
+d.s 0x4004A008 %word 0x00ff		; enable all modes
+d.s 0x4004A080 %word 0x00ff		; enable all peripherals to be active during all modes except of RESET
+
+; FXOSC settings
+; FXOSC.CTL.B.EOCV = 0xA0
+;FXOSC.CTL.B.OSCBYP = 0x0
+;FXOSC.CTL.B.GM_SEL = 0x7
+d.s 0x4003C280 %Long 0x01a02070
+
+
+; enable xosc and firc oscillators and select xosc as sysclk.
+d.s 0x4004A030 %word 0x0031	
+
+d.s 0x4004A004 %long 0x40005AF0             ; Mode & Key
+d.s 0x4004A004 %long 0x4000A50F             ; Mode & Key
+WHILE ((DATA.LONG(ANC:0x4004A000))&0x08000000)!=0x00000000 
+
+while ((DATA.LONG(ANC:0x4004A000))&0x00000020)==0x00000000 
+
+wait 1s
+
+d.s 0x4004A270 %long 0x00001110
+
+d.s 0x4004A004 %long 0x40005AF0             ; Mode & Key
+d.s 0x4004A004 %long 0x4000A50F             ; Mode & Key
+WHILE ((DATA.LONG(ANC:0x4004A000))&0x08000000)!=0x00000000 
+
+
+
+wait 1s
+
+; start the Cortex-A53 core
+d.s 0x3e800000 %long 0x14000000             ; while(1) instruction for A53
+
+d.s 0x4004A1E4 %Long 0x3e800001             ; Set A53 boot address and Reset on next mode change
+
+;   MC_ME.CCTL1.R = 0xffff;
+d.s 0x4004A1C4 %word 0xffff
+d.s 0x4004A004 %long 0x40005AF0             ; Mode & Key
+d.s 0x4004A004 %long 0x4000A50F             ; Mode & Key
+WHILE ((DATA.LONG(ANC:0x4004A000))&0x08000000)!=0x00000000 
+
+wait 1s
+
+ENDDO

@@ -1,0 +1,10 @@
+#!gbuild
+#component integrity_os_modules_file_system_dist
+[Program]
+	-I.
+	:sourceDir=.
+	-DVFS_NO_MAP
+	-I../../ghs/ffs
+	:sourceDir=../../ghs/ffs
+filesystem.c
+vfsserver_common.gpj

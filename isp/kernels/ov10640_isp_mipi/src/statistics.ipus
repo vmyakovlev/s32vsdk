@@ -1,0 +1,89 @@
+#IPUS statistics kernel, follow HDR
+# image will be divide into 16x16 blocks
+# input line parameters: image_width, image_height, image_threadhold 
+# input line: two lines
+# output: 256 statistics recordes with 4x32 bits each, 1st 32bit: sumR, 
+# 	2nd 32bit: sumG, 3rd 32bit: sumB, 4th 32bit: number of pixels less than threadhold
+# parameters
+# gpr11         image width
+# gpr1         image height
+# gpr2:        threadhold
+
+.global statistics_start
+statistics_start:
+		done d0,i
+d0:	
+		done d1,i
+d1:
+
+		mov confalu,(1 /* signed*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ )
+		mov confstat,((2<<6)|(2<<4)|(2<<2)|2)	//all 4 statistics fields mode are unsigned addition
+		mov confsort,(1 /*ina*/ | (0<<2) /*no mask*/)  | (0<<3) /*unsigned*/)	//INA is the input matrix to adder tree
+		mov lock,0
+		mov maskv,0x1b				//ina0, ina1, ina3, ina4 corresponding to GB,B,R,GR
+		
+//		mov gpr11,1280			//input image width
+//		mov gpr1,704			//input image height
+//		mov gpr2,0x1000			//threadhold
+		
+		lsr gpr3,gpr11,4		//block width
+		lsr gpr4,gpr1,4			//block height
+		
+	
+block_start:					//block number = (ypos/(block height))*16 + xpos/(block width)
+block_y_init:
+		mov gpr5,0			//block_y = ypos/(block height)
+		mov gpr6,0
+block_y:
+		sub zero,gpr6,ypos
+		bge block_x_init
+		add gpr5,1
+		add gpr6,gpr6,gpr4
+		bal block_y
+block_x_init:
+		mov gpr7,0			//block_x = xpos/(block width)
+		mov gpr8,0
+block_x:	
+		sub zero,gpr8,xpos
+		bge block_number
+		add gpr7,1
+		add gpr8,gpr8,gpr3
+		bal block_x
+
+block_number:
+		lsl gpr9,gpr5,4			//block_y * 16
+		add gpr9,gpr9,gpr7		//block_number = block_y * 16 + block_x
+			
+
+//		mov srec,gpr9		
+
+		lsr loopcnt,gpr3,1			//loopcnt = block_widith/2		
+		
+block_loop:
+		lsl zero,ypos,15
+		bne block_step_in0
+
+		sub zero,max,gpr2		//compare pixel value with threadhold
+		bgt block_step_in0		//if greater, then, jump to block_step_in0
+		
+		mov sfl0,ina3			//R sum			pixel:  B  GB
+		add gpr10,ina0,ina4		//GB+GR				GR  R
+		lsr sfl1,gpr10,1		//(GB+GR)/2 sum				
+		mov sfl2,ina1			//B sum
+		mov sfl3,1			//pixels counter++
+
+//		mov sfl0,1			//just for testing
+//		mov sfl1,2			//just for testing
+//		mov sfl2,3			//just for testing
+//		mov sfl3,4			//just for testing
+		mov srec,gpr9
+block_step_in0:
+		done block_step_in1, ix	
+block_step_in1:	
+		ldon block_loop,ix
+		bal block_start
+
+		halt		
+.global statistics_end
+statistics_end:	
+		

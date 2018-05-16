@@ -1,0 +1,49 @@
+# for IPUV1
+#.org    0x00
+.global rgb2yuv_sint_start
+# set shift_in/x/out to 4 pixels
+# in0  :  R  15 bit
+# in1  :  G  16 bit
+# in2  :  B  15 bit
+# out0 :  Y  15 bit
+# out1 :  U  15 bit signed (zero centric)
+# out2 :  V  15 bit signed (zero centric)
+
+        
+rgb2yuv_sint_start:
+  // scaled to 32768 = 15 bits to allow to deal with overflows
+  // Y= 0,299xR + 0,587xG + 0,114xB
+  // U= 0,483x(B-Y)
+  // V= 0,877x(R-Y)
+  mov gpr0,9797  //R->Y :  32768 * 0,299
+  mov gpr1,19234 //G->Y :  32768 * 0,587
+  mov gpr2,3735  //B->Y :  32768 * 0,114
+  mov gpr3,16154 //(B-Y)->U :  32768 * 0,493
+  mov gpr4,28737 //(R-Y)->V :  32768 * 0,877
+  //mov gpr5,0x8000 // 15 bit positive max value
+  mov gpr6,1     // shift value for output data
+  mov gpr7,0x7fff   // max unsigned value
+  done rgb2yuv_sint_loop,i
+
+rgb2yuv_sint_loop:	
+  //Y
+  mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (15<<4) /*shr*/)
+  lsr vh5,vh5,gpr6  // make y 15-bit
+  mulh vsacc0,vh0,gpr0  // R->Y
+  mulh vacc0,vh5,gpr1   // G->Y
+  mulh vacc0,vh10,gpr2  // B->Y
+  min  vgpr2,vacc0,gpr7	
+  //mov vout0,vacc0
+  // U
+  mov confalu,(1 /*signed*/ | (1<<1) /*saturate*/ | (15<<4) /*shr*/)
+  sub vout1,vh10,vacc0  // B-Y
+  mulh vout1,vout1,gpr3 //
+  // V
+  sub vout2,vh0,vacc0   // R-Y
+  mulh vout2,vout2,gpr4 //
+
+  dvot vacc0,rgb2yuv_sint_loop,ixo
+
+  //halt
+.global rgb2yuv_sint_end
+rgb2yuv_sint_end:

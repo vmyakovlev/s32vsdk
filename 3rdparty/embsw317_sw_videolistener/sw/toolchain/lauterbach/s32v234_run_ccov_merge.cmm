@@ -1,0 +1,57 @@
+;   "infile" argument is expected to be a text file containing module name and paths
+;   to particular code coverage result files, each on a separate line followed by
+;   related elf file:
+;       module_name
+;       ...path/test/1/ccov_res.acd
+;       ...path/test/1/elffile1.elf
+;       ...path/test/2/ccov_res.acd
+;       ...path/test/1/elffile2.elf
+;       ...
+
+;entry &infile
+&infile="../../ccov_results.txt"
+local &ccov
+
+cov.init
+cov.method incremental
+
+open #1 "&infile" /Read
+
+read #1 %LINE &module
+
+repeat
+(
+    read #1 %LINE &ccov
+    if ("&ccov"!="")
+    (
+        read #1 %LINE &elf
+        if ("&elf"!="")
+        (
+            ;   Load symbols
+            data.load.elf "&elf" /nocode
+            ;   Load coverage
+            coverage.load "&ccov" /add
+        )
+        else
+        (
+            print "Error: Missing elf. Please check input file.
+            wait 3.s
+            enddo
+        )
+    )
+    
+    print "&ccov"
+)
+while !eof()
+
+close #1
+
+;   Dump results
+cov.export.ListModule coverage.xml  "*\"+"&module"+"\*"
+;cov.export.ListGroup coverage.xml  "*\"+"&module"+"\*" /Append
+cov.export.ListFunc coverage.xml    "*\"+"&module"+"\*" /Append
+cov.export.ListLine coverage.xml    "*\"+"&module"+"\*" /Append
+;cov.export.ListVar coverage.xml /Append
+;list.export.mix coverage.xml  /Append /COVerage
+
+enddo

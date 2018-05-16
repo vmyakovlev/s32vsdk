@@ -1,0 +1,44 @@
+#Engine: IPUS2, IPUS3 (LUT)
+#Function:
+#separate even and odd pixels of the line: even = L/S, odd=VS
+#apply LUT to odd pixles
+#
+#step_x, step_in, step_out=1
+# no neighborhood used
+#input:
+#line0: Y 16 bit  odd: L/S  even: VS
+#output:
+#line0: LUT[odd] 16 bit
+#line1: even 16 bit
+#
+# parameters:
+# gpr15   turn LUT on:1 or off:0
+
+.global lut4k_tee_start
+
+lut4k_tee_start:
+//        mov lock,0
+//        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* 8.8*/ ) 
+	//mov out0,0     // initialize for first pixels becasue of delayed mult
+	sub zero, zero,gpr15
+        done lut4k_tee_d1,i
+lut4k_tee_d1:
+        done lut4k_tee_d2,i
+lut4k_tee_d2:
+	beq lut4k_tee_bypass_loop
+
+lut4k_tee_loop:
+        lsr  luta,ina1,4        // 16bit to 12bit
+        mov  out1,ina4          // branch out VS pixels
+//	done lut4k_tee_first,i
+
+lut4k_tee_first:
+	dout lut,lut4k_tee_loop,ixo
+//      halt
+
+lut4k_tee_bypass_loop:
+        mov  out1,ina4          // branch out VS pixels
+	dout ina1,lut4k_tee_bypass_loop,ixo
+
+.global lut4k_tee_end
+lut4k_tee_end:

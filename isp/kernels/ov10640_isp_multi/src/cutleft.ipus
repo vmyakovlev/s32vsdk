@@ -1,0 +1,25 @@
+# IPUS kernel
+# set shift_in/x to 1 pixels
+# set shift_out to 1 pixels
+# input to line 0
+# in to LSB
+# out from LSB
+# out0 : copied input value
+
+.global cutleft_start
+cutleft_start:
+        //mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (14<<4) /*shr*/)
+	mov loopcnt,gpr0
+
+cutleft_cut:
+	ldon cutleft_cut,i
+
+        //done cutleft_loop,i    // load first pixel
+
+	
+cutleft_loop:
+	dout ina0,cutleft_loop,ixo
+
+        halt
+.global cutleft_end
+cutleft_end:

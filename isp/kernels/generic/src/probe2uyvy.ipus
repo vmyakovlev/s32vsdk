@@ -1,0 +1,51 @@
+#.org    0x00
+#Enigne: IPUS
+#function: probe one channel and convert to uyvy display
+#          capture min and max value
+#step_x, step_in, step_out=1
+#no neighborhood used
+#input:
+#line0: Y 16 bit
+#output:
+#line0: Y 16 bit
+#parameters:
+#gpr0, min
+#gpr1, max
+#gpr2, line min
+#gpr3, line max
+#gpr15, chroma = 0x8000
+
+.global probe2uyvy_start
+
+probe2uyvy_start:
+	mov gpr15,0x8000
+        min gpr0,gpr0,gpr2
+        max gpr1,gpr1,gpr3
+        min gpr4,gpr4,gpr6
+        max gpr5,gpr5,gpr7
+        min gpr8,gpr2,gpr10
+        max gpr9,gpr9,gpr11
+	mov gpr2,one
+	mov gpr3,zero
+	mov gpr6,one
+	mov gpr7,zero
+	mov gpr10,one
+	mov gpr11,zero
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ ) 
+        done probe2uyvy_d1,i
+probe2uyvy_d1:
+
+probe2uyvy_loop:
+	min  gpr2,gpr2,ina0
+	max  gpr3,gpr3,ina0
+	min  gpr6,gpr6,ina3
+	max  gpr7,gpr7,ina3
+	min  gpr10,gpr10,ina6
+	max  gpr11,gpr11,ina6
+	dout gpr15,probe2uyvy_y,o
+probe2uyvy_y:
+	dout ina0,probe2uyvy_loop,ixo
+//      halt
+
+.global probe2uyvy_end
+probe2uyvy_end:

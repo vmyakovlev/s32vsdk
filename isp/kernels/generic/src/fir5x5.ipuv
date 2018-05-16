@@ -1,0 +1,80 @@
+// IPUV
+// Function: FIR filter
+// shift x/in/out = 4	
+// set shift_in/x/out to 4 pixels
+// in0  :  Y line 0
+// in1  :  Y line 1
+// in2  :  Y line 2
+// in3  :  Y line 3
+// in4  :  Y line 4
+// registers used
+// gaussian taps gpr0 - gpr5
+// 1 4  6  4  1
+// 4 16 24 16 4
+// 6 24 36 24 6
+// 4 16 24 16 4
+// 1 4  6  4  1
+//
+// sum = 256
+//
+// gpr6 threshold
+  
+.global fir5x5_start
+fir5x5_start:
+	// set FIR coefficients
+        mov gpr0,1
+        mov gpr1,4
+        mov gpr2,6
+        mov gpr3,16
+        mov gpr4,24
+        mov gpr5,36
+        //mov gpr6,0x0300  // threshold
+        //mov gpr7,0x1000  // for debugging
+
+	// enable all ways of VALU
+        mov maskv,0xf
+
+	// configure ALU
+        mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (8<<4) /*shr*/)
+
+	// load in first data (8 columns)
+        done fir5x5_d1,i
+fir5x5_d1:
+        done fir5x5_loop,i
+
+	// pixel loop do 
+fir5x5_loop:
+        // FIR
+        mulh vsacc0,vh0,gpr0   // inital value in accumumlator (vSacc)
+        mulh vacc0,vh4 ,gpr0
+        mulh vacc0,vh20,gpr0
+        mulh vacc0,vh24,gpr0
+        mulh vacc0,vh1 ,gpr1
+        mulh vacc0,vh3 ,gpr1
+        mulh vacc0,vh5 ,gpr1
+        mulh vacc0,vh9 ,gpr1
+        mulh vacc0,vh15,gpr1
+        mulh vacc0,vh19,gpr1
+        mulh vacc0,vh21,gpr1
+        mulh vacc0,vh23,gpr1
+        mulh vacc0,vh2 ,gpr2
+        mulh vacc0,vh10,gpr2
+        mulh vacc0,vh14,gpr2
+        mulh vacc0,vh22,gpr2
+        mulh vacc0,vh6 ,gpr3
+        mulh vacc0,vh8 ,gpr3
+        mulh vacc0,vh16,gpr3
+        mulh vacc0,vh18,gpr3
+        mulh vacc0,vh7 ,gpr4
+        mulh vacc0,vh11,gpr4
+        mulh vacc0,vh13,gpr4
+        mulh vacc0,vh17,gpr4
+        mulh vacc0,vh12,gpr5
+
+        dvot vacc0,fir5x5_loop,ixo
+        //mov vout0,vacc0
+        //done fir5x5_loop,ixo
+
+        //halt
+.global fir5x5_end
+fir5x5_end:

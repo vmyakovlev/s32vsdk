@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <pthread_install>$(S32V234_SDK_ROOT)\3rdparty\pthread\win32-x86\</pthread_install>
+  </PropertyGroup>
+  <PropertyGroup>
+    <_PropertySheetDisplayName>pthread</_PropertySheetDisplayName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(pthread_install)\Pre-built.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>OPENCV_DEFINED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(pthread_install)\Pre-built.2\lib\x86;$(pthread_install)\Pre-built.2\dll\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(S32V234_SDK_ROOT)\3rdparty\pthread\win32-x86\Pre-built.2\lib\x64\pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y $(pthread_install)\Pre-built.2\dll\*.dll $(SolutionDir)$(Configuration)</Command>
+    </PostBuildEvent>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
+    </ProjectReference>
+    <PreBuildEvent>
+      <Command>
+xcopy /y $(pthread_install)\Pre-built.2\lib\*.lib $(SolutionDir)$(Configuration)\</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="pthread_install">
+      <Value>$(pthread_install)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

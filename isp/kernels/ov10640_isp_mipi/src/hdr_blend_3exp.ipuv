@@ -1,0 +1,64 @@
+// IPUV
+// set shift_in/x/out to 4 pixels
+// in0  :  L
+// in0  :  S
+// in1  :  VS
+// out0 :  HDR combined
+
+// sum = 16
+
+// gpr3 : 4 to convert from 0.16 to 4.12
+// gpr4,5,6: used by alternative kernel
+// gpr12: maximum ypos (debugging)
+// gpr13: maximum ypos by alternative kernel (debugging)
+// gpr14: shift right for L over VS (assumption: 64x or 256x)
+// gpr15: shift right for S over VS (assumption:  8x or  16x)
+// gpr16: min threshold, for L; all lower will be l only
+// gpr17: max threshold, for S; all higher will be vs only
+// gpr18: slope at min threhold (S->L)  (in 8.8)
+// gpr19: slope at max threhold (S->VS) (in 8.8)
+
+// gpr8 -11: max for L
+// gpr20-23: alpha for L
+// gpr24-27: alpha for S
+// gpr28-31: alpha for VS 0.16
+
+// instruction format
+// instr dest,op0,op1
+// instr dest,im16
+
+.global hdr_blend_3exp_start
+hdr_blend_3exp_start:
+  
+	max gpr12,gpr12,ypos       // check for last line (debugging)
+	mov vgpr0,gpr16
+	mov vgpr2,gpr17
+
+	// load first pixel
+	done hdr_blend_3exp_loop, i // first input 4 pixels
+
+hdr_blend_3exp_loop:
+	// compute alpha
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (0<<4) /* 16.0 multiplication*/ )
+	sub  vgpr5,vgpr0,vh0        // (threshold_L-L)
+	mulh vgpr5,vgpr5,gpr18      // alpha_L=(threshold_L-L)*slope_L
+	sub  vgpr6,vgpr2,vh5        // (threshold_S-S)
+	mulh vgpr6,vgpr6,gpr19      // alpha_S=(threshold_S-S)*slope_S
+	sub  vgpr6,vgpr6,vgpr5      // alpha_S-=alpha_L
+	sub  vgpr7,vone,vgpr6       // alpha_VS=1-alpha_S
+	sub  vgpr7,vgpr7,vgpr5      // alpha_VS-=alpha_L
+
+	// multiply with alpha
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (16<<4) /* 0.16 multiplication*/ )
+	mulh vgpr5,vgpr5,vh0        // scaled_L =alpha_L  * L
+	mulh vgpr6,vgpr6,vh5        // scaled_S =alpha_S  * S
+	mulh vgpr7,vgpr7,vh10       // scaled_VS=alpha_VS * VS
+
+	lsr vsacc0,vgpr5,gpr14     
+	lsr vacc0,vgpr6,gpr15     
+	mov vacc0,vgpr7     
+	dvot vacc0,hdr_blend_3exp_loop,ixo
+        //halt
+
+.global hdr_blend_3exp_end
+hdr_blend_3exp_end:

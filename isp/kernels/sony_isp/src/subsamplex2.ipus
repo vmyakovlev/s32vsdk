@@ -1,0 +1,22 @@
+.global subsamplex2_start
+subsamplex2_start:
+        mov  confalu, (0 /*unsigned*/ | (1<<1) /*saturate*/)
+        mov  confaddt,(0 /*w*/ | (0<<3) /*unsigned*/ | (0<<5) /*shift*/| (0x40 << 9) /* scale*/)
+        done subsamplex2_d0,i
+subsamplex2_d0: 
+        done subsamplex2_d1,i
+subsamplex2_d1:
+        // shift matrix
+        // 0 2 2                              0 1 1
+        // 0 2 2   => FIR coefficients 1/4  * 0 1 1
+        // 0 0 0                              0 0 0
+        mset 0b000011011
+subsamplex2_loop:
+        lsr  w,inb,2
+        mov  out1,sum
+        lsr  w,ina,2
+        dout sum,subsamplex2_odd,ixo
+subsamplex2_odd:
+        done subsamplex2_loop,i
+.global subsamplex2_end
+subsamplex2_end:

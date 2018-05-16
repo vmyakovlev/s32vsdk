@@ -1,0 +1,8 @@
+#!gbuild
+#component target_resources
+[Project]
+default.ld
+INTEGRITY.ld
+default.bsp
+s32v234-evb.notes
+$__BSP_DIR/default.con

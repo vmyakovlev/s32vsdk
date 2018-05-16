@@ -1,0 +1,29 @@
+# Input File for the Integrate utility for use with the 
+# INTEGRITY real-time operating system by Green Hills Software.
+# Before editing this file, refer to your integrate documentation
+
+Variables
+	__VFS_MEMSIZE	0
+EndVariables
+
+Kernel
+	Filename	multi_login_net_server_kernel
+EndKernel
+
+#
+#
+#
+
+AddressSpace
+	Name				net_server_parent_as
+	Filename	net_server_parent_as
+	Language	C
+	Task Initial
+		StartIt		true
+	EndTask
+EndAddressSpace
+
+#%include "$__OS_DIR/tcpip/modules/ftpserver/iftpserver_module.int"
+
+#%include "baseimage_ivfsserver_module.int"
+

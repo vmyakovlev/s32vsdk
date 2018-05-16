@@ -1,0 +1,21 @@
+add
+
+menu
+(
+  popup "IPU's"
+  (
+    menuitem "[:chip]VSEQ"  "per ./pervseq ""VSEQ"""
+    menuitem "[:chip]IPUS0" "per ./peripus0 ""IPUS0"""
+    menuitem "[:chip]IPUS1" "per ./peripus1 ""IPUS1"""
+    menuitem "[:chip]IPUS2" "per ./peripus2 ""IPUS2"""
+    menuitem "[:chip]IPUS3" "per ./peripus3 ""IPUS3"""
+    menuitem "[:chip]IPUS4" "per ./peripus4 ""IPUS4"""
+    menuitem "[:chip]IPUS5" "per ./peripus5 ""IPUS5"""
+    menuitem "[:chip]IPUS6" "per ./peripus6 ""IPUS6"""
+    menuitem "[:chip]IPUS7" "per ./peripus7 ""IPUS7"""
+    menuitem "[:chip]IPUV0" "per ./peripuv0 ""IPUV0"""
+    menuitem "[:chip]IPUV1" "per ./peripuv1 ""IPUV1"""
+    menuitem "[:chip]IPUV2" "per ./peripuv2 ""IPUV2"""
+    menuitem "[:chip]IPUV3" "per ./peripuv3 ""IPUV3"""
+  )
+)

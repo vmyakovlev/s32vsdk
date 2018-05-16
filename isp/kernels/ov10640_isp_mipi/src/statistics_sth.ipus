@@ -1,0 +1,98 @@
+//IPUS statistics kernel, follow HDR
+// image will be divide into 16x16 blocks
+// input line parameters: block widthmage_width, image_height, image_threadhold 
+// input line: two lines
+// output: 256 statistics recordes with 4x32 bits each, 1st 32bit: sumR, 2nd 32bit: sumG, 3rd 32bit: sumB, 4th 32bit: number of pixels less than threshold
+
+// Parameters:
+// gpr0         width of block
+// gpr1         height of block
+// gpr2         skip lines at top
+// gpr3         threshold
+
+// Variables
+// gpr4         remaining lines in block row
+// gpr5         start block in block row
+// gpr6         constant 0xff00 to check if we are wrapping srec
+
+
+.global statistics_sth_start
+statistics_sth_start:
+
+  // check for first lines to be skipped
+  sub zero,ypos,gpr2            // gpr2 is # of skipped lines
+  bls statistics_sth_skip
+
+statistics_sth_continue:
+  mov confalu,(0 /*unsigned*/ | (1 << 1) /*saturate*/ | (8<<4) /*shr =8*/)
+  //all 4 statistics fields mode are unsigned accumulate
+  mov confstat,((2<<6)|(2<<4)|(2<<2)|2 /*unsigned accumulate*/)
+  //ina is the input matrix to sorting tree
+  mov confsort,(1	/*INA)*/ |  (0<<2) /*apply mask*/ | (0<<3) /*unsigned*/)
+  mov lock,(0b1111101111111111) /*unlock stat*/)
+
+  // initialize constants
+  mov gpr6,0xff00
+  mov maskv,0x1b		// ina0, ina1, ina3, ina4 corresponding to GB,B,R,GR
+
+  sub gpr4,1			// decrement remaining lines
+  bhi statistics_sth_firstblock	// if last line
+
+  // if gpr4 is 0 then go to next block row
+  mov gpr4,gpr1	                // re-init remaining line counter
+  add gpr5,16			// go top next block row
+  max gpr7,gpr7,gpr5            // for debugging save max of srec
+
+statistics_sth_firstblock:
+  // check if we are processing too many lines, for debugging
+  and zero,gpr5,gpr6            // if gpr5 & 0xff00
+  
+  bhi statistics_sth_halt       // then go to halt
+
+  //re-initialize block counter to start of row 
+  mov srec,gpr5
+
+  // load first pixels of the line
+  done statistics_sth_in0,i
+statistics_sth_in0:
+  done statistics_sth_newblock,i
+		
+statistics_sth_newblock:
+  mov loopcnt,gpr0
+statistics_sth_loop:
+  sub zero,max,gpr3		// compare the maximum of GB,B,R,GR with threshold in gpr3
+  //nop				// stall between cmp and branch
+  bhi statistics_sth_next	// if max higher threshold, jump to skip
+
+  // add to statistics_sth
+  mov sfl0,ina3			// R sum
+  mov sfl1,ina4			// G sum
+  mov sfl1,ina0			// G sum
+  mov sfl2,ina1			// B sum
+  mov sfl3,4			//pixels counter++
+
+statistics_sth_next:		// go to next two pixels
+  ldon statistics_sth_next1,ix
+statistics_sth_next1:
+  ldon statistics_sth_loop,ix
+
+  //if loop counter expired (end of block)
+  add srec,1	   	   	// go to next block
+  bal statistics_sth_newblock	// continue with next block
+
+statistics_sth_skip:
+  // initilaize remaining lines in block row
+  mov gpr4,gpr1
+  // initilaize srec to 0
+  mov gpr5,0
+
+  // check if no lines should be skipped
+  sub zero,gpr2,zero
+  bls statistics_sth_continue
+
+statistics_sth_halt:
+  halt
+		
+.global statistics_sth_end
+statistics_sth_end:	
+		

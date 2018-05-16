@@ -1,0 +1,91 @@
+--- linux/arch/arm64/boot/dts/freescale/s32v234.dtsi	2017-05-25 13:11:24.724615035 +0200
++++ linux/arch/arm64/boot/dts/freescale/s32v234.dtsi	2017-05-31 12:03:29.981375056 +0200
+@@ -109,6 +109,26 @@
+ 			reg = <0x0 0xC1000000 0x0 0x100000>;    /* 1 MB */
+ 			no-map;
+ 		};
++        
++        oalddr0_allocator_memory: oalddr0@0x8B000000 {
++            reg = <0x0 0x8B000000 0x0 0x05000000>;  /* 80 MB */
++            no-map;
++        };
++        
++        oalddr1_allocator_memory: oalddr1@0xCB000000 {
++            reg = <0x0 0xCB000000 0x0 0x05000000>;  /* 80 MB */
++            no-map;
++        };
++        
++        oalsramS_allocator_memory: oalsramS@0x3E800000 {
++            reg = <0x0 0x3E800000 0x0 0x00300000>;  /* 3 MB */
++            no-map;
++        };
++        
++        oalsramM_allocator_memory: oalsramM@0x3EB00000 {
++            reg = <0x0 0x3EB00000 0x0 0x00100000>;  /* 1 MB */
++            no-map;
++        };
+ 	};
+ 
+ 	timer {
+@@ -436,6 +456,61 @@
+ 				memory-region = <&dcu_surface_memory>;
+ 				status = "disabled";
+ 			};
++            
++            oalmem0: oalmem0@8B000000 {
++                compatible = "fsl,s32v234-oal";               // OAL ALLOCATOR DEVICE
++                reg = <0x0 0x8B000000 0x0 0x05000000>;        // MEMORY RANGE
++                memory-region = <&oalddr0_allocator_memory>;  // MEMORY REGION TO USE (RESERVED MEMORY)
++                id = <0>;                                     // ID (FOR ALLOCATORY USE - MUST MATCH WITH MEM REGION ID)
++                align = <0x1000>;                             // DEFAULT ALIGNMENT
++                autobalance;                                  // PRESENT IF AUTOBALANCE IS NEEDED (ONE AUTO BALANCE REGION)
++            };
++            
++            oalmem1: oalmem1@CB000000 {
++                compatible = "fsl,s32v234-oal";               // OAL ALLOCATOR DEVICE
++                reg = <0x0 0xCB000000 0x0 0x05000000>;        // MEMORY RANGE
++                memory-region = <&oalddr1_allocator_memory>;  // MEMORY REGION TO USE (RESERVED MEMORY)
++                id = <1>;                                     // ID (FOR ALLOCATORY USE - MUST MATCH WITH MEM REGION ID)
++                align = <0x1000>;                             // DEFAULT ALIGNMENT
++                autobalance;                                  // PRESENT IF AUTOBALANCE IS NEEDED (ONE AUTO BALANCE REGION)
++            };
++            
++            oalsramS: oalsramS@3E800000 {
++                compatible = "fsl,s32v234-oal";
++                reg = <0x0 0x3E800000 0x0 0x00300000>;
++                memory-region = <&oalsramS_allocator_memory>;
++                id = <2>;
++                align = <0x8>;                             
++                init;
++            };
++            
++            oalsramM: oalsramM@3EB00000 {
++                compatible = "fsl,s32v234-oal";
++                reg = <0x0 0x3EB00000 0x0 0x00100000>;
++                memory-region = <&oalsramM_allocator_memory>;
++                id = <3>;
++                align = <0x8>;                             
++                init;                             
++            };
++            
++            // 1 = low-to-high edge triggered
++            // 2 = high-to-low edge triggered
++            // 4 = active high level-sensitive
++            // 8 = active low level-sensiti
++            apex0: apex0@0x74000000 {
++                compatible = "nxp,s32v234-apex";
++                reg = <0x0 0x74000000 0x0 0x00100000>;
++                id = <0>;
++                interrupts = <0 109 4>;
++            };
++            
++            apex1: apex1@0x78000000 {
++                compatible = "nxp,s32v234-apex";
++                reg = <0x0 0x78000000 0x0 0x00100000>;
++                id = <1>;
++                interrupts = <0 110 4>;
++            };
++        
+ 		};
+ 
+ 	};

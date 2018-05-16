@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <boost_install>$(S32V234_SDK_ROOT)\3rdparty\boost_1_62_0\</boost_install>
+  </PropertyGroup>
+  <PropertyGroup>
+    <_PropertySheetDisplayName>boost</_PropertySheetDisplayName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(boost_install)\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>OPENCV_DEFINED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(boost_install)\win32-x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y $(boost_install)\win32-x86\*.dll $(SolutionDir)$(Configuration)\</Command>
+    </PostBuildEvent>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
+    </ProjectReference>
+    <PreBuildEvent>
+      <Command>
+xcopy /y $(boost_install)\win32-x86\*.lib $(SolutionDir)$(Configuration)\</Command>
+    </PreBuildEvent>
+    <Lib>
+      <AdditionalLibraryDirectories>$(boost_install)\win32-x86\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="boost_install">
+      <Value>$(boost_install)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,27 @@
+# for IPUV
+# set shift_in/x/out to 4 pixels
+# in0  :  BayerPattern (broken OVT 12bit mode)
+# out0 :  BayerPattern (fixed)
+# parameters
+# gpr16       : shift for making brighter
+# used registers
+# gpr0 -gpr3 : intermediate results
+# gpr4       : shift down by 1
+
+.global tonemap_12b_start
+tonemap_12b_start:
+  mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/) | (16<<4) /*shr*/)
+  mov gpr4,1
+  done tonemap_12b_loop,i
+	
+tonemap_12b_loop:	
+
+  asl  vout0,vh0,gpr16
+  lsr  vout0,vout0,gpr4
+  add  vout0,vout0,vh0
+  mov  vout1,vout0
+  done tonemap_12b_loop,ixo
+
+  //halt
+.global tonemap_12b_end
+tonemap_12b_end:

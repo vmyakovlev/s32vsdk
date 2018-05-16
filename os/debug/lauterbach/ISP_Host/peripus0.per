@@ -1,0 +1,606 @@
+; $Id: per_ipus0.per 2014-12-03 21:52:08Z servera $
+; @Copyright: (c) 2014-2015 Freescale Halbleiter GmbH
+; --------------------------------------------------------------------------------
+; @Title: IPU On-Chip Peripherals
+; @Props: Released
+; @Author: SH
+; @Changelog: 2008-02-29 MPO
+; @Manufacturer: FSL.
+; @Doc: IPUS-BlockGuide
+; @Core: IPUS0
+; --------------------------------------------------------------------------------
+
+; whats that for?
+config 16. 8.
+
+width 0xf
+
+tree.open "IPUS0"
+ base ahb:0x7c042000
+
+tree.open "Run Control ahb:"
+
+group.long 0x600++0x03
+ line.long 0x00 "Reset"
+  bitfld.long 0x00 1.      "HW-Rst ,Hardware Reset" "-,Reset"
+  bitfld.long 0x00 0.      " SW-Rst ,Software Reset" "No,Yes"
+
+group.long 0x000++0x03
+ line.long 0x00 "Start"
+  hexmask.long.byte 0x00 16.--23. 1 "CSA ,Current Start Address"
+  hexmask.long.byte 0x00  0.--7.  1 " NSA ,Next Start Address"
+
+group.long 0x004++0x03
+ line.long 0x00 "Status"
+  hexmask.long.short 0x00 16.--31. 1 "RPix ,Remaining Pixels"
+  bitfld.long 0x00 10.     " DBG ,Debug Status " " Run,Dbg"
+  bitfld.long 0x00  8.--9. " CQUE ,Command Queue Status" "empty,active,buf,act/buff"
+  bitfld.long 0x00  0.--1. " EVT ,Event Counter - write value to decrement" "0,1,2,3"
+
+group.long 0x008++0x03
+ line.long 0x00 "POS ,Next Position"
+  decmask.long.short 0x00 16.--31. 1 "X-Pos d,Start X-Position for next line"
+  decmask.long.short 0x00  0.--15. 1 " Y-Pos d,Start Y-Position for next line"
+
+rgroup.long 0x00C++0x03
+ line.long 0x00 "CPOS ,Current Position"
+  decmask.long.short 0x00 16.--31. 1 "X-Pos d,Current X-Position"
+  decmask.long.short 0x00  0.--15. 1 " Y-Pos d,Current Y-Position"
+
+group.long 0x010++0x03
+ line.long 0x00 "XCFG ,Next X-coutner configuration"
+  decmask.long.short 0x00 16.--31. 1 "XSize d,Line execution length"
+  bitfld.long 0x00  0.--1.  " XStep ,X-Counter Step size" "4,1,2,3"
+
+group.long 0x014++0x03
+ line.long 0x00 "CXCFG ,Current X-coutner configuration"
+  decmask.long.short 0x00 16.--31. 1 "XSize d,Line execution length"
+  bitfld.long 0x00  0.--1.  " XStep ,X-Counter Step size" "4,1,2,3"
+
+tree "INA Setup"
+
+group.long 0x018++0x03 "INA Core Setup"
+ line.long 0x00 "CFG , configuration"
+  bitfld.long 0x00 26.      "CL2EN ,Current Line 2 enabled" "No,Yes"
+  bitfld.long 0x00 25.      " CL1EN ,Current Line 1 enabled" "No,Yes"
+  bitfld.long 0x00 24.      " CL0EN ,Current Line 0 enabled" "No,Yes"
+  bitfld.long 0x00 18.      " CNHD ,Current Neighborhood" "3x3,1x9" 
+  bitfld.long 0x00 16.--17. " CShft ,Current Move Input by # positions" "NA4,1,NA2,NA3"
+  bitfld.long 0x00 10.      " L2EN ,Next Line 2 enabled" "No,Yes"
+  bitfld.long 0x00  9.      " L1EN ,Next Line 1 enabled" "No,Yes"
+  bitfld.long 0x00  8.      " L0EN ,Next Line 0 enabled" "No,Yes"
+  bitfld.long 0x00  2.      " NHD ,Next Neighborhood" "3x3,1x9" 
+  bitfld.long 0x00  0.--1.  " Shft ,Next Move Input by # positions" "NA4,1,NA2,NA3"
+
+rgroup.long 0x204++0x0b "INA0 Current Stream Setup"
+ line.long 0x00 "LEN ,Line Length [pixel]"
+  decmask.long.short 0x00  0.--15. 1 "LEN d,Length of next Line in Pixels"
+ line.long 0x04 "CFG ,Configuration"
+  bitfld.long 0x04 28.--29. "BTYP ,Buffer Type" "16bit,8BitMSB,8bitLSB,NA"
+  bitfld.long 0x04 24.--26. " RPWI ,Replace Width" "0,1,2,3,4,NA5,NA6,NA7"
+  bitfld.long 0x04 20.--22. " RPMD ,Replace Mode" "RPVAL-Pix,Hold,NA2,RPVAL,0-RPVAL,NA5,NA6,NA7"
+  bitfld.long 0x04 18.--19. " RPT ,Repeat each pixel # times" "4,once,2,3"
+  bitfld.long 0x04 16.--17. " STEP ,Step Between Pixels" "+4,+1,+2,+3"
+  hexmask.long.short 0x04  0.--15. 1 " RPVAL ,Replacement Value"
+ line.long 0x08 "ADDR ,Start Address"
+
+rgroup.long 0x210++0x0b "INA1 Current Stream Setup"
+ copy
+
+rgroup.long 0x21C++0x0b "INA2 Current Stream Setup"
+ copy
+
+group.long 0x104++0x0b "INA0 Next Stream Setup"
+  copy
+
+group.long 0x110++0x0b "INA1 Next Stream Setup"
+ copy
+
+group.long 0x11C++0x0b "INA2 Next Stream Setup"
+ copy
+
+;INA setup
+tree.end  
+
+tree "INB Setup"
+
+group.long 0x01C++0x03 "INB Engine"
+ copy 7
+
+rgroup.long 0x244++0x0b "INB0 Current Stream Setup"
+ copy 7
+
+rgroup.long 0x250++0x03 "INB1 Current Stream Setup"
+ copy
+
+rgroup.long 0x25C++0x03 "INB2 Current Stream Setup"
+ copy
+
+group.long 0x144++0x0b "INB0 Next Stream Setup"
+ copy
+
+group.long 0x150++0x03 "INB1 Next Stream Setup"
+ copy
+
+group.long 0x15C++0x03 "INB2 Next Stream Setup"
+ copy
+
+;INB setup
+tree.end  
+
+tree "INAlpha Setup"
+
+group.long 0x020++0x03 "INAlpha Engine"
+  copy 7
+
+rgroup.long 0x284++0x0b "INAL0 Current Stream Setup"
+ copy 7
+
+rgroup.long 0x290++0x03 "INAL1 Current Stream Setup"
+ copy
+
+rgroup.long 0x29C++0x03 "INAL2 Current Stream Setup"
+ copy
+
+group.long 0x184++0x0b "INAL0 Next Stream Setup"
+ copy
+
+group.long 0x190++0x03 "INAL1 Next Stream Setup"
+ copy
+
+group.long 0x19C++0x03 "INAL2 Next Stream Setup"
+ copy
+
+;INAL setup
+tree.end  
+
+tree "Out Setup"
+
+
+group.long 0x024++0x03 "OUT Core Setup"
+ line.long 0x00 "OUTCFG ,OUT configuration"
+  bitfld.long 0x00 27.      "CL3EN ,Current Line 3 enabled" "No,Yes"
+  bitfld.long 0x00 26.      " CL2EN ,Current Line 2 enabled" "No,Yes"
+  bitfld.long 0x00 25.      " CL1EN ,Current Line 1 enabled" "No,Yes"
+  bitfld.long 0x00 24.      " CL0EN ,Current Line 0 enabled" "No,Yes"
+  bitfld.long 0x00 11.      " L3EN ,Next Line 3 enabled" "No,Yes"
+  bitfld.long 0x00 10.      " L2EN ,Next Line 2 enabled" "No,Yes"
+  bitfld.long 0x00  9.      " L1EN ,Next Line 1 enabled" "No,Yes"
+  bitfld.long 0x00  8.      " L0EN ,Next Line 0 enabled" "No,Yes"
+
+rgroup.long 0x2C4++0x0b "OUT0 Current Stream Setup"
+ line.long 0x00 "LEN , Line  Length"
+  decmask.long.short 0x00  0.--15. 1 "LEN d,Length of Line in Pixels"
+ line.long 0x04 "CFG , Configuration"
+  bitfld.long 0x04 28.--29. "BTYP ,Buffer Type" "16bit,8BitMSB,8bitLSB,NA"
+  bitfld.long 0x04 16.--17. " SKIP ,SKIP Writes for Pixels" "none,1x,2x,3x"
+ line.long 0x08 "ADDR , Start Address"
+
+rgroup.long 0x2D0++0x0b "OUT1 Current Stream Setup"
+  copy
+
+rgroup.long 0x2DC++0x0b "OUT2 Current Stream Setup"
+  copy
+
+rgroup.long 0x2E8++0x0b "OUT3 Current Stream Setup"
+  copy
+
+group.long 0x1c4++0x0b "OUT0 Next Stream Setup"
+ copy
+
+group.long 0x1D0++0x0b "OUT1 Next Stream Setup"
+  copy
+
+group.long 0x1DC++0x0b "OUT2 Next Stream Setup"
+  copy
+
+group.long 0x1E8++0x0b "OUT3 Next Stream Setup"
+  copy
+
+;Out Setup
+tree.end  
+
+;Run Control
+tree.end  
+
+
+tree "Debug Control dap:"
+;width 0xf
+ base dap:0x7c042000
+
+group.long 0x004++0x03
+ textline ""
+  bitfld.long 0x00 10.     "DBG Status ,Debug Status " "Run,Dbg"
+
+group.long 0x400++0x03
+ line.long 0x00 "DebugEN"
+  bitfld.long 0x00 0.       "BKPT_ON " "No,Yes "
+  button "BKPT_ON " "per.set.field dap:0x7c042403 %byte 0x0001 0x1"
+  button "BKPT_OFF" "per.set.field dap:0x7c042403 %byte 0x0001 0x0"
+
+group.long 0x404++0x03
+ line.long 0x00 "DBG_STAT ,Debug Status"
+ button "Run/Cont"  "per.set dap:0x7c042405 %byte 0x1"
+ button "Step" "per.set dap:0x7c042404 %byte 0x2"
+
+group.long 0x414++0x03
+ line.long 0x00 "DBG_CORE_STAT ,Debug Core Status"
+  bitfld.long 0x00 24.--27.     "NZCO ,Flag" "----,---O,--C-,--CO,-Z--,-Z-O,-ZC-,-ZCO,N---,N--O,N-C-,N-CO,NZ--,NZ-O,NZC-,NZCO"
+  hexmask.long.byte 0x00 0.--7. 1 " IAddr ,Next Instruction address"
+  hexmask.long.byte 0x00 2.--7. 1 " ,Word Num in IMEM Addr"
+
+;rgroup.long 0x44 0x04
+; saveout 0x40 %byte 0x3
+;; "d.in dap:0x7c042414"
+;;0x03
+;; textline ""
+; line.long 0x00  "Instr "
+;;  os.area echo 1"
+  textline ""
+
+group.long 0x400++0x03
+ textline ""
+ line.long 0x00 "Mode & Step"
+;  button "BKPT_EN" "d.set dap:0x7c042403 %byte 0x1"
+  bitfld.long 0x00 16.--19. "Steps    ,Execute # of Instructions per step" "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15" 
+  bitfld.long 0x00 31.      " EnBEnd ,Enable Break at end of line" "No,Yes"
+  bitfld.long 0x00 30.      " EnBWA ,Enable Break on Register Write" "No,Yes"
+  bitfld.long 0x00 29.      " EnBRA ,Enable Break on Register Read" "No,Yes"
+  bitfld.long 0x00 28.      " EnBIA ,Enable Break on Instrauction Fetch" "No,Yes"
+  bitfld.long 0x00 27.      " EnBPos ,Enable Break on Position Match" "No,Yes"
+  bitfld.long 0x00 26.      " EnBYPos ,Enable Break on Y-Position Match" "No,Yes"
+  bitfld.long 0x00 25.      " EnBXPos ,Enable Break on X-Position Match" "No,Yes"
+  bitfld.long 0x00 1.       " CTrig ,Enable Debug Mode Cross Triggering" "No,Yes"
+  bitfld.long 0x00 0.       " Dbg    ,Request Debug Mode" "No,Yes"
+
+group.long 0x404++0x03
+ line.long 0x00 "DBG_STAT ,Debug Status"
+  bitfld.long 0x00 25.      "ReqStep ,Request Steps" "No,Yes"
+  bitfld.long 0x00 23.      " HitEnd ,Hit Break at end of line - write 1 to clear" "No,Yes"
+  bitfld.long 0x00 22.      " HitWA ,Hit Break on Register Write - write 1 to clear" "No,Yes"
+  bitfld.long 0x00 21.      " HitRA ,Hit Break on Register Read - write 1 to clear" "No,Yes"
+  bitfld.long 0x00 20.      " HitIA ,Hit Break on Instrauction Fetch - write 1 to clear" "No,Yes"
+  bitfld.long 0x00 19.      " HitPos ,Hit Break on Position Match - write 1 to clear" "No,Yes"
+  bitfld.long 0x00 18.      " HitYPos ,Hit Break on Y-Position Match - write 1 to clear" "No,Yes"
+  bitfld.long 0x00 17.      " HitXPos ,Hit Break on X-Position Match - write 1 to clear" "No,Yes"
+  bitfld.long 0x00 16.      " DbgBG ,Debug Mode is active - write 1 to run mode" "No,Yes"
+  bitfld.long 0x00 0.       " HitDBG ,Cross Trigger Req is Active" "No,Yes"
+
+group.long 0x408++0x03
+ line.long 0x00 "BKPT_POS ,Position Break Points"
+  decmask.long.short 0x00 16.--31. 1 "X-Pos d,X-Position for position based break points"
+  decmask.long.short 0x00  0.--15. 1 " Y-Pos d,Y-Position for position based break points"
+
+group.long 0x40C++0x03
+ line.long 0x00 "BKPT_ADDR ,Address Break Points"
+  hexmask.long.byte 0x00 24.--31. 1 "IAddr ,Instruction address break point"
+  hexmask.long.byte 0x00 16.--23. 1 " RAddr ,Read  Register Address break point"
+  hexmask.long.byte 0x00  8.--15. 1 " WAddr ,Write Register Address break point"
+  
+;Debug Control
+tree.end  
+
+tree "Set Registers"
+;width 0xf
+ base ahb:0x7c042000
+
+group.long 0x40--0x43
+ line.long 0x0 "IMEM Addr"
+
+hgroup.long 0x44--0x47
+ hide.long 0x0 "Value"
+ in
+
+group.long 0x48--0x4b
+ line.long 0x0 "DREG #"
+
+hgroup.long 0x4c--0x4f
+ hide.short 0x0 "Value"
+ in
+
+;Set Registers
+tree.end  
+
+
+tree "Registers"
+;width 0xf
+
+tree "Conf (1-4)"
+rgroup.long 0x4c 0x10
+ saveout 0x48 %byte 0x01
+ textline ""
+ hexmask.long.short 0x00 0.--15. 1  "Loopcnt "
+ hexmask.long.short 0x04 0.--15. 1  " XPOS "
+ hexmask.long.short 0x08 0.--15. 1  " YPOS "
+ textline ""
+; line.short 0x0c "ConfALU "
+ hexmask.long.short 0x0c 0.--15. 1  "ConfALU "
+ bitfld.short       0x0c 0.--0.     " Sgn " "uint,int"
+ bitfld.short       0x0c 1.--1.     " Sat " "ovfl,sat"
+ decmask.long.byte  0x0c 4.--8.  1  " Shr d "
+
+rgroup.long 0x4c 0x18
+ saveout 0x48 %byte 0x08
+ textline "(8-13)"
+ textline ""
+ hexmask.long.short 0x00 0.--15. 1  "ConfAddt "
+ bitfld.short       0x00 0.--1.     " In " "W,INA,WW,INB"
+ bitfld.short       0x00 2.--2.     " Mask " "apply,ignore"
+ bitfld.short       0x00 3.--3.     " Sgn " "uint,int"
+ bitfld.short       0x00 4.--4.     " Thr keep " "lower,upper"
+ decmask.long.byte  0x00 5.--8.  1  " Shr+6 d "
+ decmask.long.byte  0x00 9.--15. 1  " Scale6 d "
+ textline ""
+ hexmask.long.short 0x04 0.--15. 1  "ConfThres "
+ textline ""
+ hexmask.long.short 0x08 0.--15. 1  "ConfSort "
+ bitfld.short       0x08 0.--1.     " In " "W,INA,WW,INB"
+ bitfld.short       0x08 2.--2.     " Mask " "apply,ignore"
+ bitfld.short       0x08 3.--3.     " Sgn " "uint,int"
+; textline ""
+; hexmask.long.short 0x0c 0.--15. 1  "ConfBest "
+; bitfld.short       0x0c 0.--0.     " Mod " "max,min"
+; bitfld.short       0x0c 1.--1.     " Sgn " "uint,int"
+ textline ""
+ hexmask.long.short 0x10 0.--15. 1  "ConfHist "
+ decmask.long.byte  0x10 0.--7.  1  " Offsetd "
+ decmask.long.byte  0x10 8.--11. 1  " Shr d "
+; textline ""
+; hexmask.long.short 0x14 0.--15. 1  "ConfStat "
+; bitfld.short       0x14 0.--1.     " F0 " "max,min,uacc,sacc"
+; bitfld.short       0x14 2.--4.     " F1 " "max,min,uacc,sacc"
+; bitfld.short       0x14 4.--5.     " F2 " "max,min,uacc,sacc"
+; bitfld.short       0x14 6.--7.     " F3 " "max,min,uacc,sacc"
+;"Conf"
+tree.end
+
+tree "InA (16-24)"
+rgroup.long 0x4c 0x24
+ saveout 0x48 %byte 0x10
+ textline "InA "
+ hexmask.long.short 0x08 0.--15. 1  "  2 "
+ hexmask.long.short 0x04 0.--15. 1  "  1 "
+ hexmask.long.short 0x00 0.--15. 1  "  0 "
+ textline "InA "
+ hexmask.long.short 0x14 0.--15. 1  "  5 "
+ hexmask.long.short 0x10 0.--15. 1  "  4 "
+ hexmask.long.short 0x0c 0.--15. 1  "  3 "
+ textline "InA "
+ hexmask.long.short 0x20 0.--15. 1  "  8 "
+ hexmask.long.short 0x1c 0.--15. 1  "  7 "
+ hexmask.long.short 0x18 0.--15. 1  "  6 "
+;"InA"
+tree.end
+
+tree "InB (32-40)"
+rgroup.long 0x4c 0x24
+ saveout 0x48 %byte 0x20
+ textline "InB "
+ hexmask.long.short 0x08 0.--15. 1  "  2 "
+ hexmask.long.short 0x04 0.--15. 1  "  1 "
+ hexmask.long.short 0x00 0.--15. 1  "  0 "
+ textline "InB "
+ hexmask.long.short 0x14 0.--15. 1  "  5 "
+ hexmask.long.short 0x10 0.--15. 1  "  4 "
+ hexmask.long.short 0x0c 0.--15. 1  "  3 "
+ textline "InB "
+ hexmask.long.short 0x20 0.--15. 1  "  8 "
+ hexmask.long.short 0x1c 0.--15. 1  "  7 "
+ hexmask.long.short 0x18 0.--15. 1  "  6 "
+;"InA"
+tree.end
+
+tree "InAL (48-56)"
+rgroup.long 0x4c 0x24
+ saveout 0x48 %byte 0x30
+ textline "InAL "
+ hexmask.long.short 0x08 0.--15. 1  "  2 "
+ hexmask.long.short 0x04 0.--15. 1  "  1 "
+ hexmask.long.short 0x00 0.--15. 1  "  0 "
+ textline "InAL "
+ hexmask.long.short 0x14 0.--15. 1  "  5 "
+ hexmask.long.short 0x10 0.--15. 1  "  4 "
+ hexmask.long.short 0x0c 0.--15. 1  "  3 "
+ textline "InAL "
+ hexmask.long.short 0x20 0.--15. 1  "  8 "
+ hexmask.long.short 0x1c 0.--15. 1  "  7 "
+ hexmask.long.short 0x18 0.--15. 1  "  6 "
+;"InA"
+tree.end
+
+tree "OUT"
+rgroup.long 0x4c 0x10
+ saveout 0x48  %byte 0x80
+ textline "Out "
+ hexmask.long.short 0x00 0.--15. 1  "  0 "
+ hexmask.long.short 0x04 0.--15. 1  "  1 "
+ hexmask.long.short 0x08 0.--15. 1  "  2 "
+ hexmask.long.short 0x0C 0.--15. 1  "  3 "
+
+;"OUT"
+tree.end
+
+tree "W (64-72)"
+rgroup.long 0x4c 0x24
+ saveout 0x48 %byte 0x40
+ textline "InA "
+ hexmask.long.short 0x08 0.--15. 1  "  2 "
+ hexmask.long.short 0x04 0.--15. 1  "  1 "
+ hexmask.long.short 0x00 0.--15. 1  "  0 "
+ textline "InA "
+ hexmask.long.short 0x14 0.--15. 1  "  5 "
+ hexmask.long.short 0x10 0.--15. 1  "  4 "
+ hexmask.long.short 0x0c 0.--15. 1  "  3 "
+ textline "InA "
+ hexmask.long.short 0x20 0.--15. 1  "  8 "
+ hexmask.long.short 0x1c 0.--15. 1  "  7 "
+ hexmask.long.short 0x18 0.--15. 1  "  6 "
+;"W"
+tree.end
+
+tree "WW (80-88)"
+rgroup.long 0x4c 0x24
+ saveout 0x48 %byte 0x50
+ textline "InA "
+ hexmask.long.short 0x08 0.--15. 1  "  2 "
+ hexmask.long.short 0x04 0.--15. 1  "  1 "
+ hexmask.long.short 0x00 0.--15. 1  "  0 "
+ textline "InA "
+ hexmask.long.short 0x14 0.--15. 1  "  5 "
+ hexmask.long.short 0x10 0.--15. 1  "  4 "
+ hexmask.long.short 0x0c 0.--15. 1  "  3 "
+ textline "InA "
+ hexmask.long.short 0x20 0.--15. 1  "  8 "
+ hexmask.long.short 0x1c 0.--15. 1  "  7 "
+ hexmask.long.short 0x18 0.--15. 1  "  6 "
+;"WW"
+tree.end
+
+tree "Matrix Ways (105/106/108-111)"
+rgroup.long 0x4c 0x1c
+ saveout 0x48  %byte 0x69
+ textline ""
+ hexmask.long.short 0x00 0.--15. 1  " Mask "
+ hexmask.long.short 0x04 0.--15. 1  " Nhood "
+ hexmask.long.short 0x0C 0.--15. 1  " MOvfl "
+ hexmask.long.short 0x10 0.--15. 1  " MCry  "
+ hexmask.long.short 0x14 0.--15. 1  " MNeg  "
+ hexmask.long.short 0x18 0.--15. 1  " MZero "
+;"Matrix Ways"
+tree.end
+
+tree "OPIX (144-147) - ACC (152-155; SACC 156-159)"
+rgroup.long 0x4c 0x10
+ saveout 0x48 %byte 0x90
+ textline "OPIX"
+ hexmask.long.short 0x00 0.--15. 1  " A0 "
+ hexmask.long.short 0x04 0.--15. 1  "  0 "
+ hexmask.long.short 0x08 0.--15. 1  " A1 "
+ hexmask.long.short 0x0C 0.--15. 1  "  1 "
+
+rgroup.long 0x4c 0x10
+ saveout 0x48 %byte 0x98
+ textline "ACC "
+ hexmask.long.short 0x00 0.--15. 1  "  0 "
+ hexmask.long.short 0x04 0.--15. 1  "  1 "
+ hexmask.long.short 0x08 0.--15. 1  "  2 "
+ hexmask.long.short 0x0c 0.--15. 1  "  3 "
+
+;"OPIX - ACC"
+tree.end
+
+
+tree "GPR (112-127)"
+rgroup.long 0x4c 0x40
+ saveout 0x48 %byte 0x70
+ textline "GPR "
+ hexmask.long.short 0x00 0.--15. 1  "  0 "
+ hexmask.long.short 0x04 0.--15. 1  "  1 "
+ hexmask.long.short 0x08 0.--15. 1  "  2 "
+ hexmask.long.short 0x0c 0.--15. 1  "  3 "
+ textline "GPR "
+ hexmask.long.short 0x10 0.--15. 1  "  4 "
+ hexmask.long.short 0x14 0.--15. 1  "  5 "
+ hexmask.long.short 0x18 0.--15. 1  "  6 "
+ hexmask.long.short 0x1c 0.--15. 1  "  7 "
+ textline "GPR "
+ hexmask.long.short 0x20 0.--15. 1  "  8 "
+ hexmask.long.short 0x24 0.--15. 1  "  9 "
+ hexmask.long.short 0x28 0.--15. 1  " 10 "
+ hexmask.long.short 0x2c 0.--15. 1  " 11 "
+ textline "GPR "
+ hexmask.long.short 0x30 0.--15. 1  " 12 "
+ hexmask.long.short 0x34 0.--15. 1  " 13 "
+ hexmask.long.short 0x38 0.--15. 1  " 14 "
+ hexmask.long.short 0x3c 0.--15. 1  " 15 "
+;"GPR's"
+tree.end
+
+tree "Hist (212-215)"
+rgroup.long 0x4c 0x10
+ saveout 0x48 %byte 0xd4
+ textline "Core registers"
+ textline ""
+ hexmask.long.short 0x00 0.--15. 1  "HistA ,histogram address (bin) "
+ hexmask.long.short 0x04 0.--15. 1  " HistAdd  ,histogram add value to bin "
+ hexmask.long.short 0x08 0.--15. 1  " HistIncL ,histogram increment bin "
+ hexmask.long.short 0x0c 0.--15. 1  " HistIncH ,histogram incremet spcial "
+
+group.long 0x50--0x53
+ textline "Host registers"
+ textline ""
+ decmask.long.byte 0x0 0.--7. 1 "HistAddr d "
+
+hgroup.long 0x54--0x57
+ hide.long 0x0 "Value"
+ in
+
+;"Hist"
+tree.end
+
+
+
+;Register Dump
+tree.end  
+
+tree "Profiling c:"
+;width 0x1f
+ base c:0x7c042000
+
+group.long 0x500++0x1b
+ textline " "
+ textline ""
+  button "Clear"    "per.set d:0x7c042500 %byte 0x1f"
+  button "Enable"   "per.set d:0x7c042503 %byte 0x1f"
+  button "Disable"  "per.set d:0x7c042503 %byte 0x0"
+  button "Freeze"   "per.set d:0x7c042502 %byte 0x1f"
+  button "DeFreeze" "per.set d:0x7c042502 %byte 0x0"
+ textline ""
+  button "Sample"   "per.set d:0x7c042507 %byte 0x1f"
+  button "Update"   "per.set d:0x7c042507 %byte 0x0"
+ line.long 0x00 "Control"
+  bitfld.long 0x00 20.       " Init Exec "  "-,Clear "
+  bitfld.long 0x00 19.       " Init Pipe "  "-,Clear "
+  bitfld.long 0x00 18.       " Init InOut " "-,Clear "
+  bitfld.long 0x00 17.       " Init Out "   "-,Clear "
+  bitfld.long 0x00 16.       " Init In "    "-,Clear "
+ textline ""
+  bitfld.long 0x00 12.       " Stop Exec "  "Run,Freeze"
+  bitfld.long 0x00 11.       " Stop Pipe "  "Run,Freeze"
+  bitfld.long 0x00 10.       " Stop InOut " "Run,Freeze"
+  bitfld.long 0x00 09.       " Stop Out "   "Run,Freeze"
+  bitfld.long 0x00 08.       " Stop In "    "Run,Freeze"
+ textline ""
+  bitfld.long 0x00 04.       " En   Exec "  "Off,On    "
+  bitfld.long 0x00 03.       " En   Pipe "  "Off,On    "
+  bitfld.long 0x00 02.       " En   InOut " "Off,On    "
+  bitfld.long 0x00 01.       " En   Out "   "Off,On    "
+  bitfld.long 0x00 00.       " En   In "    "Off,On    "
+
+ line.long 0x04 "Sample"
+ textline ""
+  bitfld.long 0x04 04.       " Smpl Exec "  "Off,On    "
+  bitfld.long 0x04 03.       " Smpl Pipe "  "Off,On    "
+  bitfld.long 0x04 02.       " Smpl InOut " "Off,On    "
+  bitfld.long 0x04 01.       " Smpl Out "   "Off,On    "
+  bitfld.long 0x04 00.       " Smpl In "    "Off,On    "
+
+ line.long 0x08 "Stall In , Stall cycle counter on input channels"
+  decmask.long.short 0x08 0.--31. 1 "dec"
+ line.long 0x0c "Stall Out , Stall cycle counter on output channels"
+  decmask.long.short 0x0c 0.--31. 1 "dec"
+ line.long 0x10 "Stall In/Out , Stall cycle counter on input and output channels"
+  decmask.long.short 0x10 0.--31. 1 "dec"
+ line.long 0x14 "Stall Pipe , Stall cycle on pipeline hazards"
+  decmask.long.short 0x14 0.--31. 1 "dec"
+ line.long 0x18 "Execution , Execution cycle counter"
+  decmask.long.short 0x18 0.--31. 1 "dec"
+
+
+;Profiling
+tree.end
+
+; IPUS0
+tree.end
+
+

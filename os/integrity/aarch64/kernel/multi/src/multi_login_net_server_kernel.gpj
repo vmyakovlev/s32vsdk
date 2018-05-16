@@ -1,0 +1,13 @@
+#!gbuild
+[Program]
+	-kernel
+	-delete
+	-ldebug
+	-lres
+	-lload
+	-lip4
+	-livfs
+	-L/usr/local/tools/ghs/int1104/libs/Vivante/
+	-lcore
+global_table.c
+net_server_child_image.c

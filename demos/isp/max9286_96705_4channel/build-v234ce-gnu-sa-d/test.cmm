@@ -1,0 +1,37 @@
+; This is the test-specific Lauterbach debug script
+
+
+area.view
+//do ../../../../os\debug\lauterbach\S32V234.cmm
+do ../../../../os\debug\lauterbach\S32V234-CA53.cmm
+
+;d.load isp_ov10640_12bcomb_surround.elf /verify /plusvm
+d.load isp_imx224_quad.elf /verify /plusvm
+
+y.spath.reset
+y.spath ../src
+y.spath ../../../../libs/io/sdi/src
+y.spath ../../../../libs/isp/sequencer/user/src
+y.spath ../../../../libs/isp/sequencer/kernel/src
+y.spath ../../../../libs/startup/v234ce_standalone/src
+y.spath ../../../../libs/isp/sram/kernel/src
+y.spath ../../../../libs/utils/oal/user/src/standalone
+y.spath ../../../../libs/io/frame_io/src
+y.spath ../../../../libs/io/dcu/src
+y.spath ../../../../libs/isp/csi/kernel/src
+y.spath ../../../../libs/isp/csi/user/src
+y.spath ../../../../libs/isp/fdma/kernel/src
+y.spath ../../../../libs/isp/fdma/user/src
+y.spath ../../../../libs/io/i2c/src
+y.spath ../../../../libs/io/uartlinflex_io/src
+system.option dualport on
+
+//do a53_win.cmm
+
+;b.s SeqStart
+;b.s io::FrameInputISP::Stop
+
+
+go main
+
+ENDDO

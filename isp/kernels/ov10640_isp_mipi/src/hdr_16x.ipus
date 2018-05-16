@@ -1,0 +1,89 @@
+//IPUS
+// input: 2 exposures
+// line 0: l/s
+// line 1: vs
+// output: combined
+// parameters
+// gpr0         processed line length - 2
+// gpr1         gap between lines
+// gpr14:       shift right for vs
+// gpr15:       shift right for long/short
+
+// instrcution format:
+// inst outreg,inreg1,inreg2
+// inst outreg,inreg1,immediate
+// inst outreg,inreg1
+
+.global hdr_16x_start
+hdr_16x_start:
+
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (8<<4) /* shr =8*/ )
+	// in case of line reduction
+	//lsr loopcnt,gpr1,1       // Margin is subtracted in graph
+	//and loopcnt,0xfffe       // make sure it starts on even pixel
+	// in case of line extension
+
+	mov loopcnt,1            // fetch first pixel
+	add zero,gpr14,zero      // select the mode: 2 inputs vs one input
+
+hdr_16x_linestart:
+        ldon hdr_16x_linestart,i
+	mov loopcnt,gpr0         // line length
+	bne hdr_16x_signle       // if selected branch to single input
+
+hdr_16x_loop:
+	lsr ina0,ina0,gpr15     // long/short is shifted down
+	add out0,ina3,ina0      // add very short
+	// stall because of acc is operand next cycle
+
+	ldon  hdr_16x_loop,ixo
+
+hdr_16x_lineend:
+	// in case of line reduction
+	//mov loopcnt,gpr1         // gaps between lines
+  	//bal hdr_16x_linestart
+	
+	// in case of line extensionqy
+	lsr ina0,ina0,gpr15     // long/short is shifted down
+	add gpr2,ina3,ina0      // add very short
+	dout gpr2,hdr_16x_lineend1,ixo
+hdr_16x_lineend1:
+	// last two regular pixels, store result for extension
+	lsr ina0,ina0,gpr15     // long/short is shifted down
+	add gpr3,ina3,ina0      // add very short
+	dout gpr3,hdr_16x_lineend2,ixo
+hdr_16x_lineend2:
+	dout gpr2,hdr_16x_lineend3,xo
+hdr_16x_lineend3:
+	dout gpr3,hdr_16x_lineend4,xo
+hdr_16x_lineend4:
+	dout gpr2,hdr_16x_lineend5,xo
+hdr_16x_lineend5:
+	dout gpr3,hdr_16x_lineend6,xo
+hdr_16x_lineend6:
+	
+	mov loopcnt,gpr0       // process last two pixels separety
+	bal hdr_16x_loop
+
+hdr_16x_signle:
+	ldot ina0,hdr_16x_signle,ixo
+hdr_16x_single_lineend:
+	dout ina0,hdr_16x_single_lineend1,ixo
+hdr_16x_single_lineend1:
+	mov gpr2,out0
+	dout ina0,hdr_16x_single_lineend2,ixo
+hdr_16x_single_lineend2:
+	mov gpr3,out0
+	dout gpr2,hdr_16x_single_lineend3,xo
+hdr_16x_single_lineend3:
+	dout gpr3,hdr_16x_single_lineend4,xo
+hdr_16x_single_lineend4:
+	dout gpr2,hdr_16x_single_lineend5,xo
+hdr_16x_single_lineend5:
+	dout gpr3,hdr_16x_single_lineend6,xo
+hdr_16x_single_lineend6:
+	mov loopcnt,gpr0       // process last two pixels separety
+	bal hdr_16x_signle
+
+.global hdr_16x_end
+hdr_16x_end:

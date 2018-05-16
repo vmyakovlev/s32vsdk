@@ -1,0 +1,24 @@
+#!gbuild
+macro __BSP_DIR=$__OS_DIR/$__BSP_NAME
+macro __BSP_NAME=devtree-arm64
+macro __BUILD_DIR=%expand_path(.)
+macro __LIBS_DIR_BASE=${__OS_DIR}/libs
+macro __IS_64BIT=1
+macro __NO_LIBFLASH=1
+macro __NO_GTWS=1
+macro __NO_KERNEL_RELOC=1
+macro __OS_DIR=$INTEGRITY_ROOT_PATH
+import INTEGRITY_ROOT_PATH
+primaryTarget=arm64_integrity.tgt
+customization=$__OS_DIR/target/integrity.bod
+#component top_level_project
+[Project]
+	-bsp devtree-arm64
+	-G
+	-object_dir=objs
+	:sourceDir=.
+	:optionsFile=$(__OS_DIR)/target/$(__BSP_NAME).opt
+	-os_dir $__OS_DIR
+	-Itgt
+src/baseimage.gpj		[INTEGRITY Application]
+tgt/resources.gpj		[Project]

@@ -1,0 +1,30 @@
+#.org    0x00
+.global copy_1over3_ipus_start
+# set shift_in/x to 1 pixels
+# set shift_out to 1 pixels
+# input to line 0
+# in to LSB
+# out from LSB
+# out0 : copied input value
+
+copy_1over3_ipus_start:
+        //mov confalu,(0 /*unsigned*/ | (1<<1) /*saturate*/ | (14<<4) /*shr*/)
+	mov loopcnt, 2	// 1=L - 2=S - 3=VS
+        
+
+copy_1over3_ipus_linestart:
+	ldon copy_1over3_ipus_linestart,i    // load first pixel(s)
+
+copy_1over3_ipus_loop:
+	//lsl ina0, ina0, 3	// shift
+	dout ina0,copy_1over3_ipus_2nd,ixo	// output first pixel (S in 3exp mode)
+
+copy_1over3_ipus_2nd:
+	done copy_1over3_ipus_3rd,ix
+copy_1over3_ipus_3rd:
+	done copy_1over3_ipus_loop,ix
+
+
+        halt
+.global copy_1over3_ipus_end
+copy_1over3_ipus_end:

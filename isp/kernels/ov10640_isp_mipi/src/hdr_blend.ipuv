@@ -1,0 +1,88 @@
+// IPUV
+// set shift_in/x/out to 4 pixels
+// in0  :  L/S
+// in1  :  VS
+// out0 :  HDR combined
+
+// sum = 16
+
+// gpr0 : length of valid input pixels-2 (to extend line by 4 pixels)
+// gpr2 : fix line length
+// gpr3 : 4 to convert from 0.16 to 4.12
+// gpr4,5,6: used by alternative kernel
+// gpr11: black level for LS
+// gpr12: maximum ypos
+// gpr13: maximum ypos by alternative kernel
+// gpr14: (shift right for vs) --  select if vs available
+// gpr15: shift right for long/short  -- ignored
+// gpr16: ratio between L and VS
+// gpr17: min threshold; all lower will be l/s only
+// gpr18: max threshold; all higher will be vs only    in 4.12
+// gpr19: slope between min and max threshold (should be 1.0) in 4.12
+// gpr20-23: 4096 for 1-alpha computation
+// gpr24-27: l/s - min threshold, alpha 0.16, alpha 4.12
+// gpr28-31: 1-alpha in 4.12
+
+// instruction format
+// instr dest,op0,op1
+// instr dest,im16
+
+.global hdr_blend_start
+hdr_blend_start:
+  
+        mov  confalu,(0 /* unsigned*/ | (1 << 1) /* saturate*/ | (12<<4) /* 4.12 multiplication*/ )
+	// in case of line reduction
+	//lsr loopcnt,gpr1,1       // Margin is subtracted in graph
+	//and loopcnt,0xfffe       // make sure it starts on even pixel
+	// in case of line extension
+	max gpr12,gpr12,ypos       // check for last line (debugging)
+	//mov gpr16,0x4000           // amplify VS
+	//mov gpr17,4096             // low threshold (16bit)
+	//mov gpr18,0xf000           // high threshold (16bit)
+	//mov gpr19,4681             // slope in 4.12...
+	//                           // 65535/(61114-4096)*4096=4681
+
+
+hdr_blend_linestart:
+	// fetch first pixel
+        ldon hdr_blend_d1,i // fill in first data word
+hdr_blend_d1:
+	mov gpr2,gpr0              // fix line length to IPUV
+	add gpr2,2
+	lsr loopcnt,gpr2,2         // line length
+	add zero,gpr14,zero        // select the mode: 2 inputs vs one input
+	mov gpr20,4096
+	mov vgpr5,gpr20
+	mov gpr3,4
+	bne hdr_blend_signle       // if selected branch to single input
+
+hdr_blend_loop:
+	sub vh0,vh0,gpr11          // subtract black level
+	sub vgpr6,vh0,gpr17        // get what l/s is above min threshold
+	lsr vh0,vh0,gpr15          // shift down the l/s exposure
+	mulh vgpr6,vgpr6,gpr19     // get alpha in 0.16
+	// stall?
+	mulh  vh5,vh5,gpr16        // weight VS to balance with 
+	lsr vgpr6,vgpr6,gpr3       // make alpha 5.11
+	sub vgpr7,vgpr5,vgpr6      // compute 1-alpha
+	mulh vsacc0,vh5,vgpr6      // vs * alpha
+	mov vacc0,vh0              // l/s (1)
+	//mulh vacc0,vh0,vgpr7       // l/s (1-alpha)
+	// stall because of acc is operand next cycle
+	ldvo vacc0,hdr_blend_loop,ixo
+	
+hdr_blend_eol:
+	lsr loopcnt,gpr2,2         // line length
+	dvot vacc0,hdr_blend_loop,ixo// last pixels are already in vout0
+
+hdr_blend_signle:       // if selected branch to single input
+	sub vh0,vh0,gpr11          // subtract black level
+	ldvo vh0,hdr_blend_signle,ixo
+	
+hdr_blend_eol_single:
+	lsr loopcnt,gpr2,2         // line length
+	dvot vout0,hdr_blend_signle,ixo// last pixels are already in vout0
+
+        //halt
+.global hdr_blend_end
+hdr_blend_end:

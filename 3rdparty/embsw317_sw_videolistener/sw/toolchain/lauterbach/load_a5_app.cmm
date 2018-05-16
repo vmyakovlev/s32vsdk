@@ -1,0 +1,139 @@
+ENTRY &elf &debug &trace &merge
+LOCAL &err
+LOCAL &totalFailures
+
+if (&trace=="1")
+(
+    if !analyzer()
+    (
+        //  TODO: Do a log entry
+        print "Please connect a suitable debugger..."
+        wait 3.s
+        intercom.executenowait 10000 quit
+        quit
+    )
+)
+
+if !state.power()
+(
+    //  TODO: Do a log entry
+    intercom.executenowait 10000 quit
+    quit
+)
+
+if (state.target()!="system down")
+(
+    //  TODO: Do a log entry
+    intercom.executenowait 10000 quit
+    quit
+)
+
+ON ERROR GOSUB my_error_handler
+&err=0.
+&totalFailures=0.
+
+repeat
+(
+    &err=0.
+    do ./S32V234.cmm
+    //  TODO: If error do a log entry
+)
+while &err!=0.
+
+repeat
+(
+    &err=0.
+    do ./S32V234-CA53.cmm
+    //  TODO: If error do a log entry
+)
+while &err!=0.
+
+if (state.target()!="system ready")
+(
+    //  TODO: Do a log entry
+    intercom.executenowait 10000 quit
+    quit
+)
+
+sys.reset
+sys.resettarget
+
+if (&merge=="1") ;   CCOV merge is requested
+(
+    do ./s32v234_run_ccov_merge.cmm
+    intercom.executenowait 10000 quit
+    quit
+)
+
+IF ("&elf"=="")
+    d.load ../../output/theA5App.elf /verify /plusvm
+ELSE
+    d.load &elf /verify /plusvm
+
+&toolchdir=os.pwd()
+&outdir=os.file.path("&elf")
+    
+r.set pc __startup
+WinCLEAR
+winpos 0% 0% 50% 100%
+d.list
+;register /sl
+
+if &err!=0.
+(
+    //  TODO: Do a log entry
+    intercom.executenowait 10000 quit
+    quit
+)
+
+IF symbol.exist(test_end)
+(
+    if (&debug=="1")
+    (
+        do install_debug_menu.cmm
+        b.s test_end
+    )
+    else
+    (
+        cd "&outdir"
+        b.s test_end /CMD "do "+"&toolchdir"+"/s32v234_finalize_test.cmm success "+&trace
+    )
+    
+    if (&trace=="1")
+    (
+        do &toolchdir/trace_prepare.cmm
+        ; ENDDO
+        trace.init
+        trace.method analyzer
+    )
+    
+    if (&debug=="0")
+    (
+        go
+        wait !state.run() 10.s
+        if state.run()
+        (
+            break
+            &thescript="&toolchdir"+"/s32v234_finalize_test.cmm timeout "+&trace
+            do &thescript
+        )
+    )
+)
+
+ENDDO
+
+my_error_handler:
+    beep 5.
+    print %ERROR
+    // dialog.message "[load_a5_app.cmm] Error handler"
+    &err=&err+1.
+    &totalFailures=&totalFailures+1.
+    if &totalFailures>10.
+    (
+        //  TODO: Do a log entry
+        //  Close both T32 instances
+        intercom.executenowait 10000 quit
+        quit
+    )
+    wait 1.s
+    return
