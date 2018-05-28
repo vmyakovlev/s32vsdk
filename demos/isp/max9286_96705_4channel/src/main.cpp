@@ -66,7 +66,6 @@ vsdk::Mat frame_map_out;
 ///char  mem_right_t[1280*720*2];  
 unsigned char  mem_ui_t[1280*720*2];
 unsigned char  mem_tmp_T3[1280*720*2];
-char  stitchingrunflag,stitchingfinisflag ;
 ///char  channel_number ,snaponoffflag;
 ///int  snap_number;
 ///	void Resize_Interpolation_SingleView(unsigned short *resize_lut,unsigned int **remap_lut, unsigned char * dout,int Nwidth,int Nheight);
@@ -157,7 +156,7 @@ int main(int, char **)  //zhy
 	int ret = 0;
 	int a =100;
 	pthread_t id1,id2,id3,id4,id5,id6;
-	ret = pthread_create(&id1, NULL, VideoCaptureTask,NULL);
+	ret = pthread_create(&id5, NULL, VideoCaptureTask,NULL);
 	if(ret)
 	{
 		printf("Create VideoCaptureTask error!\n");
@@ -184,7 +183,7 @@ int main(int, char **)  //zhy
 		return 1;
 	}
 #endif
-	ret = pthread_create(&id5, NULL, KeyTask,NULL);
+	ret = pthread_create(&id1, NULL, KeyTask,NULL);
 	if(ret)
 	{
 		printf("Create keytask error!\n");
@@ -209,7 +208,7 @@ int main(int, char **)  //zhy
 }
 void *VideoCaptureTask(void *ptr1)  //zhy  
 {
-
+  int i;
   LIB_RESULT lRet = LIB_SUCCESS;
   LIB_RESULT lRes = LIB_SUCCESS; 
 ///  char ch;
@@ -222,7 +221,8 @@ void *VideoCaptureTask(void *ptr1)  //zhy
     return    0 ;// -1;
   }  
    printf("Press Ctrl+C to terminate the demo.\n");  
-   
+      printf("This is  VideoCaptureTask\n");
+
    printf("##########VideoCaptureTask############\n");  
  // *** set terminal to nonblock input ***
  //TermNonBlockSet();
@@ -293,7 +293,7 @@ void *VideoCaptureTask(void *ptr1)  //zhy
 
 	p_lut_right_test=Lut_Right;
 	p_wt_right_test = (UInt32_t *)Wt_Lut_Right;
-	TabBev **bev_Table[4];
+	///TabBev **bev_Table[4];
 	Bev_Tab_Init(p_lut_front_test, p_wt_front_test, 0, 832, 396, bev_Table);
 	Bev_Tab_Init(p_lut_back_test, p_wt_back_test, 1, 832, 396, bev_Table);
 	Bev_Tab_Init(p_lut_left_test, p_wt_left_test, 2, 352, 1024, bev_Table);
@@ -340,7 +340,8 @@ void *VideoCaptureTask(void *ptr1)  //zhy
        lLoop = 0;
     }
 	lLoop++; 	
-	switch(console_cmd)
+	 ///console_cmd = 2;
+	switch(console_cmd)//
 	{	
 		 case 0 :	//snap of original view
 			for(int i =0;i<720;i++)
@@ -355,8 +356,6 @@ void *VideoCaptureTask(void *ptr1)  //zhy
 			else if( channel_select  == 3)  
 				memcpy((char*)SINGLE_BUFFER, (char *) mem_tmp_T3, 1280*720*2);//for snap
 			  DisSnapOriginalVideocap(channel_select);
-	  		  actualBufferIndex = 3; 
-			  stitchingrunflag = 0;
 			break;
 		case 1 ://single view resize of video
 			for(int i =0;i<720;i++)
@@ -366,54 +365,76 @@ void *VideoCaptureTask(void *ptr1)  //zhy
 			 DisUndistortionSingleVideo(channel_select,(char *) frame_map_out.data);
 			///  GETTIME(&lTimeEnd2);  
   			///  printf("%d\n",lTimeEnd2 - lTimeStart2);
-	  		 actualBufferIndex = 3; 
-			 stitchingrunflag = 0;
 		       break;			
 		 case 2://video svm
-			for(int i =0;i<720;i++)
-			memcpy((char*)mem_tmp_T3+i*1280*2,(char *)frame_map[3].data+1920*2*i,1280*2);  // 1920*1080  conver 1280*720
+				for(int i =0;i<720;i++)
+				memcpy((char*)mem_tmp_T3+i*1280*2,(char *)frame_map[3].data+1920*2*i,1280*2);  // 1920*1080  conver 1280*720
+				frame_map_out =lFrame[3].mUMat.getMat(vsdk::ACCESS_RW | OAL_USAGE_CACHED); 
+			 ///SVMStitching(frame_map[0].data,frame_map[1].data,frame_map[2].data,mem_tmp_T3); 	
+				memset((char *) frame_map_out.data,0,1920*1080*2);	
+				bev_process(
+				SVM_BUFFER,//result_image_uyvy,
+				frame_map[0].data,//front_p,//front_image_uyvy,
+				frame_map[1].data,//back_p,//back_image_uyvy,
+				frame_map[2].data,//left_p,//left_image_uyvy,
+				mem_tmp_T3,//right_p,//right_image_uyvy,
+				car_up_left,
+				car_down_right,
+				front_fov_height,
+				right_fov_width,
+				832,//Width,
+				1280,//SINGLE_VIEW_WIDTH,
+				bev_Table);	
+
+			rotate270(SVM_BUFFER,SVM_BUFFER_dst,832,1024);
+		       for(i=124;i<956;i++) 
+			{
+				memcpy((char *) frame_map_out.data+i*1920*2+448*2,(char*)SVM_BUFFER_dst+(i-124)*1024*2, 1024*2);
+			}
+		      ///SVMDis();			
+			break;
+		case 3: //display static picture
+			frame_map_out =lFrame[3].mUMat.getMat(vsdk::ACCESS_RW | OAL_USAGE_CACHED); 			
+			DisOriginalSingleViewPic(channel_select,(char *) frame_map_out.data);
+			break;
+		case 4://display static picture resize
+			frame_map_out =lFrame[3].mUMat.getMat(vsdk::ACCESS_RW | OAL_USAGE_CACHED); 			
+			DisUndistortionSingleViewPic(channel_select,(char *) frame_map_out.data);
+			break;
+		case 5://pic svm
 			frame_map_out =lFrame[3].mUMat.getMat(vsdk::ACCESS_RW | OAL_USAGE_CACHED); 
-		///	SVMStitching(frame_map[0].data,frame_map[1].data,frame_map[2].data,mem_tmp_T3); 	
+			/// SVMStitching(front_p,back_p,left_p,right_p); 			 
+			/// SVMDis();
 			memset((char *) frame_map_out.data,0,1920*1080*2);	
-			bev_process(
+		      bev_process(
 			SVM_BUFFER,//result_image_uyvy,
-			frame_map[0].data,//front_p,//front_image_uyvy,
-			frame_map[1].data,//back_p,//back_image_uyvy,
-			frame_map[2].data,//left_p,//left_image_uyvy,
-			mem_tmp_T3,//right_p,//right_image_uyvy,
+			front_p,//front_image_uyvy,
+			back_p,//back_image_uyvy,
+			left_p,//left_image_uyvy,
+			right_p,//right_image_uyvy,
 			car_up_left,
 			car_down_right,
 			front_fov_height,
 			right_fov_width,
 			832,//Width,
 			1280,//SINGLE_VIEW_WIDTH,
-			bev_Table);
+			bev_Table);	
+
+			rotate270(SVM_BUFFER,SVM_BUFFER_dst,832,1024);
+		       for(i=124;i<956;i++) 
+			{
+				memcpy((char *) frame_map_out.data+i*1920*2+448*2,(char*)SVM_BUFFER_dst+(i-124)*1024*2, 1024*2);
+			}			
 			
-			SVMDis();
-			actualBufferIndex =3;
 			break;
-		case 3: //display static picture
-			frame_map_out =lFrame[3].mUMat.getMat(vsdk::ACCESS_RW | OAL_USAGE_CACHED); 			
-			DisOriginalSingleViewPic(channel_select,(char *) frame_map_out.data);
-			actualBufferIndex =3;
-			stitchingrunflag = 0;
-			break;
-		case 4://display static picture resize
-			frame_map_out =lFrame[3].mUMat.getMat(vsdk::ACCESS_RW | OAL_USAGE_CACHED); 			
-			DisUndistortionSingleViewPic(channel_select,(char *) frame_map_out.data);
-			actualBufferIndex =3;
-			stitchingrunflag = 0;
-			break;
-		case 5://pic svm
+		case 6:
 			frame_map_out =lFrame[3].mUMat.getMat(vsdk::ACCESS_RW | OAL_USAGE_CACHED); 
-			 SVMStitching(front_p,back_p,left_p,right_p); 
-			 SVMDis();
-			actualBufferIndex =3;
-			stitchingrunflag = 0;
+			memset((char *) frame_map_out.data,0,1920*1080*2);	
 			break;
-		default:break;		   	
+	default:break;		   	
       	}	 
 //***********DY**********************//	
+actualBufferIndex =3;
 // push all
     for (int i = 0;i < 4;i++)  //*******;************DY****************
     { 
@@ -474,24 +495,44 @@ void *DisplayTaskHD(void  *ptr1)//(void)
     ptr1 = NULL;
     printf("*************DisplayTask************\n"); 
 	sleep(10);
-	for(;;)
-	{
+					
 	#if 0
-	   //   if(stitchingrunflag==1)
-	      	{
-	      	 printf("1\n");     
-		for( i =0;i<720;i++)
-		 memcpy((char*)mem_tmp_T3+i*1280*2,(char *)frame_map[3].data+1920*2*i,1280*2);  // 1920*1080  conver 1280*720
-		SVMStitching(frame_map[0].data,frame_map[1].data,frame_map[2].data,mem_tmp_T3); 	
-		  printf("*********************i = %d", i++);
-		  stitchingfinisflag = 1;
-	      	}
-	#endif
-	sleep(1);
+	for(;;)
+	{         
+	                  if(2==console_cmd)
+	                  {
+				  printf("*************DisplayTaskHD************\n"); 
+				for(int i =0;i<720;i++)
+				memcpy((char*)mem_tmp_T3+i*1280*2,(char *)frame_map[3].data+1920*2*i,1280*2);  // 1920*1080  conver 1280*720
+				frame_map_out =lFrame[3].mUMat.getMat(vsdk::ACCESS_RW | OAL_USAGE_CACHED); 
+			///	SVMStitching(frame_map[0].data,frame_map[1].data,frame_map[2].data,mem_tmp_T3); 	
+			///memset((char *) frame_map_out.data,0,1920*1080*2);	
+				bev_process(
+				SVM_BUFFER,//result_image_uyvy,
+				frame_map[0].data,//front_p,//front_image_uyvy,
+				frame_map[1].data,//back_p,//back_image_uyvy,
+				frame_map[2].data,//left_p,//left_image_uyvy,
+				mem_tmp_T3,//right_p,//right_image_uyvy,
+				car_up_left,
+				car_down_right,
+				front_fov_height,
+				right_fov_width,
+				832,//Width,
+				1280,//SINGLE_VIEW_WIDTH,
+				bev_Table);	
+				memcpy(SVM_BUFFER_dst0,SVM_BUFFER,832*1024*2);
+				stitchingfinisflag = 1;
+	                  	}
+
+
+
+
+
+
+	//sleep(1);
 	 }
-
-
 	return 0;
+#endif
 }
 
 
@@ -654,11 +695,6 @@ void   Show4picSVM(void)
 void SVMDis(void)
 {
   		int i = 0;
-///		if(stitchingfinisflag)
-///		{
-///			memcpy(SVM_BUFFER_dst,SVM_BUFFER,1024*832*2);
-///			stitchingfinisflag = 0;
-///		}
 		memset((char *) frame_map_out.data,0,1920*1080*2);	
 		for(i=0;i<1024;i++)  //  front of birdview    1280-800=480
 		{

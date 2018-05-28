@@ -197,6 +197,8 @@ unsigned short Lut_right_u1[SIG_WIDTH  * SIG_HEIGHT * 4];
 
 unsigned char  SVM_BUFFER[SVM_WIDTH * SVM_HEIGHT * 2]; 
 unsigned char  SVM_BUFFER_dst[SVM_WIDTH * SVM_HEIGHT * 2]; 
+unsigned char  SVM_BUFFER_dst0[SVM_WIDTH * SVM_HEIGHT * 2]; 
+
 unsigned char  SINGLE_BUFFER[SIG_WIDTH * SIG_HEIGHT * 2];
 unsigned char  canrxbuf[8];
 int key,key16;
@@ -318,6 +320,9 @@ typedef struct TabBev_Struct
 	Int32_t wt_downleft;
 	Int32_t wt_downright;
 }TabBev;
+
+TabBev **bev_Table[4];
+
 Int32_t bev_process(
 	uchar* result_image,
 	uchar* front_image_uyvy,

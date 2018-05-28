@@ -25,15 +25,35 @@ void *TerminalTask(void *ptr)
 		    fprintf(stderr, "Quit\n", ch);
 		} 
 		else if(ch=='0')
+		{
 			console_cmd = 0;
+			channel_select++;
+			if(channel_select>3)
+				channel_select=0;
+		}
 		else if(ch=='1')
+		{
 			console_cmd = 1;
+			channel_select++;
+			if(channel_select>3)
+				channel_select=0;
+		}
 		else if(ch=='2')
 			console_cmd = 2;
 		else if(ch=='3')
+		{
 			console_cmd = 3;
+			channel_select++;
+			if(channel_select>3)
+				channel_select=0;
+		}
 		else if(ch=='4')
+		{
 			console_cmd = 4;		
+			channel_select++;
+			if(channel_select>3)
+				channel_select=0;
+		}
 		else if(ch == '5') 
 			console_cmd = 5;
 		else if(ch == '6') 
@@ -48,15 +68,15 @@ void *TerminalTask(void *ptr)
 			printf("%d,%d\n",channel_select,snap_number);//for test
 			if(channel_select==0)
 			str = "/home/cap/front";	
-		       	else if(channel_select==1)
+		       else if(channel_select==1)
 			str = "/home/cap/back";	
-		       	else if(channel_select==2)
+		       else if(channel_select==2)
 			str = "/home/cap/left";
 		        else if(channel_select==3)
 			str = "/home/cap/right";					
 			sprintf(str1, "%d" , snap_number);
 			strcat(filename,str);
-		        strcat(filename,str1);
+		       strcat(filename,str1);
 			strcat(filename,".yuv");	
 			printf("%s\n",filename);				
 			saveframe(filename , SINGLE_BUFFER, SIG_WIDTH * SIG_HEIGHT * 2, 1);
