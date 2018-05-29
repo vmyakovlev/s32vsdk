@@ -18,6 +18,8 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+#if 1
 void  DisOriginalSingleViewPic(char num,char* dis_buf)
 {
     	int  i = 0;	
@@ -66,4 +68,4 @@ void DisUndistortionSingleViewPic(int num,char* dis_buf)
 	memcpy((char *)dis_buf+i*1920*2,(char*)p_result+1280*2*i, 1280*2);
 }
 
-
+#endif

@@ -51,7 +51,6 @@
 //static uint8_t          OutPutBufferUYVY[WIDTH*HEIGHT*2];
 //static uint8_t          RGB24Buffer[WIDTH*HEIGHT*3];
 //***************************************************************************
-///void rotate270(unsigned char *src,unsigned char *dst,int width,int height);
 
 /*******************************************************\u8bfb\u8868\u64cd\u4f5c**********************************************************/
 
@@ -79,7 +78,7 @@ unsigned char  mem_tmp_T3[1280*720*2];
 
 
 Int32_t Bev_Tab_Init(UInt32_t* p_pos_fusion_lut, UInt32_t* p_wt_lut, Int32_t camid, Int32_t fov_width, Int32_t fov_height, TabBev **bev_Table[4]);
-
+Int32_t Bev_Tab_Init1(UInt32_t* p_pos_fusion_lut, UInt32_t* p_wt_lut, Int32_t camid, Int32_t fov_width, Int32_t fov_height, TabBev **bev_Table[4]);
 
 //*****************************************************************************/
 
@@ -221,9 +220,7 @@ void *VideoCaptureTask(void *ptr1)  //zhy
     return    0 ;// -1;
   }  
    printf("Press Ctrl+C to terminate the demo.\n");  
-      printf("This is  VideoCaptureTask\n");
 
-   printf("##########VideoCaptureTask############\n");  
  // *** set terminal to nonblock input ***
  //TermNonBlockSet();
  #if 0
@@ -243,7 +240,6 @@ void *VideoCaptureTask(void *ptr1)  //zhy
   // *** create grabber ***
   sdi_grabber *lpGrabber = new(sdi_grabber);  // 
   lpGrabber->ProcessSet(gpGraph, &gGraphMetadata);
-  printf("main.cpp line144\n");
   // *** set user defined Sequencer event handler *** 
   int32_t lCallbackUserData = 12345;
   lpGrabber->SeqEventCallBackInstall(&SeqEventCallBack, &lCallbackUserData);
@@ -266,46 +262,44 @@ void *VideoCaptureTask(void *ptr1)  //zhy
    lpFdma->DdrBufferDescSet(3, lFrmDesc); 
   //*** allocate DDR buffers ***
   lpFdma->DdrBuffersAlloc(DDR_BUFFER_CNT);
-  printf("main.cpp line154\n");
+
+  	car_up_left.x = 464;//352;
+	car_up_left.y = 655;//396;
+	car_down_right.x = 591;//479;
+	car_down_right.y = 1008;//627;
+	front_fov_height = 655;//396;
+	back_fov_height = 655;//396;
+	left_fov_width = 464;//352;
+	right_fov_width =464;//352;		
+	p_lut_front_test=Lut_Front;
+	p_wt_front_test = Wt_Lut_Front;
+	p_lut_back_test=Lut_Back;
+	p_wt_back_test = (UInt32_t *)Wt_Lut_Back;
+	p_lut_left_test=Lut_Left;
+	p_wt_left_test = Wt_Lut_Left;
+	p_lut_right_test=Lut_Right;
+	p_wt_right_test = (UInt32_t *)Wt_Lut_Right;
+	
+	Bev_Tab_Init(p_lut_front_test, p_wt_front_test, 0, DST_WIDTH, car_up_left.y , bev_Table);
+	Bev_Tab_Init(p_lut_back_test, p_wt_back_test, 1, DST_WIDTH, car_up_left.y , bev_Table);
+	Bev_Tab_Init(p_lut_left_test, p_wt_left_test, 2, car_up_left.x , DST_HEIGHT, bev_Table);
+	Bev_Tab_Init(p_lut_right_test, p_wt_right_test, 3, car_up_left.x , DST_HEIGHT, bev_Table);
+
+
+
+  
   // *** prestart grabber ***
   lpGrabber->PreStart();
-  printf("main.cpp line157\n");
   // fetched frame buffer storage
   // *** start grabbing ***
   lpGrabber->Start();  
   #endif
-  printf("main.cpp line163\n");
   unsigned long lTimeStart1 = 0, lTimeEnd1 = 0, lTimeDiff1 = 0;
 
   uint32_t lFrmCnt = 0;
-  printf("Complete init done.\n");
   uint8_t lLoop=0; 
 
   /*******************************************************************************/
-	p_lut_front_test=Lut_Front;
-	p_wt_front_test = (UInt32_t *)Wt_Lut_Front;
-
-	p_lut_back_test=Lut_Back;
-	p_wt_back_test = (UInt32_t *)Wt_Lut_Back;
-
-	p_lut_left_test=Lut_Left;
-	p_wt_left_test = (UInt32_t *)Wt_Lut_Left;
-
-	p_lut_right_test=Lut_Right;
-	p_wt_right_test = (UInt32_t *)Wt_Lut_Right;
-	///TabBev **bev_Table[4];
-	Bev_Tab_Init(p_lut_front_test, p_wt_front_test, 0, 832, 396, bev_Table);
-	Bev_Tab_Init(p_lut_back_test, p_wt_back_test, 1, 832, 396, bev_Table);
-	Bev_Tab_Init(p_lut_left_test, p_wt_left_test, 2, 352, 1024, bev_Table);
-	Bev_Tab_Init(p_lut_right_test, p_wt_right_test, 3, 352, 1024, bev_Table);
-	car_up_left.x = 352;
-	car_up_left.y = 396;
-	car_down_right.x = 479;
-	car_down_right.y = 627;
-	front_fov_height = 396;
-	back_fov_height = 396;
-	left_fov_width = 352;
-	right_fov_width =352;		
   /*******************************************************************************/
   GETTIME(&lTimeStart1);
   for(;;)
@@ -382,16 +376,26 @@ void *VideoCaptureTask(void *ptr1)  //zhy
 				car_down_right,
 				front_fov_height,
 				right_fov_width,
-				832,//Width,
-				1280,//SINGLE_VIEW_WIDTH,
+				DST_WIDTH,
+				SIG_WIDTH,//SINGLE_VIEW_WIDTH,
 				bev_Table);	
-
-			rotate270(SVM_BUFFER,SVM_BUFFER_dst,832,1024);
-		       for(i=124;i<956;i++) 
-			{
-				memcpy((char *) frame_map_out.data+i*1920*2+448*2,(char*)SVM_BUFFER_dst+(i-124)*1024*2, 1024*2);
-			}
-		      ///SVMDis();			
+			#if 0
+			      for(i=0;i<1024;i++) //i = (1080-1056)/2;i<12+1056=1068
+				{//128 = (1920-DST_HEIGHT)/2
+					memcpy((char *) frame_map_out.data+i*1920*2+128*2,(char*)SVM_BUFFER+(i-12)*1024*2, 1024*2);
+				}			 
+			#else
+				rotate270(SVM_BUFFER,SVM_BUFFER_dst,DST_WIDTH,DST_HEIGHT);
+			       for(i=12;i<1068;i++) //i = (1080-1056)/2;i<12+1056=1068
+				{//128 = (1920-DST_HEIGHT)/2
+					memcpy((char *) frame_map_out.data+i*1920*2+256*2,(char*)SVM_BUFFER_dst+(i-12)*DST_HEIGHT*2, DST_HEIGHT*2);
+				}			 
+				//for(i=124;i<956;i++) //i =124 = (1080-832)/2;i<124+832=956;
+				//{//448 = (1920-1024)/2
+				//	memcpy((char *) frame_map_out.data+i*1920*2+448*2,(char*)SVM_BUFFER_dst+(i-124)*1024*2, 1024*2);
+				//}
+		    ///  SVMDis();		
+				#endif
 			break;
 		case 3: //display static picture
 			frame_map_out =lFrame[3].mUMat.getMat(vsdk::ACCESS_RW | OAL_USAGE_CACHED); 			
@@ -404,7 +408,9 @@ void *VideoCaptureTask(void *ptr1)  //zhy
 		case 5://pic svm
 			frame_map_out =lFrame[3].mUMat.getMat(vsdk::ACCESS_RW | OAL_USAGE_CACHED); 
 			/// SVMStitching(front_p,back_p,left_p,right_p); 			 
-			/// SVMDis();
+			 ///SVMDis();
+				
+
 			memset((char *) frame_map_out.data,0,1920*1080*2);	
 		      bev_process(
 			SVM_BUFFER,//result_image_uyvy,
@@ -416,15 +422,29 @@ void *VideoCaptureTask(void *ptr1)  //zhy
 			car_down_right,
 			front_fov_height,
 			right_fov_width,
-			832,//Width,
-			1280,//SINGLE_VIEW_WIDTH,
-			bev_Table);	
+			DST_WIDTH,//Width,
+			SIG_WIDTH,//SINGLE_VIEW_WIDTH,
+			bev_Table);
+			  #if 0
 
-			rotate270(SVM_BUFFER,SVM_BUFFER_dst,832,1024);
-		       for(i=124;i<956;i++) 
-			{
-				memcpy((char *) frame_map_out.data+i*1920*2+448*2,(char*)SVM_BUFFER_dst+(i-124)*1024*2, 1024*2);
-			}			
+			for(i=0;i<1024;i++) //i = (1080-1056)/2;i<12+1056=1068
+			{//128 = (1920-DST_HEIGHT)/2
+				memcpy((char *) frame_map_out.data+i*1920*2,(char*)SVM_BUFFER+(i)*1056*2, 1056*2);
+			}			 
+			///  printf("rrrr init done.\n");
+			  #else  
+
+			rotate270(SVM_BUFFER,SVM_BUFFER_dst,DST_WIDTH,DST_HEIGHT);
+			for(i=12;i<1068;i++) //i = (1080-1056)/2;i<12+1056=1068
+			{//128 = (1920-DST_HEIGHT)/2
+				memcpy((char *) frame_map_out.data+i*1920*2+256*2,(char*)SVM_BUFFER_dst+(i-12)*DST_HEIGHT*2, DST_HEIGHT*2);
+			}			 
+
+			 //for(i=124;i<956;i++) 
+			//{
+			//	memcpy((char *) frame_map_out.data+i*1920*2+448*2,(char*)SVM_BUFFER_dst+(i-124)*1024*2, 1024*2);
+			//}	
+			 #endif
 			
 			break;
 		case 6:
@@ -630,7 +650,7 @@ int32_t SigintSetup()
 
 
 
-
+#if 0
 void  Show4picT(void)
 {
         int  i = 0;
@@ -653,6 +673,8 @@ void  Show4picT(void)
 	}
 
 }
+
+#endif
 #if 0
 void   Show4picSVM(void)
 {
@@ -722,10 +744,10 @@ void SVMStitching(uchar* sf, uchar* sb, uchar* sl,uchar* sr)
 		///right_fov_width =352;	
 	#if 1
 		memset((char *) frame_map_out.data,0,1920*1080*2);	
-		analysis_panorama_lut_uyvy(Lut_Front,Lut_Back,Lut_Left,Lut_Right,\
-									Wt_Lut_Front,Wt_Lut_Back,Wt_Lut_Left,Wt_Lut_Right,\
-									SVM_BUFFER,sf,sb,sl,sr,\
-									car_up_left,car_down_right,front_fov_height,left_fov_width,1024,832,720,1280);
+		//analysis_panorama_lut_uyvy(Lut_Front,Lut_Back,Lut_Left,Lut_Right,\
+		//							Wt_Lut_Front,Wt_Lut_Back,Wt_Lut_Left,Wt_Lut_Right,\
+		//							SVM_BUFFER,sf,sb,sl,sr,\
+		//							car_up_left,car_down_right,front_fov_height,left_fov_width,1024,832,720,1280);
 	  #else
 	/***************no rotation start***************************/
 		if(stitchingfinisflag==1){
@@ -878,6 +900,7 @@ Int32_t Bev_Tab_Init(UInt32_t* p_pos_fusion_lut, UInt32_t* p_wt_lut, Int32_t cam
 	{
 		printf("malloc error");
 	}
+	#if 1
 	for ( i = 0; i < fov_height; i++)
 	{
 		for ( j = 0; j < fov_width; j++)
@@ -893,12 +916,55 @@ Int32_t Bev_Tab_Init(UInt32_t* p_pos_fusion_lut, UInt32_t* p_wt_lut, Int32_t cam
 			wt_item = p_wt_lut[2 * i * fov_width + 2 * j + 1];
 			bev_Table[camid][i][j].wt_downleft = wt_item >> 16;
 			bev_Table[camid][i][j].wt_downright = wt_item & 0xFFFF;
+			
 		}
 	}
+	#endif
 	return 0;
 }
 
+Int32_t Bev_Tab_Init1(UInt32_t* p_pos_fusion_lut, UInt32_t* p_wt_lut, Int32_t camid, Int32_t fov_width, Int32_t fov_height, TabBev **bev_Table[4])
+{
+///	Int32_t wt_upleft, wt_upright, wt_downleft, wt_downright;
+	UInt32_t item, wt_item;
+       Int32_t i,j ;
+	bev_Table[camid] = (TabBev**)malloc(sizeof(TabBev*)* fov_height);
+	for ( i = 0; i < fov_height; i++)
+	{
+		TabBev* p = (TabBev*)malloc(sizeof(TabBev)* fov_width);
+		bev_Table[camid][i] = p;
+	}
+	if (bev_Table == NULL)
+	{
+		printf("malloc error");
+	}
+	#if 1
+	for ( i = 0; i < fov_height; i++)
+	{
+		for ( j = 0; j < fov_width; j++)
+		{
+			item = p_pos_fusion_lut[i * fov_width + j];
+			bev_Table[camid][i][j].point_pos.x = (item >> 10) & 0x7FF;
+			bev_Table[camid][i][j].point_pos.y = (item >> 21);
+			bev_Table[camid][i][j].wt_fusion = item & 0x3FF;
 
+			/*wt_item = p_wt_lut[2 * i * fov_width + 2 * j];
+			bev_Table[camid][i][j].wt_upleft = wt_item >> 16;
+			bev_Table[camid][i][j].wt_upright = wt_item & 0xFFFF;
+			wt_item = p_wt_lut[2 * i * fov_width + 2 * j + 1];
+			bev_Table[camid][i][j].wt_downleft = wt_item >> 16;
+			bev_Table[camid][i][j].wt_downright = wt_item & 0xFFFF;*/
+
+			bev_Table[camid][i][j].wt_upleft = 16384;
+			bev_Table[camid][i][j].wt_upright = 16384;
+			
+			bev_Table[camid][i][j].wt_downleft = 16384;
+			bev_Table[camid][i][j].wt_downright = 16384;
+		}
+	}
+	#endif
+	return 0;
+}
 
 
 #if 0

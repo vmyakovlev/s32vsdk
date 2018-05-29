@@ -237,6 +237,8 @@ void stitching_block()
 		///stitchFusion(CAPTURE_MEM_FRONT_cpy, 	CAPTURE_MEM_RIGHT_cpy, 	BACK_RIGHT, 	n7, SVM_HEIGHT, m6, SVM_WIDTH);
 }
 #endif
+
+#if 0
 void stitching_block(unsigned int ** c1,unsigned int ** c2,unsigned int ** c3,unsigned int ** c4)
 {
 ////	static int frameCount = 0;
@@ -685,7 +687,7 @@ void stitchFusion(Uint32 **rawDataAddrFB, Uint32 **rawDataAddrLR, int fusionBloc
 		}
 	}
 }
-
+#endif
 void rotate270(unsigned char *src,unsigned char *dst,int width,int height)
 {
 	int copyBytes = 4;
@@ -798,7 +800,7 @@ void Rotate90(unsigned char *src,unsigned char *dst,int width,int height)
 	}
 }
 
-
+#if 1
 void ReadOriginalImage(void)
 {
 		FILE* fp_front = NULL;
@@ -864,7 +866,7 @@ void ReadOriginalImage(void)
 	printf("get each row  address success\n");	
 #endif
 }
-
+#endif
 
 void ReadLut(void)
 {
@@ -907,6 +909,7 @@ void ReadLut(void)
 		fclose(fp_fsvlut_file);
 		printf("Lut_Front.bin  success !\n");		
 	}
+	
  ///read back svm  of lut
 	memset(filename,0,100);
 	memcpy(filename,str1,strlen(str1));
@@ -940,7 +943,7 @@ void ReadLut(void)
 	memcpy(filename,str1,strlen(str1));
 	strcat(filename,"Lut_Right.bin");
 	if((fp_fsvlut_file= fopen(filename, "rb"))== NULL){
-		printf("Lut_Right.binwas not opened\n");	
+		printf("Lut_Right.bin was not opened\n");	
 		}
 
 	else	{
@@ -962,7 +965,7 @@ void ReadLut(void)
 		}
 
 	else	{
-		fread(Wt_Lut_Front,sizeof(UInt64_t),LUT_WT_FB,fp_fsvlut_file);    //SINGLEVIEW_SIZES 
+		fread(Wt_Lut_Front,sizeof(unsigned int),LUT_WT_FB*2,fp_fsvlut_file);    //SINGLEVIEW_SIZES 
 		fflush(fp_fsvlut_file);
 		fclose(fp_fsvlut_file);
 		printf("Wt_Front.bin   success !\n");		
@@ -990,7 +993,7 @@ void ReadLut(void)
 		}
 
 	else	{
-		fread(Wt_Lut_Left,sizeof(UInt64_t),LUT_WT_LR,fp_fsvlut_file);    //SINGLEVIEW_SIZES 
+		fread(Wt_Lut_Left,sizeof(unsigned int),LUT_WT_LR*2,fp_fsvlut_file);    //SINGLEVIEW_SIZES 
 		fflush(fp_fsvlut_file);
 		fclose(fp_fsvlut_file);
 		printf("Wt_Left.bin   success !\n");		
@@ -1357,7 +1360,7 @@ Int32_t bev_process(
 {
 	Int32_t ret = 0;
 	uchar* p_src, *p_src1, *p_src2;
-	memset(result_image, 0, 832 * 1024 * 2);
+	memset(result_image, 0, DST_WIDTH * DST_HEIGHT* 2);
 	
 	Int32_t yuv[3];
 	Int32_t result_widthstep, src_widthstep;
@@ -1381,7 +1384,6 @@ Int32_t bev_process(
 		fusion_pic2 = 2;
 		region_roi = cvRect1(0, 0, car_up_left.x, car_up_left.y);
 		analysis_fusion_region_lut_uyvy(result_image, p_src1, p_src2, fusion_pic1, fusion_pic2, &region_roi, result_widthstep, src_widthstep, bev_Table);
-
 #ifdef TIME_CONSUME		
 		time_t  time1_1 = clock();
 		double time0_1 = (double)(clock() - start_time);
@@ -1404,7 +1406,6 @@ Int32_t bev_process(
 #ifdef TIME_CONSUME		
 	time_t  time1_2 = clock();
 	double time0_1 = (double)(clock() - time1_1);
-	printf("front cost :%f\n", time0_1);
 
 ///	time1_1 = clock();
 #endif
@@ -1415,22 +1416,20 @@ Int32_t bev_process(
 	fusion_pic2 = 3;
 	region_roi = cvRect1(car_down_right.x + 1, 0, car_up_left.x, car_up_left.y);
 	analysis_fusion_region_lut_uyvy(result_image, p_src1, p_src2, fusion_pic1, fusion_pic2, &region_roi, result_widthstep, src_widthstep, bev_Table);
-
 #ifdef TIME_CONSUME		
 	time1_2 = clock();
 	time0_1 = (double)(clock() - time1_1);
-	printf("front right cost :%f\n", time0_1);
 
 	///time1_1 = clock();
 #endif
 	//left
 	region_roi = cvRect1(0, car_up_left.y, car_up_left.x, car_down_right.y - car_up_left.y + 1);
+//printf("y:%d ");
 	analysis_single_region_lut_uyvy(result_image, left_image_uyvy, &region_roi, 2, result_widthstep, src_widthstep, bev_Table);
 
 #ifdef TIME_CONSUME		
 	time1_2 = clock();
 	time0_1 = (double)(clock() - time1_1);
-	printf("left cost :%f\n", time0_1);
 
 	///time1_1 = clock();
 #endif
@@ -1442,7 +1441,6 @@ Int32_t bev_process(
 #ifdef TIME_CONSUME		
 	time1_2 = clock();
 	time0_1 = (double)(clock() - time1_1);
-	printf("right cost :%f\n", time0_1);
 	time1_1 = clock();
 #endif	//back left
 	p_src1 = left_image_uyvy;
@@ -1450,14 +1448,11 @@ Int32_t bev_process(
 	fusion_pic1 = 2;
 	fusion_pic2 = 1;
 	region_roi = cvRect1(0, car_down_right.y + 1, car_up_left.x, frontback_fov_height);
-
 	analysis_fusion_region_lut_uyvy(result_image, p_src1, p_src2, fusion_pic1, fusion_pic2, &region_roi, result_widthstep, src_widthstep, bev_Table);
-
 
 #ifdef TIME_CONSUME		
 	time1_2 = clock();
 	time0_1 = (double)(clock() - time1_1);
-	printf("back left cost :%f\n", time0_1);
 #endif
 	//back
 	region_roi = cvRect1(car_up_left.x, car_down_right.y + 1, car_down_right.x - car_up_left.x + 1, frontback_fov_height);
@@ -1474,11 +1469,9 @@ Int32_t bev_process(
 
 	analysis_fusion_region_lut_uyvy(result_image, p_src1, p_src2, fusion_pic1, fusion_pic2, &region_roi, result_widthstep, src_widthstep, bev_Table);
 
-
 #ifdef TIME_CONSUME		
 	time1_2 = clock();
 	time0_1 = (double)(clock() - time1_1);
-	printf("back right cost :%f\n", time0_1);
 #endif	
 
 	return ret;

@@ -32,11 +32,14 @@ CvPoint1;
 
  ///CarPosition car_up_left,car_down_right;
  CvPoint1  car_up_left, car_down_right;
+ 
+#define ORG_WIDTH            1280
+#define ORG_HEIGHT           720
+#define DST_HEIGHT             1664//1920-256
+#define DST_WIDTH            1056
+#define SIG_WIDTH             1280  //960
+#define SIG_HEIGHT            720// 800
 
-///#define  HEIGHT 1024
-///#define WIDTH   832
-#define SIG_WIDTH        1280  //960
-#define SIG_HEIGHT        720// 800
 
 #define SVM_WIDTH          832		
 #define	SVM_HEIGHT         1024	
@@ -75,24 +78,24 @@ CvPoint1;
 #define RIGHT_COL_START		(SVM_WIDTH-BACK_RIGHT_WIDTH)//832-352
 #define RIGHT_COL_END		(SVM_WIDTH)//832
 
-int blockLumaAvg[4];
-int blockLumaCnt[4];
-int blockLumaSum[4];
+//int blockLumaAvg[4];
+//int blockLumaCnt[4];
+//int blockLumaSum[4];
 
 #define BACK_COEF				(256)
 #define FORWARD					(0u)
 #define REVERSE					(1u)
 #define    SINGLEVIEWSIZE 			(960*800*4)
 #define    PIC_ORISIZE  				(1280*720*2) //(1280*1080*2)
-#define    CARLOGSIZE 				(128*320*2)
-#define    NOTESIZE  				(960*224*2)
-#define BIRDVIEW   				(832)
-#define SIGLEVIEW 				(960)
+///#define    CARLOGSIZE 				(128*320*2)
+///#define    NOTESIZE  				(960*224*2)
+//#define BIRDVIEW   				(832)
+///#define SIGLEVIEW 				(960)
 ///for single view 
-#define   SINGLEVIEW_SIZE  				(1280*720) //
+//#define   SINGLEVIEW_SIZE  				(1280*720) //
 
 //define single view output storage
-unsigned char  SINGLE_CAMERA[960*800*2];
+//unsigned char  SINGLE_CAMERA[960*800*2];
 
 //***************************Global variable*****wyf added 2017.11.29****************
 
@@ -128,29 +131,29 @@ UInt64_t Wt_Lut_Right[LUT_WT_LR*4];
 #endif
 
 
-#define LUT_WT_FB     (329472)
-#define LUT_WT_LR     360448
-#define LUT_POS_FB    329472
-#define LUT_POS_LR    360448
+#define LUT_WT_FB     655*1056// (329472)
+#define LUT_WT_LR     1664*464//360448
+#define LUT_POS_FB    655*1056//329472
+#define LUT_POS_LR    1664*464 //360448
 
 unsigned int Lut_Fsv_View[1280*720];
 unsigned int Lut_Front[LUT_POS_FB];
-unsigned int Lut_Back[LUT_POS_FB*4];
-unsigned int Lut_Left[LUT_POS_LR*4];
-unsigned int Lut_Right[LUT_POS_LR*4];
+unsigned int Lut_Back[LUT_POS_FB];
+unsigned int Lut_Left[LUT_POS_LR];
+unsigned int Lut_Right[LUT_POS_LR];
 
-UInt64_t Wt_Lut_Front[LUT_WT_FB];
+unsigned int Wt_Lut_Front[LUT_WT_FB*2];
 UInt64_t Wt_Lut_Back[LUT_WT_FB];
-UInt64_t Wt_Lut_Left[LUT_WT_LR];
+unsigned int Wt_Lut_Left[LUT_WT_LR*2];
 UInt64_t Wt_Lut_Right[LUT_WT_LR];
 
-unsigned char  mem_carlog[128*320*2];
-unsigned char  mem_info[1120*200*2];	
+//unsigned char  mem_carlog[128*320*2];
+//unsigned char  mem_info[1120*200*2];	
 
 
 	
-	unsigned char  mem_rotat_left[1080*1280*2];
-	unsigned char  mem_rotat_right[1080*1280*2];	
+//	unsigned char  mem_rotat_left[1080*1280*2];
+//	unsigned char  mem_rotat_right[1080*1280*2];	
   	FILE * fp_front;
 	FILE * fp_back;
        FILE * fp_left;		
@@ -163,9 +166,9 @@ unsigned char  mem_info[1120*200*2];
 	FILE * fp_Sviewlut_right;
 	FILE * filelut;
 	
-	#define PIC4            0
-	#define CAM4           1
-	#define UI_PIC4      1
+//	#define PIC4            0
+///	#define CAM4           1
+//	#define UI_PIC4      1
 
 
 
@@ -184,7 +187,7 @@ unsigned int *CAPTURE_MEM_LEFT_cpy_video[IMG_HEIGHT];
 unsigned int *CAPTURE_MEM_RIGHT_cpy_video[IMG_HEIGHT];
 #endif
 
-
+#if 0
 unsigned short Lut_front[SVM_WIDTH  * TOP_LEFT_HEIGHT * 4]; 
 unsigned short Lut_back[SVM_WIDTH * BACK_RIGHT_HEIGHT * 4];
 unsigned short Lut_left[SVM_HEIGHT * TOP_LEFT_WIDTH * 4];
@@ -194,10 +197,10 @@ unsigned short Lut_front_u1[SIG_WIDTH  * SIG_HEIGHT * 4];
 unsigned short Lut_back_u1[SIG_WIDTH  * SIG_HEIGHT * 4];
 unsigned short Lut_left_u1[SIG_WIDTH  * SIG_HEIGHT * 4];
 unsigned short Lut_right_u1[SIG_WIDTH  * SIG_HEIGHT * 4];
-
-unsigned char  SVM_BUFFER[SVM_WIDTH * SVM_HEIGHT * 2]; 
-unsigned char  SVM_BUFFER_dst[SVM_WIDTH * SVM_HEIGHT * 2]; 
-unsigned char  SVM_BUFFER_dst0[SVM_WIDTH * SVM_HEIGHT * 2]; 
+#endif
+unsigned char  SVM_BUFFER[DST_WIDTH * DST_HEIGHT * 2]; 
+unsigned char  SVM_BUFFER_dst[DST_WIDTH * DST_HEIGHT * 2]; 
+///unsigned char  SVM_BUFFER_dst0[DST_WIDTH * DST_HEIGHT * 2]; 
 
 unsigned char  SINGLE_BUFFER[SIG_WIDTH * SIG_HEIGHT * 2];
 unsigned char  canrxbuf[8];
@@ -210,7 +213,7 @@ extern "C" {
 #endif
  int saveframe(char *str, void *p, int length, int is_oneframe);
 
-void stitching_block(unsigned int ** c1,unsigned int ** c2,unsigned int ** c3,unsigned int ** c4);
+///void stitching_block(unsigned int ** c1,unsigned int ** c2,unsigned int ** c3,unsigned int ** c4);
 #if 0
 int  analysis_panorama_lut_uyvy(unsigned int* p_lut_front_test,
 	unsigned int* p_lut_back_test,
