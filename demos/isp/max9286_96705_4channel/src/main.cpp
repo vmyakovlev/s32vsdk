@@ -263,14 +263,14 @@ void *VideoCaptureTask(void *ptr1)  //zhy
   //*** allocate DDR buffers ***
   lpFdma->DdrBuffersAlloc(DDR_BUFFER_CNT);
 
-  	car_up_left.x = 448;//464;//352;
-	car_up_left.y = 672;//655;//396;
-	car_down_right.x = 631;// 591;//479;
-	car_down_right.y = 991;//1008;//627;
+  	car_up_left.x = 460;//448;//464;//352;
+	car_up_left.y = 672;//672;//655;//396;
+	car_down_right.x = 619;//631;// 591;//479;
+	car_down_right.y = 991;//991;//1008;//627;
 	front_fov_height = 672;//655;//396;
 	back_fov_height = 672;//655;//396;
-	left_fov_width = 448;//464;//352;
-	right_fov_width =448;//464;//352;		
+	left_fov_width = 460;//448;//464;//352;
+	right_fov_width =460;//448;//464;//352;		
 	p_lut_front_test=Lut_Front;
 	p_wt_front_test = Wt_Lut_Front;
 	p_lut_back_test=Lut_Back;

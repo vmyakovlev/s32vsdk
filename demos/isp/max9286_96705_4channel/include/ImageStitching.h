@@ -132,9 +132,9 @@ UInt64_t Wt_Lut_Right[LUT_WT_LR*4];
 
 
 #define LUT_WT_FB    672*1080// 655*1056// (329472)
-#define LUT_WT_LR    1664*448// 1664*464//360448
+#define LUT_WT_LR    1664*460//1664*448// 1664*464//360448
 #define LUT_POS_FB   672*1080//655*1056//329472
-#define LUT_POS_LR   1664*448// 1664*464 //360448
+#define LUT_POS_LR   1664*460//1664*448// 1664*464 //360448
 
 unsigned int Lut_Fsv_View[1280*720];
 unsigned int Lut_Front[LUT_POS_FB];
