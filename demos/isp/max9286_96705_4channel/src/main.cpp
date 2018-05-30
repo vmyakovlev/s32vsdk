@@ -334,8 +334,8 @@ void *VideoCaptureTask(void *ptr1)  //zhy
        lLoop = 0;
     }
 	lLoop++; 	
-	 ///console_cmd = 2;
-	switch(console_cmd)//
+	 //console_cmd = 2;
+	switch(2)//
 	{	
 		 case 0 :	//snap of original view
 			for(int i =0;i<720;i++)
