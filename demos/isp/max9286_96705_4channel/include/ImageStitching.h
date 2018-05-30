@@ -36,7 +36,7 @@ CvPoint1;
 #define ORG_WIDTH            1280
 #define ORG_HEIGHT           720
 #define DST_HEIGHT             1664//1920-256
-#define DST_WIDTH            1056
+#define DST_WIDTH            1080 //1056
 #define SIG_WIDTH             1280  //960
 #define SIG_HEIGHT            720// 800
 
@@ -131,10 +131,10 @@ UInt64_t Wt_Lut_Right[LUT_WT_LR*4];
 #endif
 
 
-#define LUT_WT_FB     655*1056// (329472)
-#define LUT_WT_LR     1664*464//360448
-#define LUT_POS_FB    655*1056//329472
-#define LUT_POS_LR    1664*464 //360448
+#define LUT_WT_FB    672*1080// 655*1056// (329472)
+#define LUT_WT_LR    1664*448// 1664*464//360448
+#define LUT_POS_FB   672*1080//655*1056//329472
+#define LUT_POS_LR   1664*448// 1664*464 //360448
 
 unsigned int Lut_Fsv_View[1280*720];
 unsigned int Lut_Front[LUT_POS_FB];

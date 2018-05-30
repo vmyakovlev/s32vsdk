@@ -263,14 +263,14 @@ void *VideoCaptureTask(void *ptr1)  //zhy
   //*** allocate DDR buffers ***
   lpFdma->DdrBuffersAlloc(DDR_BUFFER_CNT);
 
-  	car_up_left.x = 464;//352;
-	car_up_left.y = 655;//396;
-	car_down_right.x = 591;//479;
-	car_down_right.y = 1008;//627;
-	front_fov_height = 655;//396;
-	back_fov_height = 655;//396;
-	left_fov_width = 464;//352;
-	right_fov_width =464;//352;		
+  	car_up_left.x = 448;//464;//352;
+	car_up_left.y = 672;//655;//396;
+	car_down_right.x = 631;// 591;//479;
+	car_down_right.y = 991;//1008;//627;
+	front_fov_height = 672;//655;//396;
+	back_fov_height = 672;//655;//396;
+	left_fov_width = 448;//464;//352;
+	right_fov_width =448;//464;//352;		
 	p_lut_front_test=Lut_Front;
 	p_wt_front_test = Wt_Lut_Front;
 	p_lut_back_test=Lut_Back;
@@ -335,7 +335,7 @@ void *VideoCaptureTask(void *ptr1)  //zhy
     }
 	lLoop++; 	
 	 //console_cmd = 2;
-	switch(2)//
+	switch(console_cmd)//
 	{	
 		 case 0 :	//snap of original view
 			for(int i =0;i<720;i++)
@@ -382,13 +382,13 @@ void *VideoCaptureTask(void *ptr1)  //zhy
 			#if 0
 			      for(i=0;i<1024;i++) //i = (1080-1056)/2;i<12+1056=1068
 				{//128 = (1920-DST_HEIGHT)/2
-					memcpy((char *) frame_map_out.data+i*1920*2+128*2,(char*)SVM_BUFFER+(i-12)*1024*2, 1024*2);
+					memcpy((char *) frame_map_out.data+i*1920*2+128*2,(char*)SVM_BUFFER+(i)*DST_WIDTH*2, DST_WIDTH*2);
 				}			 
 			#else
 				rotate270(SVM_BUFFER,SVM_BUFFER_dst,DST_WIDTH,DST_HEIGHT);
-			       for(i=12;i<1068;i++) //i = (1080-1056)/2;i<12+1056=1068
+			       for(i=0;i<1080;i++) //i = (1080-1056)/2;i<12+1056=1068
 				{//128 = (1920-DST_HEIGHT)/2
-					memcpy((char *) frame_map_out.data+i*1920*2+256*2,(char*)SVM_BUFFER_dst+(i-12)*DST_HEIGHT*2, DST_HEIGHT*2);
+					memcpy((char *) frame_map_out.data+i*1920*2+256*2,(char*)SVM_BUFFER_dst+(i)*DST_HEIGHT*2, DST_HEIGHT*2);
 				}			 
 				//for(i=124;i<956;i++) //i =124 = (1080-832)/2;i<124+832=956;
 				//{//448 = (1920-1024)/2
@@ -427,17 +427,17 @@ void *VideoCaptureTask(void *ptr1)  //zhy
 			bev_Table);
 			  #if 0
 
-			for(i=0;i<1024;i++) //i = (1080-1056)/2;i<12+1056=1068
+			for(i=0;i<1080;i++) //i = (1080-1056)/2;i<12+1056=1068
 			{//128 = (1920-DST_HEIGHT)/2
-				memcpy((char *) frame_map_out.data+i*1920*2,(char*)SVM_BUFFER+(i)*1056*2, 1056*2);
+				memcpy((char *) frame_map_out.data+i*1920*2,(char*)SVM_BUFFER+(i)*DST_WIDTH*2, DST_WIDTH*2);
 			}			 
 			///  printf("rrrr init done.\n");
 			  #else  
 
 			rotate270(SVM_BUFFER,SVM_BUFFER_dst,DST_WIDTH,DST_HEIGHT);
-			for(i=12;i<1068;i++) //i = (1080-1056)/2;i<12+1056=1068
+			for(i=0;i<1080;i++) //i = (1080-1056)/2;i<12+1056=1068
 			{//128 = (1920-DST_HEIGHT)/2
-				memcpy((char *) frame_map_out.data+i*1920*2+256*2,(char*)SVM_BUFFER_dst+(i-12)*DST_HEIGHT*2, DST_HEIGHT*2);
+				memcpy((char *) frame_map_out.data+i*1920*2+256*2,(char*)SVM_BUFFER_dst+(i)*DST_HEIGHT*2, DST_HEIGHT*2);
 			}			 
 
 			 //for(i=124;i<956;i++) 
