@@ -97,8 +97,10 @@ void FrameOutputV234Fb::Init( uint32_t aWidth,
     mpFrameBuffer = NULL;
   } // reset before reopening  
   
-  mFbFd = open("/dev/fb0", O_RDWR);
-  mDcuFd = open("/dev/dcu", O_RDWR);
+  mFbFd = open("/dev/fb6", O_RDWR);
+  //mDcuFd = open("/dev/dcu0", O_RDWR);
+
+  //printf("*****************************mDcuFd7=%d*********\n",mDcuFd);
  
   if (mFbFd < 0)
   {

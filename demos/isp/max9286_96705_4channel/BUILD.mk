@@ -54,6 +54,8 @@ ARM_APP_SRCS += main.cpp \
 		KeyTask.c\
 		TerminalTask.c\
 		demotest.c\
+		uart_to_mcu.c\
+		fb_helper.cpp\
 
 ARM_INCS +=                                                  \
     -I$(SDK_ROOT)/platform/s32_v234                          \
@@ -90,8 +92,8 @@ ARM_APP_LIBS +=                                                           \
     $(SDK_ROOT)/libs/utils/common/$(ODIR)/libcommon.a                     \
     
 ARM_LDOPTS +=                                                                \
-    -lopencv_core  
-    
+    -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs
+    #-lopencv_core -lopencv_highgui -lopencv_imgproc  -lopencv_features2d -lopencv_flann -lopencv_imgcodecs -lopencv_ml -lopencv_objdetect -lopencv_photo -lopencv_shape -lopencv_stitching
 ifneq (,$(findstring gnu-sa,$(ODIR))) 
   ARM_APP_LIBS +=                                                         \
     $(SDK_ROOT)/libs/io/i2c/$(ODIR)/libi2c.a                              \

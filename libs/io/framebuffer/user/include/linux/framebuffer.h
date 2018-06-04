@@ -48,7 +48,7 @@ inline void neon_copy_bgr_to_grb(unsigned char* src, unsigned char* dst, int siz
 		   );
 	}   
 #else
-  std::cerr << "neon_copy_bgr_to_grb(" << src << ", " << dst << ", " << size << ");  NOT IMPLEMENTED for ARMv8" << std::endl;
+  //std::cerr << "neon_copy_bgr_to_grb(" << src << ", " << dst << ", " << size << ");  NOT IMPLEMENTED for ARMv8" << std::endl;
 #endif
 }
 
@@ -71,7 +71,7 @@ inline void neon_memcpy(unsigned char* src, unsigned char* dst, int size)
 		   );
     }
 #else
-  std::cerr << "neon_copy_bgr_to_grb(" << src << ", " << dst << ", " << size << ");  NOT IMPLEMENTED for ARMv8" << std::endl;
+  //std::cerr << "neon_copy_bgr_to_grb(" << src << ", " << dst << ", " << size << ");  NOT IMPLEMENTED for ARMv8" << std::endl;
 #endif
 }
 

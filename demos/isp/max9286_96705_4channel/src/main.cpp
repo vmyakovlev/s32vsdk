@@ -40,7 +40,8 @@
 #include <stdio.h> 
 #include <stdlib.h>
 #include "ImageStitching.h"
-
+#include "uart_to_mcu.h"
+#include "fb_helper.h"
 //***************************************************************************
 
 // Possible to set input resolution (must be supported by the DCU)
@@ -154,8 +155,8 @@ int main(int, char **)  //zhy
 {	
 	int ret = 0;
 	int a =100;
-	pthread_t id1,id2,id3,id4,id5,id6;
-	ret = pthread_create(&id5, NULL, VideoCaptureTask,NULL);
+	pthread_t id1,id2,id3,id4,id5,id6,id7,id8,id9,id10;
+	ret = pthread_create(&id1, NULL, VideoCaptureTask,NULL);
 	if(ret)
 	{
 		printf("Create VideoCaptureTask error!\n");
@@ -182,26 +183,55 @@ int main(int, char **)  //zhy
 		return 1;
 	}
 #endif
-	ret = pthread_create(&id1, NULL, KeyTask,NULL);
+	ret = pthread_create(&id5, NULL, KeyTask,NULL);
 	if(ret)
 	{
 		printf("Create keytask error!\n");
 		return 1;
 	}
 
-	ret = pthread_create(&id6, NULL, TerminalTask,NULL);
+	//ret = pthread_create(&id6, NULL, TerminalTask,NULL);
+	//if(ret)
+	//{
+	//	printf("Create TerminalTask error!\n");
+	//	return 1;
+	//}
+	
+	ret = pthread_create(&id9, NULL, Gui_meg_thread,NULL);
+	if(ret)	
+	{		
+		printf("Create Gui_meg_thread error!\n");		
+		return 1;	
+	}
+	ret = pthread_create(&id10, NULL, Gui_draw_thread,NULL);
+	if(ret)	
+	{		
+		printf("Create Gui_draw_thread error!\n");		
+		return 1;	
+	}
+	ret = pthread_create(&id7, NULL, Uart_meg_thread,NULL);
 	if(ret)
-	{
-		printf("Create TerminalTask error!\n");
+	{		
+		printf("Create Uart_meg_thread error!\n");
 		return 1;
 	}
-	
+	ret = pthread_create(&id8, NULL, Uart_TX_thread,NULL);
+	if(ret)	
+	{		
+		printf("Create Uart_TX_thread error!\n");		
+		return 1;	
+	}
 	pthread_join(id1,NULL);
 	pthread_join(id2,NULL);
 	///pthread_join(id3,NULL);
 	///pthread_join(id4,NULL);
 	pthread_join(id5,NULL);
 	pthread_join(id6,NULL);
+	pthread_join(id7,NULL);
+	pthread_join(id8,NULL);
+	pthread_join(id9,NULL);
+	pthread_join(id10,NULL);
+	
 	return 0;
 
 }
@@ -334,7 +364,7 @@ void *VideoCaptureTask(void *ptr1)  //zhy
        lLoop = 0;
     }
 	lLoop++; 	
-	 //console_cmd = 2;
+	 console_cmd = 2;
 	switch(console_cmd)//
 	{	
 		 case 0 :	//snap of original view

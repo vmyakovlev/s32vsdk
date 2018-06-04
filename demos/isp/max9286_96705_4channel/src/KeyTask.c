@@ -5,9 +5,11 @@
 #include <unistd.h>
 #include"ImageStitching.h"
 //void keyboard_test()
+extern int parking_mode_select;
+extern int parking_mode_ok;
+extern int parking_mode_ok_flag;
 void *KeyTask(void *ptr1)
 {
-  #if 0
     int count_sw1 = 0;
     int count_sw2 = 0;
     int count_sw3 = 0;
@@ -37,35 +39,42 @@ void *KeyTask(void *ptr1)
                 printf("uart read error %d\n", readn);
                 continue;
             }
-            struct input_event *my_event=(struct input_event*)buf;
-            if(my_event->type == EV_KEY)
+            struct input_event *key_event=(struct input_event*)buf;
+            if(key_event->type == EV_KEY)      //ok
             {
-                switch( my_event->code )
+                if((key_event->code == 59) && !key_event->value)
                 {
-                    case 59:
 				cha16++;
-				console_cmd = cha16;
+				//console_cmd = cha16;
 				if(cha16>5)
 				cha16 = 0;	
-				printf("key16--mode\n",cha16);	
-                        	printf("This is a button:%d %d\n", my_event->code,my_event->value);
-                           break;
-			  case 60:
+				parking_mode_ok_flag = 1;
+				printf("key16--mode: parking_mode_ok_flag=%d\n",parking_mode_ok_flag);	
+                        	//printf("This is a button:%d %d\n", key_event->code,key_event->value);
+		}
+		else if((key_event->code == 60) && !key_event->value) //mode select
+		{
 				channel_select++;
 				if(channel_select>3)
 				channel_select = 0;	
-				printf("key17--camera %d\n",channel_select);
-                       	break;
-                    case 61:
-				printf("key18--no use %d\n");	
-                        break;
-                    default:
-                        break;
+			
+				if(parking_mode_ok_flag == 0)
+					parking_mode_select++;
+				if(parking_mode_select>4)
+					parking_mode_select = 1;
+				
+				printf("key17--camera %d  parking_mode_select=%d\n",channel_select,parking_mode_select);
+		}
+		else if((key_event->code == 61) && !key_event->value) //clean
+		{
+				parking_mode_select = 5;
+				parking_mode_ok_flag = 0;
+				printf("key18--no use %d\n");
 
-                }
+		}
+
             }
         }
-    	}
-	#endif
+    }
 }
 
