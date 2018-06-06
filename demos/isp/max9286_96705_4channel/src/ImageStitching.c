@@ -14,10 +14,7 @@ int gains[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 
 
-Uint32 CAR_LOGO_TOP;
-Uint32 CAR_LOGO_HEIGHT_NEW;
-Uint32 CAR_LOGO_LEFT;
-Uint32 CAR_LOGO_WIDTH_NEW;
+
 
 unsigned int sum_q1 = 256;
 unsigned int sum_q2 = BACK_COEF/*256*/;
@@ -51,19 +48,10 @@ unsigned char MYLUT[256]={1, 2, 4, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 17, 18, 2
 						224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 
 						238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 
 						252, 253, 254, 255};
-
-
-
 int   size_lut_front = SVM_WIDTH*TOP_LEFT_HEIGHT * 4;
 int   size_lut_back = SVM_WIDTH*BACK_RIGHT_HEIGHT * 4;
 int   size_lut_left = SVM_HEIGHT*TOP_LEFT_WIDTH * 4;
 int   size_lut_right = SVM_HEIGHT*BACK_RIGHT_WIDTH * 4;
-
-
-
-
-
-
 void Resize_Interpolation_SingleView(unsigned short *resize_lut,unsigned int **remap_lut, unsigned char * dout,int Nwidth,int Nheight)
 {
 	unsigned short i_int_1, j_int_1,i_int_2, j_int_2;
@@ -301,7 +289,7 @@ void ReadOriginalImage(void)
 		printf("read 4 image begin\n");
 
 
-		if((fp_front = fopen("/home/henry/test/1280720/front.yuv", "rb")) == NULL)
+		if((fp_front = fopen("/data/front.yuv", "rb")) == NULL)
 		{
 			printf("\nFail to fopen front.yuv\n");
 		}
@@ -312,7 +300,7 @@ void ReadOriginalImage(void)
 			fclose(fp_front);
 		}
 	
-		if ((fp_back = fopen("/home/henry/test/1280720/back.yuv", "rb")) == NULL)
+		if ((fp_back = fopen("/data/back.yuv", "rb")) == NULL)
 		{
 			printf("Fail to fopen back.yuv\n");
 		}
@@ -323,7 +311,7 @@ void ReadOriginalImage(void)
 			fclose(fp_back);
 		}
 			
-		if ((fp_left = fopen("/home/henry/test/1280720/left.yuv", "rb")) == NULL)
+		if ((fp_left = fopen("/data/left.yuv", "rb")) == NULL)
 		{
 			printf("Fail to fopen left.yuv\n");
 		}
@@ -334,8 +322,8 @@ void ReadOriginalImage(void)
 			fclose(fp_left);
 		}
 
-			
-	if ((fp_right = fopen("/home/henry/test/1280720/right.yuv", "rb")) == NULL)
+			//fopen("/home/henry/test/1280720/right.yuv", "rb")) 
+	if ((fp_right = fopen("/data/right.yuv", "rb")) == NULL)
 		{
 			printf("Fail to fopen right.yuv\n");
 		}
@@ -354,16 +342,18 @@ void ReadLut(void)
 ///	int i;
 ///	FILE* filelut;
 	FILE * fp_fsvlut_file;
-	char filename[200]= "";
-	char *str1;
-	char *filename1;
-	char * filename2;
-	memset(filename,0,100);
-	str1 = "/home/henry/test/wxlut/";
-	memcpy(filename,str1,23);
-	strcat(filename,"Lut_Front_Single_View.bin");
+///	char filename[200]= "";
+///	char *str1;
+///	char *filename1;
+///	char * filename2;
+///	memset(filename,0,100);
+	//str1 = "/home/henry/test/wxlut/";
+//	str1 = "/data/";
+	
+//	memcpy(filename,str1,23);
+//	strcat(filename,"/data/Lut_Front_Single_View.bin");
  ///read single view resize of lut
-	if((fp_fsvlut_file= fopen(filename, "rb"))== NULL){
+	if((fp_fsvlut_file= fopen("/data/Lut_Front_Single_View.bin", "rb"))== NULL){
 		printf("Lut_Front_Single_View.bin was not opened\n");		
 	}
 
@@ -375,12 +365,12 @@ void ReadLut(void)
 	}
 
  ///read front svm  of lut
-	memset(filename,0,100);
-	memcpy(filename,str1,strlen(str1));
-	strcat(filename,"Lut_Front.bin");
-	filename1 = "/home/henry/test/wxlut/Lut_Front.bin";
+	///memset(filename,0,100);
+	///memcpy(filename,str1,strlen(str1));
+	///strcat(filename,"Lut_Front.bin");
+	///filename1 = "/data/Lut_Front.bin";
 
-	if((fp_fsvlut_file= fopen(filename1, "rb"))== NULL){
+	if((fp_fsvlut_file= fopen("/data/Lut_Front.bin", "rb"))== NULL){
 		printf("Lut_Front.bin was not opened\n");	
 		}
 
@@ -392,10 +382,10 @@ void ReadLut(void)
 	}
 	
  ///read back svm  of lut
-	memset(filename,0,100);
-	memcpy(filename,str1,strlen(str1));
-	strcat(filename,"Lut_Back.bin");
-	if((fp_fsvlut_file= fopen(filename, "rb"))== NULL){
+	///memset(filename,0,100);
+	///memcpy(filename,str1,strlen(str1));
+	///strcat(filename,"Lut_Back.bin");
+	if((fp_fsvlut_file= fopen("/data/Lut_Back.bin", "rb"))== NULL){
 		printf("Lut_Back.bin was not opened\n");
 		}
 
@@ -406,10 +396,10 @@ void ReadLut(void)
 		printf("Lut_Back.bin  success !\n");		
 	}
  ///read left svm  of lut
-	memset(filename,0,100);
-	memcpy(filename,str1,strlen(str1));
-	strcat(filename,"Lut_Left.bin");
-	if((fp_fsvlut_file= fopen(filename, "rb"))== NULL){
+///	memset(filename,0,100);
+///	memcpy(filename,str1,strlen(str1));
+///	strcat(filename,"Lut_Left.bin");
+	if((fp_fsvlut_file= fopen("/data/Lut_Left.bin", "rb"))== NULL){
 		printf("Lut_Left.bin was not opened\n");	
 		}
 
@@ -420,10 +410,10 @@ void ReadLut(void)
 		printf("Lut_Left.bin success !\n");		
 	}
  ///read right svm  of lut
-	memset(filename,0,100);
-	memcpy(filename,str1,strlen(str1));
-	strcat(filename,"Lut_Right.bin");
-	if((fp_fsvlut_file= fopen(filename, "rb"))== NULL){
+///	memset(filename,0,100);
+///	memcpy(filename,str1,strlen(str1));
+///	strcat(filename,"Lut_Right.bin");
+	if((fp_fsvlut_file= fopen("/data/Lut_Right.bin", "rb"))== NULL){
 		printf("Lut_Right.bin was not opened\n");	
 		}
 
@@ -437,12 +427,13 @@ void ReadLut(void)
 
 	
  ///read wt front svm  of lut
-	memset(filename,0,100);
-	memcpy(filename,str1,strlen(str1));
-	strcat(filename,"Wt_Front.bin");
-	filename2 = "/home/henry/test/wxlut/Wt_Front.bin";
-	if((fp_fsvlut_file= fopen(filename2, "rb"))== NULL){
-		printf("Wt_Front.binwas not opened\n");	
+///	memset(filename,0,100);
+///	memcpy(filename,str1,strlen(str1));
+///	strcat(filename,"Wt_Front.bin");
+//	//filename2 = "/home/henry/test/wxlut/Wt_Front.bin";
+//	filename2 = "/home/henry/test/wxlut/Wt_Front.bin";
+	if((fp_fsvlut_file= fopen("/data/Wt_Front.bin", "rb"))== NULL){
+		printf("Wt_Front.bin was not opened\n");	
 		}
 
 	else	{
@@ -452,11 +443,11 @@ void ReadLut(void)
 		printf("Wt_Front.bin   success !\n");		
 	}
  ///read wt back svm  of lut
-	memset(filename,0,100);
-	memcpy(filename,str1,strlen(str1));
-	strcat(filename,"Wt_Back.bin");
-	if((fp_fsvlut_file= fopen(filename, "rb"))== NULL){
-		printf("Wt_Back.binwas not opened\n");	
+	///memset(filename,0,100);
+	///memcpy(filename,str1,strlen(str1));
+	///strcat(filename,"Wt_Back.bin");
+	if((fp_fsvlut_file= fopen("/data/Wt_Back.bin", "rb"))== NULL){
+		printf("Wt_Back.bin was not opened\n");	
 		}
 
 	else	{
@@ -466,11 +457,11 @@ void ReadLut(void)
 		printf("Wt_Back.bin   success !\n");		
 	}
  ///read wt left svm  of lut
-	memset(filename,0,100);
-	memcpy(filename,str1,strlen(str1));
-	strcat(filename,"Wt_Left.bin");
-	if((fp_fsvlut_file= fopen(filename, "rb"))== NULL){
-		printf("Wt_Left.binwas not opened\n");	
+///	memset(filename,0,100);
+///	memcpy(filename,str1,strlen(str1));
+///	strcat(filename,"Wt_Left.bin");
+	if((fp_fsvlut_file= fopen("/data/Wt_Left.bin", "rb"))== NULL){
+		printf("Wt_Left.bin was not opened\n");	
 		}
 
 	else	{
@@ -480,11 +471,11 @@ void ReadLut(void)
 		printf("Wt_Left.bin   success !\n");		
 	}
  ///read wt right svm  of lut
-	memset(filename,0,100);
-	memcpy(filename,str1,strlen(str1));
-	strcat(filename,"Wt_Right.bin");
-	if((fp_fsvlut_file= fopen(filename, "rb"))== NULL){
-		printf("Wt_Right.binwas not opened\n");	
+///	memset(filename,0,100);
+///	memcpy(filename,str1,strlen(str1));
+///	strcat(filename,"Wt_Right.bin");
+	if((fp_fsvlut_file= fopen("/data/Wt_Right.bin", "rb"))== NULL){
+		printf("Wt_Right.bin was not opened\n");	
 		}
 
 	else	{
