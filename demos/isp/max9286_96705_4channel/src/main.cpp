@@ -42,6 +42,8 @@
 #include "ImageStitching.h"
 #include "uart_to_mcu.h"
 #include "fb_helper.h"
+#include "network.h"
+
 //***************************************************************************
 
 // Possible to set input resolution (must be supported by the DCU)
@@ -148,6 +150,7 @@ int main(int, char **)  //zhy
 	int ret = 0;
 	int a =100;
 	pthread_t id1,id2,id3,id4,id5,id6,id7,id8,id9,id10;
+	pthread_t  net_staus_thread,tr_thread,rv_thread;
 	ret = pthread_create(&id1, NULL, VideoCaptureTask,NULL);
 	if(ret)
 	{
@@ -213,6 +216,27 @@ int main(int, char **)  //zhy
 		printf("Create Uart_TX_thread error!\n");		
 		return 1;	
 	}
+
+	//ret = pthread_create(&net_staus_thread,NULL,net_status_check,NULL); 
+	//if(ret)	
+	//{		
+	//	printf("Create net_status_check error!\n");		
+	//	return 1;	
+	//}
+	ret = pthread_create(&tr_thread, NULL, net_tr_thread, NULL);	
+	if(ret)	
+	{		
+		printf("Create net_tr_thread error!\n");		
+		return 1;	
+	}
+	//ret = pthread_create(&rv_thread, NULL, net_rv_thread,NULL); 
+	//if(ret)	
+	//{		
+	//	printf("Create net_rv_thread error!\n");		
+	//	return 1;	
+	//}
+
+	
 	pthread_join(id1,NULL);
 	pthread_join(id2,NULL);
 	///pthread_join(id3,NULL);
@@ -411,6 +435,11 @@ void *VideoCaptureTask(void *ptr1)  //zhy
 				DST_WIDTH,
 				SIG_WIDTH,//SINGLE_VIEW_WIDTH,
 				bev_Table);	
+
+				buf_camfront = (unsigned char *)frame_map[0].data;
+				buf_camback  = (unsigned char *)frame_map[1].data;
+				buf_camleft  = (unsigned char *)frame_map[2].data;
+				buf_camright = mem_tmp_T3;
 			#if 0
 			      for(i=0;i<1024;i++) //i = (1080-1056)/2;i<12+1056=1068
 				{//128 = (1920-DST_HEIGHT)/2

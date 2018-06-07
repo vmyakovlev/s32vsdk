@@ -146,28 +146,21 @@ void *Uart_meg_thread(void *t)
 	
 		while(1)
 		{		
-			//FD_ZERO(&fds);
-			//FD_SET(fd_uart,&fds);
-			//if(select(fd_uart+1,&fds,NULL,NULL,&tv)<0)
-			//	printf("select error\n");
-			//else
-			//{
-				rd_count = read(fd_uart, rxBuffer, sizeof(rxBuffer));
-				printf("rd_count = %d\n", rd_count);
+			rd_count = read(fd_uart, rxBuffer, sizeof(rxBuffer));
+			printf("rd_count = %d\n", rd_count);
 
-	          	if (rd_count > 0)
+          	if (rd_count > 0)
+			{
+				for (i=0; i<rd_count; i++)
 				{
-					for (i=0; i<rd_count; i++)
-					{
-						printf("%x ", rxBuffer[i]);
-					}
-					printf("\n");
-
+					printf("%x ", rxBuffer[i]);
 				}
-				frame_get_data(rxBuffer, rd_count);
-				//write(fd_uart, txBuffer, 10);
-				//usleep(100000);
-			//}
+				printf("\n");
+
+			}
+			frame_get_data(rxBuffer, rd_count);
+				
+			
 		}
     }   
  

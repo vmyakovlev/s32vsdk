@@ -56,6 +56,7 @@ ARM_APP_SRCS += main.cpp \
 		demotest.c\
 		uart_to_mcu.c\
 		fb_helper.cpp\
+		network.c\
 
 ARM_INCS +=                                                  \
     -I$(SDK_ROOT)/platform/s32_v234                          \

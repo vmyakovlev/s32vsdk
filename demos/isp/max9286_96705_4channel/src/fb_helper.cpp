@@ -169,7 +169,7 @@ void *Gui_meg_thread(void *t)
 
 	//int fb_resx = 400;
 	//int fb_resy = 400;
-	printf("gui_log201805311500\n");
+	printf("gui_log201806041618\n");
 	readbmp();
 	/* Perform layer transitions */
 	dcu_fd = open("/dev/dcu0", O_RDONLY);
@@ -582,10 +582,10 @@ void *Gui_draw_thread(void *t)
 				default:				
 					break;			
 			}
-			if(parking_mode_ok_flag==1)
-				parking_mode_ok = parking_mode_select;
-			else
-				parking_mode_ok = 5;
+			//if(parking_mode_ok_flag==1)
+			//	parking_mode_ok = parking_mode_select;
+			//else
+			//	parking_mode_ok = 5;
 		}
 		else 
 		{	
@@ -635,6 +635,10 @@ void *Gui_draw_thread(void *t)
 				memcpy(view_mem_temp+i*1920*4,logo_gear_temp+i*240*4,240*4);
 			}
 		}
+		if(parking_mode_ok_flag == 1)
+			parking_mode_ok = parking_mode_select;
+		else
+			parking_mode_ok = 5;
 		/////////////////////////////////////////////////////////////////////////////////////////////////////
 		switch(car_paring_status)
 		{
@@ -1109,7 +1113,7 @@ void readbmp()
 {
 	FILE* fp;
 	int i,j;
-	if((fp = fopen("/home/wyf/radar_alarm_view32.bmp", "rb")) == NULL)
+	if((fp = fopen("/data/radar_alarm_view32.bmp", "rb")) == NULL)
 	{
 		printf("Fail to fopen radar_alarm_view32.bmp \n");
 	}	
@@ -1312,7 +1316,7 @@ void readbmp()
 		}	
 	}
 	/*
-	if((fp = fopen("/home/wyf/logo_mode_right32.bmp", "rb")) == NULL)
+	if((fp = fopen("/data/logo_mode_right32.bmp", "rb")) == NULL)
 	{
 		printf("Fail to fopen logo_mode_right32.bmp \n");
 	}	
@@ -1332,7 +1336,7 @@ void readbmp()
 		}
 	}
 
-	if((fp = fopen("/home/wyf/logo_mode_left32.bmp", "rb")) == NULL)
+	if((fp = fopen("/data/logo_mode_left32.bmp", "rb")) == NULL)
 	{
 		printf("Fail to fopen logo_mode_left32.bmp \n");
 	}	
@@ -1352,7 +1356,7 @@ void readbmp()
 		}
 	}
 	*/
-	if((fp = fopen("/home/wyf/logo_park_status_scan32.bmp", "rb")) == NULL)
+	if((fp = fopen("/data/logo_park_status_scan32.bmp", "rb")) == NULL)
 	{
 		printf("Fail to fopen logo_park_status_scan32.bmp \n");
 	}	
@@ -1374,7 +1378,7 @@ void readbmp()
 		}
 	}
 
-	if((fp = fopen("/home/wyf/logo_park_status_ready32.bmp", "rb")) == NULL)
+	if((fp = fopen("/data/logo_park_status_ready32.bmp", "rb")) == NULL)
 	{
 		printf("Fail to fopen logo_park_status_ready32.bmp \n");
 	}	
@@ -1396,7 +1400,7 @@ void readbmp()
 		}
 	}
 
-	if((fp = fopen("/home/wyf/logo_park_status_run32.bmp", "rb")) == NULL)
+	if((fp = fopen("/data/logo_park_status_run32.bmp", "rb")) == NULL)
 	{
 		printf("Fail to fopen logo_park_status_run32.bmp \n");
 	}	
@@ -1418,7 +1422,7 @@ void readbmp()
 		}
 	}
 
-	if((fp = fopen("/home/wyf/logo_park_status_stop32.bmp", "rb")) == NULL)
+	if((fp = fopen("/data/logo_park_status_stop32.bmp", "rb")) == NULL)
 	{
 		printf("Fail to fopen logo_park_status_ok32.bmp \n");
 	}	
@@ -1440,7 +1444,7 @@ void readbmp()
 		}
 	}
 
-	if((fp = fopen("/home/wyf/logo_park_status_fail32.bmp", "rb")) == NULL)
+	if((fp = fopen("/data/logo_park_status_fail32.bmp", "rb")) == NULL)
 	{
 		printf("Fail to fopen logo_park_status_fail32.bmp \n");
 	}	
@@ -1462,7 +1466,7 @@ void readbmp()
 		}
 	}
 
-	if((fp = fopen("/home/wyf/logo_gear_d32.bmp", "rb")) == NULL)
+	if((fp = fopen("/data/logo_gear_d32.bmp", "rb")) == NULL)
 	{
 		printf("Fail to fopen logo_gear_d32.bmp \n");
 	}	
@@ -1482,7 +1486,7 @@ void readbmp()
 		//}
 	}
 
-	if((fp = fopen("/home/wyf/logo_gear_r32.bmp", "rb")) == NULL)
+	if((fp = fopen("/data/logo_gear_r32.bmp", "rb")) == NULL)
 	{
 		printf("Fail to fopen logo_park_status_fail32.bmp \n");
 	}	
