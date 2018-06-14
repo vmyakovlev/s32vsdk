@@ -67,13 +67,13 @@ void *TerminalTask(void *ptr)
 			snap_number++;
 			printf("%d,%d\n",channel_select,snap_number);//for test
 			if(channel_select==0)
-			str = "/home/front";	
+			str = "/root/front";	
 		       else if(channel_select==1)
-			str = "/home/back";	
+			str = "/root/back";	
 		       else if(channel_select==2)
-			str = "/home/left";
+			str = "/root/left";
 		        else if(channel_select==3)
-			str = "/home/right";					
+			str = "/root/right";					
 			sprintf(str1, "%d" , snap_number);
 			strcat(filename,str);
 		       strcat(filename,str1);

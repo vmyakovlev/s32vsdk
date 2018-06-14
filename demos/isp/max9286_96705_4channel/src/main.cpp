@@ -185,13 +185,13 @@ int main(int, char **)  //zhy
 		return 1;
 	}
 
-	//ret = pthread_create(&id6, NULL, TerminalTask,NULL);
-	//if(ret)
-	//{
-	//	printf("Create TerminalTask error!\n");
-	//	return 1;
-	//}
-	
+	ret = pthread_create(&id6, NULL, TerminalTask,NULL);
+	if(ret)
+	{
+		printf("Create TerminalTask error!\n");
+		return 1;
+	}
+#if 1	
 	ret = pthread_create(&id9, NULL, Gui_meg_thread,NULL);
 	if(ret)	
 	{		
@@ -204,6 +204,8 @@ int main(int, char **)  //zhy
 		printf("Create Gui_draw_thread error!\n");		
 		return 1;	
 	}
+#endif
+
 	ret = pthread_create(&id7, NULL, Uart_meg_thread,NULL);
 	if(ret)
 	{		
@@ -391,7 +393,7 @@ void *VideoCaptureTask(void *ptr1)  //zhy
        lLoop = 0;
     }
 	lLoop++; 	
-	 console_cmd = 2;
+	// console_cmd = 2;
 	switch(console_cmd)//
 	{	
 		 case 0 :	//snap of original view
@@ -505,7 +507,14 @@ void *VideoCaptureTask(void *ptr1)  //zhy
 			 #endif
 			
 			break;
-		case 6:
+			 case 6:
+				for(int i =0;i<720;i++)		
+					memcpy((char*)mem_tmp_T3+i*1280*2,(char *)frame_map[3].data+1920*2*i,1280*2);  // 1920*1080  conver 1280*720		
+					frame_map_out =lFrame[3].mUMat.getMat(vsdk::ACCESS_RW | OAL_USAGE_CACHED); 		
+					Show4videoT();		
+					actualBufferIndex =3;		
+					break;
+			case 7:
 			frame_map_out =lFrame[3].mUMat.getMat(vsdk::ACCESS_RW | OAL_USAGE_CACHED); 
 			memset((char *) frame_map_out.data,0,1920*1080*2);	
 			break;
