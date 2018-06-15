@@ -61,6 +61,9 @@
 vsdk::Mat frame_map[4];
 vsdk::Mat frame_map_out;
 unsigned char  mem_ui_t[1280*720*2];
+unsigned char  mem_tmp_T0[1280*720*2];
+unsigned char  mem_tmp_T1[1280*720*2];
+unsigned char  mem_tmp_T2[1280*720*2];
 unsigned char  mem_tmp_T3[1280*720*2];
 /*****************************************************************************/
 
@@ -420,15 +423,19 @@ void *VideoCaptureTask(void *ptr1)  //zhy
   			///  printf("%d\n",lTimeEnd2 - lTimeStart2);
 		       break;			
 		 case 2://video svm
+				memcpy((char*)mem_tmp_T0,(char *)frame_map[0].data,1280*720*2);  // 1920*1080  conver 1280*720
+				memcpy((char*)mem_tmp_T1,(char *)frame_map[1].data,1280*720*2);  // 1920*1080  conver 1280*720
+				memcpy((char*)mem_tmp_T2,(char *)frame_map[2].data,1280*720*2);  // 1920*1080  conver 1280*720
 				for(int i =0;i<720;i++)
-				memcpy((char*)mem_tmp_T3+i*1280*2,(char *)frame_map[3].data+1920*2*i,1280*2);  // 1920*1080  conver 1280*720
+					memcpy((char*)mem_tmp_T3+i*1280*2,(char *)frame_map[3].data+1920*2*i,1280*2);  // 1920*1080  conver 1280*720
+
 				frame_map_out =lFrame[3].mUMat.getMat(vsdk::ACCESS_RW | OAL_USAGE_CACHED); 
 				memset((char *) frame_map_out.data,0,1920*1080*2);	
 				bev_process(
 				SVM_BUFFER,//result_image_uyvy,
-				frame_map[0].data,//front_p,//front_image_uyvy,
-				frame_map[1].data,//back_p,//back_image_uyvy,
-				frame_map[2].data,//left_p,//left_image_uyvy,
+				mem_tmp_T0, //frame_map[0].data,//front_p,//front_image_uyvy,
+				mem_tmp_T1, //frame_map[1].data,//back_p,//back_image_uyvy,
+				mem_tmp_T2, //frame_map[2].data,//left_p,//left_image_uyvy,
 				mem_tmp_T3,//right_p,//right_image_uyvy,
 				car_up_left,
 				car_down_right,
