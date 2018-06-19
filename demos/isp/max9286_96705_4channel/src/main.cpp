@@ -59,12 +59,17 @@
 
 //unsigned char  mem_ui[1280*720*2];
 vsdk::Mat frame_map[4];
+//vsdk::Mat frame_map_dis_play[4];				   //added by che
+unsigned char  frame_map_display[3][1280*720*2]; //added by che
+unsigned char  frame_map_displayT4[1920*1080*2];//added by che
+
 vsdk::Mat frame_map_out;
 unsigned char  mem_ui_t[1280*720*2];
 unsigned char  mem_tmp_T0[1280*720*2];
 unsigned char  mem_tmp_T1[1280*720*2];
 unsigned char  mem_tmp_T2[1280*720*2];
 unsigned char  mem_tmp_T3[1280*720*2];
+unsigned char  mem_tmp_T3_tmp[1280*720*2];            //added by che
 /*****************************************************************************/
 
 
@@ -139,6 +144,8 @@ void *DisplayTaskHD(void * ptr);
 
   SDI_Frame lFrame[4];
   uint32_t actualBufferIndex = 0;
+
+  uint8_t get_frame_map_flag = 0;
 
 /************************************************************************/
 /** Frees DDR buffers for one ISP stream.
@@ -382,6 +389,15 @@ void *VideoCaptureTask(void *ptr1)  //zhy
 	frame_map[i] = lFrame[i].mUMat.getMat(vsdk::ACCESS_RW | OAL_USAGE_CACHED);	
 	}
 	//***************************************************************
+	if(get_frame_map_flag==0)      //added by che
+	{
+		for(int i =0;i<3;i++)
+		{
+			memcpy((uint8_t *)&frame_map_display[i][0]	, (char *)frame_map[i].data, 1280*720*2);	//frame_map_display[3][1280*720*2]; 
+		}
+		memcpy((uint8_t *)frame_map_displayT4	, (char *)frame_map[3].data, 1920*1080*2);	//frame_map_display[3][1280*720*2]; 
+	}
+	
     if (lLoop < 30)
        actualBufferIndex = 0;
     else if(lLoop < 60)
@@ -396,7 +412,7 @@ void *VideoCaptureTask(void *ptr1)  //zhy
        lLoop = 0;
     }
 	lLoop++; 	
-	// console_cmd = 2;
+	 console_cmd = 8;///2   //modified by che
 	switch(console_cmd)//
 	{	
 		 case 0 :	//snap of original view
@@ -524,7 +540,70 @@ void *VideoCaptureTask(void *ptr1)  //zhy
 			case 7:
 			frame_map_out =lFrame[3].mUMat.getMat(vsdk::ACCESS_RW | OAL_USAGE_CACHED); 
 			memset((char *) frame_map_out.data,0,1920*1080*2);	
+		case 8:				//added by che
+			
+				for(int i =0;i<720;i++)
+					memcpy((uint8_t *)mem_tmp_T3_tmp+i*1280*2,(uint8_t *)frame_map_displayT4+1920*2*i,1280*2);  // 1920*1080  conver 1280*720
+
+					
+				frame_map_out =lFrame[3].mUMat.getMat(vsdk::ACCESS_RW | OAL_USAGE_CACHED); 
+				memset((char *) frame_map_out.data,0,1920*1080*2);				
+
+#if 1
+			if(get_frame_map_flag==0)//<100)//==0)
+			{
+			
+				for(i=0;i<720;i++)  
+					memcpy( frame_map_out.data+i*1920*2, (uint8_t *)&frame_map_display[0][0]+1280*2*i, 1280*2);
+				for(i=720;i<1080;i++)  //lines
+					memcpy( frame_map_out.data+i*1920*2, (uint8_t *)&frame_map_display[1][0]+1280*2*(i-720), 1280*2);//columns
+													
+				for(i=0;i<360;i++)  
+					memcpy( frame_map_out.data+i*1920*2+1280*2, (uint8_t *)&frame_map_display[1][0]+1280*2*360+i*1280*2, 640*2);
+				for(i=360;i<720;i++)  
+					memcpy( frame_map_out.data+i*1920*2+1280*2, (uint8_t *)&frame_map_display[1][0]+1280*2*360+640*2+(i-360)*1280*2, 640*2);
+				// to be deleted
+				//for(i=720;i<1080;i++)  
+				//	memcpy( frame_map_out.data+i*1920*2+1280*2, frame_map_dis_play[1].data+1280*2*360+640*2+(i-720)*1280*2, 640*2);
+#if 1				
+				get_frame_map_flag=1;//++;// = 1 ;
+#endif
+			}
+#if 1			
+			else if(get_frame_map_flag==1)//>=100)//==1)
+#endif				
+#endif				
+			{
+#if 1				
+				for(i=0;i<720;i++)  
+					memcpy( frame_map_out.data+i*1920*2,(uint8_t *)&frame_map_display[2][0]+1280*2*i, 1280*2);
+				//memcpy( frame_map_out.data+i*1920*2,mem_tmp_T3_tmp+1280*2*i, 1280*2);
+				
+				for(i=720;i<1080;i++)  //lines
+					memcpy( frame_map_out.data+i*1920*2, mem_tmp_T3_tmp+1280*2*(i-720), 1280*2);//columns
+													
+				for(i=0;i<360;i++)  
+					memcpy( frame_map_out.data+i*1920*2+1280*2, mem_tmp_T3_tmp+1280*2*360+i*1280*2, 640*2);
+				
+				for(i=360;i<720;i++)  
+					memcpy( frame_map_out.data+i*1920*2+1280*2,mem_tmp_T3_tmp+1280*2*360+640*2+(i-360)*1280*2, 640*2);
+				// to be deleted
+				//for(i=720;i<1080;i++)  
+					//memcpy( frame_map_out.data+i*1920*2+1280*2, mem_tmp_T3_tmp+1280*2*360+640*2+(i-720)*1280*2, 640*2);
+#if 1				
+				get_frame_map_flag=0;//++;//=0;
+				//if(get_frame_map_flag>=200)
+					//get_frame_map_flag=0;
+#endif				
+#endif
+			}
 			break;
+		case 9:				//added by che
+
+			
+			break;
+																				
+				
 	default:break;		   	
       	}	 
 //***********DY**********************//	
