@@ -396,6 +396,10 @@ void *VideoCaptureTask(void *ptr1)  //zhy
 			memcpy((uint8_t *)&frame_map_display[i][0]	, (char *)frame_map[i].data, 1280*720*2);	//frame_map_display[3][1280*720*2]; 
 		}
 		memcpy((uint8_t *)frame_map_displayT4	, (char *)frame_map[3].data, 1920*1080*2);	//frame_map_display[3][1280*720*2]; 
+                frame_map_display[0][0] = 0x00;
+                frame_map_display[0][1] = 0x00;
+                frame_map_display[2][0] = 0xff;
+                frame_map_display[2][1] = 0xff;
 	}
 	
     if (lLoop < 30)
