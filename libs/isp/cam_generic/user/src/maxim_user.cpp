@@ -32,6 +32,7 @@
 #include "s32vs234.h"
 #include <stdint.h>
 #include <cstring>
+#include <time.h>
 
 #ifndef __STANDALONE__
   #include <fcntl.h>      // open 
@@ -90,10 +91,37 @@ extern "C"
     {\
       uint64_t lStart = (uint64_t)get_uptime_microS();\
       while((get_uptime_microS() - lStart) < _val*1000U);\
-    }  
-#else //#ifdef __STANDALONE__ 
-  #define msleep(_msec)(usleep(_msec*1000))
-#endif // else from #ifdef __STANDALONE__ 
+    }
+#else //#ifdef __STANDALONE__
+  //#define msleep(_msec)(usleep(_msec*1000))
+
+void  msleep(uint32_t aTimeoutMs)
+{
+	struct timespec lTimeToSleep = {aTimeoutMs/1000, (aTimeoutMs%1000)*1000000};
+	while(1)
+	{
+		if(aTimeoutMs > 0)
+	    {
+	      uint64_t        lTimeSpent;
+
+	      lTimeSpent   = aTimeoutMs - \
+	        lTimeToSleep.tv_sec  * 1000 - \
+	        lTimeToSleep.tv_nsec / 1000000;
+
+	      if(aTimeoutMs <= lTimeSpent)
+	      {
+	        break;
+	      } // if timed-out
+	    } // if timeout required
+
+	    if(nanosleep(&lTimeToSleep, &lTimeToSleep) == 0)
+	    {
+	      break;
+	    } // if whole sleep ended uninterrupted
+	}
+}
+
+#endif // else from #ifdef __STANDALONE__
 
 
 
@@ -275,9 +303,11 @@ CAM_LIB_RESULT MAXIM_Open(const MAXIM_Cfg_t &arConfig)
           } // case MAX_OV10640
             break;
 		  case CSI_MAX9286_96705:
-          {
-            lRet = MAXIM9286_96705_Init(lCsiIdx, lCamCnt);
-          } // case MAX9286_96705
+            i = 5;
+            while(i--) {
+                if(MAXIM9286_96705_Init(lCsiIdx, lCamCnt) == CAM_LIB_SUCCESS)
+                    i=0;
+            }
             break;
           case CSI_MAX_SONY224:
           {
@@ -1321,7 +1351,7 @@ CAM_LIB_RESULT MAXIM9286_96705_Init(enum CSI_IDX aCsiIdx,
   /*********************************************************************/
   /*                          Setup Link 0 - Setup Link CamCnt         */
   /*********************************************************************/
-  printf("Initialization of virtual I2C addresses");
+  //printf("Initialization of virtual I2C addresses");
   lVal3 = 0;
 
   CamI2cCfg_t    lCamCfg;
@@ -1351,7 +1381,7 @@ CAM_LIB_RESULT MAXIM9286_96705_Init(enum CSI_IDX aCsiIdx,
 		CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x0A, reg);
 
 		//CAM_WriteSingle(spClients[aCsiIdx].mpSerializers[0], 0x04, 0x43);
-	  	msleep(5);
+	  	msleep(7); //establishing link 0 only
     // //Change serializer I2C Slave Address to I2C_MAX_96705_ADDR(i)
     CAM_WriteSingle(spClients[aCsiIdx].mpSerializers[0],
                     0x0,
@@ -1407,7 +1437,7 @@ CAM_LIB_RESULT MAXIM9286_96705_Init(enum CSI_IDX aCsiIdx,
   /*********************************************************************/
   /*                   MAX9286 Post MAX9271 Setup                      */
   /*********************************************************************/
-  printf("MAX9286 Post MAX96705 Setup \n");
+  //printf("MAX9286 Post MAX96705 Setup \n");
   CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x0a,0xFF);    //Enable all I2C reverse and forward channels
   msleep(2); // Wait 2ms
   CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x0a,0xFF);    //Enable all I2C reverse and forward channels
@@ -1444,6 +1474,14 @@ CAM_LIB_RESULT MAXIM9286_96705_Init(enum CSI_IDX aCsiIdx,
   //CAM_WriteSingle(spClients[aCsiIdx].mpSerializers[0], 0x04,0x83);	  //Enable all serializer and disable configuration link
 
   msleep(100); // Wait 5ms
+    CAM_ReadSingle(spClients[aCsiIdx].mDeserializer, 0x70, lVal);
+    printf("Maxim9286_96705 Init statu 0x%x.\n", lVal);
+    if(lVal != 0xf0) {
+        lRet = CAM_LIB_FAILURE;
+    } else {
+        lRet = CAM_LIB_SUCCESS;    
+    }
+
   printf("....Completed\n");
 
   MAXIM_CsiDisable(aCsiIdx);
