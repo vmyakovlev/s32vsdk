@@ -133,100 +133,20 @@ void FrameOutputDCU::Init(uint32_t aWidth,
   // *** Dcu_LCD_Para_t setup based on the datasheet ***
 
 // *** define in config.h ***
-//#define SAMSUNG 1
-//#define PC_MONITOR_1280X1024_60HZ
-
-#ifdef SAMSUNG
-  mLcdPara.mDeltaX    = mWidth;   /**< delta X */
-
-  mLcdPara.mDeltaY    = mHeight;  /**< delta Y */
-  //mHorzBP+mHorzPW+mHorzFP =2200
-  mLcdPara.mHorzBP    = 192;//88;       /**< Horizontal back porch */
-  mLcdPara.mHorzPW    = 48;       /**< Horizontal sync pulse */
-  mLcdPara.mHorzFP    = 40;       /**< Horizontal front porch */
-//mVertBP+mVertPW+mVertFP = 1125
-  mLcdPara.mVertBP    = 29;//32;       /**< Vertical back porch */
-  mLcdPara.mVertPW    = 3;        /**< Vertical sync pulse */
-  mLcdPara.mVertFP    = 13;       /**< Vertical front porch */
-  mLcdPara.mVertFq    = 60;       /**< Vertical frequency/Pixell frequency/Division factor */
-  mLcdPara.mSyncPol   = 3;        /**< Sync signal polarity */
-  mLcdPara.mDivFactor = 0;        /**< division factor */
-  mDcuClk = 148500000;//148000000; ///< DCU input clock  2475000
-  ///mDcuClk = 100000000;//148000000; ///< DCU input clock
-
-
- 					#if 0
-
-					  //mLcdPara.mDeltaX    = mWidth;   /**< delta X */
-					  //mLcdPara.mDeltaY    = mHeight;  /**< delta Y */
-					  mLcdPara.mDeltaX    = 1920;     /**< delta X */
-					  mLcdPara.mDeltaY    = 1080;     /**< delta Y */
-					  mLcdPara.mHorzBP    = 30;       /**< Horizontal back porch */
-					  mLcdPara.mHorzPW    = 60;       /**< Horizontal sync pulse */
-					  mLcdPara.mHorzFP    = 30;       /**< Horizontal front porch */
-					  mLcdPara.mVertBP    = 3;        /**< Vertical back porch */
-					  mLcdPara.mVertPW    = 5;        /**< Vertical sync pulse */
-					  mLcdPara.mVertFP    = 3;        /**< Vertical front porch */
-					  mLcdPara.mVertFq    = 60;       /**< Vertical frequency/Pixell frequency/Division factor */
-					  mLcdPara.mSyncPol   = 3;        /**< Sync signal polarity */
-					  mLcdPara.mDivFactor = 0;        /**< division factor */
-					  mDcuClk = 150000000; ///< DCU input clock
-					  #endif
- 
-#else
-#ifdef PC_MONITOR_1280X1024_60HZ
-  mLcdPara.mDeltaX    = 1280;     /**< delta X */
-  mLcdPara.mDeltaY    = 1024;     /**< delta Y */
-  
-  mLcdPara.mHorzBP    = 216;      /**< Horizontal back porch */
-  mLcdPara.mHorzPW    = 128;      /**< Horizontal sync pulse */
-  mLcdPara.mHorzFP    = 88;       /**< Horizontal front porch */
-  mLcdPara.mVertBP    = 29;       /**< Vertical back porch */
-  mLcdPara.mVertPW    = 7;        /**< Vertical sync pulse */
-  mLcdPara.mVertFP    = 3;        /**< Vertical front porch */
-  mLcdPara.mVertFq    = 60;       /**< Vertical frequency/Pixell frequency/Division factor */
-  mLcdPara.mSyncPol   = 3;        /**< Sync signal polarity */
-  mLcdPara.mDivFactor = 0;        /**< division factor */
-  mDcuClk = 100000000; ///< DCU input clock
-
-#else
-#ifdef PC_MONITOR_1920X1080_60HZ
-  //mLcdPara.mDeltaX    = mWidth;   /**< delta X */
-  //mLcdPara.mDeltaY    = mHeight;  /**< delta Y */
   mLcdPara.mDeltaX    = 1920;     /**< delta X */
   mLcdPara.mDeltaY    = 1080;     /**< delta Y */
   
-  mLcdPara.mHorzBP    = 88;       /**< Horizontal back porch */
-  mLcdPara.mHorzPW    = 48;       /**< Horizontal sync pulse */
-  mLcdPara.mHorzFP    = 40;       /**< Horizontal front porch */
-  mLcdPara.mVertBP    = 32;       /**< Vertical back porch */
-  mLcdPara.mVertPW    = 3;        /**< Vertical sync pulse */
-  mLcdPara.mVertFP    = 13;       /**< Vertical front porch */
+  mLcdPara.mHorzBP    = 148;       /**< Horizontal back porch */
+  mLcdPara.mHorzPW    = 44;       /**< Horizontal sync pulse */
+  mLcdPara.mHorzFP    = 88;       /**< Horizontal front porch */
+  mLcdPara.mVertBP    = 36;       /**< Vertical back porch */
+  mLcdPara.mVertPW    = 5;        /**< Vertical sync pulse */
+  mLcdPara.mVertFP    = 4;       /**< Vertical front porch */
   mLcdPara.mVertFq    = 60;       /**< Vertical frequency/Pixell frequency/Division factor */
   mLcdPara.mSyncPol   = 3;        /**< Sync signal polarity */
   mLcdPara.mDivFactor = 0;        /**< division factor */
-  mDcuClk = 148000000; ///< DCU input clock
+  mDcuClk = 148500000; ///< DCU input clock
 
-#else
-  mLcdPara.mDeltaX    = mWidth;   /**< delta X */
-  mLcdPara.mDeltaY    = mHeight;  /**< delta Y */
-  //mHorzBP+mHorzPW+mHorzFP =2200
-  mLcdPara.mHorzBP    = 192;//88;       /**< Horizontal back porch */
-  mLcdPara.mHorzPW    = 48;       /**< Horizontal sync pulse */
-  mLcdPara.mHorzFP    = 40;       /**< Horizontal front porch */
-//mVertBP+mVertPW+mVertFP = 1125
-  mLcdPara.mVertBP    = 29;//32;       /**< Vertical back porch */
-  mLcdPara.mVertPW    = 3;        /**< Vertical sync pulse */
-  mLcdPara.mVertFP    = 13;       /**< Vertical front porch */
-  mLcdPara.mVertFq    = 60;       /**< Vertical frequency/Pixell frequency/Division factor */
-  mLcdPara.mSyncPol   = 3;        /**< Sync signal polarity */
-  mLcdPara.mDivFactor = 0;        /**< division factor */
-  mDcuClk = 148500000;//148000000; ///< DCU input clock
-#endif  // PC_MONITOR_1920X1080_60HZ
-#endif  // PC_MONITOR_1280X1024_60HZ
-#endif  // SAMSUNG
-  
- 
   mLcdConnection = DCU_FREQDIV_NORMAL;
 
   
