@@ -1,2 +1,0 @@
-0x00000000	OAL_KernelMemoryFree	/home/henry/25/S32DS/s32v234_sdk/libs/utils/oal/kernel/build-v234ce-gnu-linux-d/oal_cma	EXPORT_SYMBOL
-0x00000000	OAL_KernelMemoryAlloc	/home/henry/25/S32DS/s32v234_sdk/libs/utils/oal/kernel/build-v234ce-gnu-linux-d/oal_cma	EXPORT_SYMBOL
