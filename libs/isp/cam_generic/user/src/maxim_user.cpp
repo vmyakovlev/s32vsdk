@@ -1167,6 +1167,7 @@ CAM_LIB_RESULT MAXIM9286_96705_Init(enum CSI_IDX aCsiIdx,
   uint8_t reg, sensor_addr = 0;
   unsigned int g_sensor_num = 0;
   unsigned char g_sensor_is_there = 0;
+  static unsigned char g_sensor_is_init = 0;
 
   if(acCamCnt > MAXIM_CAM_SLOTS)
   {
@@ -1179,6 +1180,7 @@ CAM_LIB_RESULT MAXIM9286_96705_Init(enum CSI_IDX aCsiIdx,
 #endif
 
   printf("Maxim9286_96705 cameras init\n");
+  msleep(50);
 /*  CAM_ReadSingle(spClients[aCsiIdx].mDeserializer, 0x1e, lVal);
   if(lVal != 0x40)
   {
@@ -1231,8 +1233,17 @@ CAM_LIB_RESULT MAXIM9286_96705_Init(enum CSI_IDX aCsiIdx,
 	 // CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x3B, 0x19);
 	 // msleep(5);
 
+  CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x1B, 0x0F);   //enable equalizer
+  msleep(10);
+  
+  CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x32, 0x99);   //
+  msleep(10);
+  
+  CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x33, 0x99);   //
+  msleep(10);
+
 	  CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x12, 0xF3);//0xF3 //F4	  //YUV422,8bit,Double Data Rate, 4 data lane
-	  msleep(5);
+	  msleep(10);
 
 	  //Frame Sync
 
@@ -1281,9 +1292,9 @@ CAM_LIB_RESULT MAXIM9286_96705_Init(enum CSI_IDX aCsiIdx,
 	  }
 
 	  CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x0E, 0x50);	  //Disable PRBS test
-	  msleep(2);
-	  CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x0D, 0x03);	  //张建军
-
+	  msleep(10);
+	  CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x0D, 0x03);	  //???¨?ü
+	  msleep(10);
 	  // Set link order in MIPI CSI-2 output
 	  reg = 0xE4;  //Default setting
 	  if (g_sensor_num == 1) {			  //只连接1个摄像头
@@ -1347,6 +1358,7 @@ CAM_LIB_RESULT MAXIM9286_96705_Init(enum CSI_IDX aCsiIdx,
 	  reg = 0xE0 | g_sensor_is_there;
 	  //DesRegWrite(0x00, reg);   //enable all links,auto select
 	  CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x00, 0xEF);
+	  msleep(10);
 
   /*********************************************************************/
   /*                          Setup Link 0 - Setup Link CamCnt         */
@@ -1381,31 +1393,33 @@ CAM_LIB_RESULT MAXIM9286_96705_Init(enum CSI_IDX aCsiIdx,
 		CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x0A, reg);
 
 		//CAM_WriteSingle(spClients[aCsiIdx].mpSerializers[0], 0x04, 0x43);
-	  	msleep(7); //establishing link 0 only
+	  	msleep(10);
     // //Change serializer I2C Slave Address to I2C_MAX_96705_ADDR(i)
     CAM_WriteSingle(spClients[aCsiIdx].mpSerializers[0],
                     0x0,
                     I2C_MAX_96705_ADDR(i) << 1);
-
+	msleep(10);
     lSerCfg.mI2cAddr = I2C_MAX_96705_ADDR(i);
-    spClients[aCsiIdx].mpSerializers[i] = CAM_ClientAdd(lSerCfg);
+    if(g_sensor_is_init ==0)
+        spClients[aCsiIdx].mpSerializers[i] = CAM_ClientAdd(lSerCfg);
 
 	CAM_WriteSingle(spClients[aCsiIdx].mpSerializers[i], 0x01, I2C_MAXIM_DES_ADDR << 1);
-	msleep(5);
+	msleep(10);
 
     // Unique Link 0 image sensor slave address
     CAM_WriteSingle(spClients[aCsiIdx].mpSerializers[i],
                     0x9,
                     I2C_MAX_OV490_ADDR(i) << 1);
-
+	msleep(10);
     lCamCfg.mI2cAddr = I2C_MAX_OV490_ADDR(i);
-    spClients[aCsiIdx].mpCameras[i] = CAM_ClientAdd(lCamCfg);
+    if(g_sensor_is_init ==0)
+        spClients[aCsiIdx].mpCameras[i] = CAM_ClientAdd(lCamCfg);
 
     //Link [i] Image Sensor Address
     CAM_WriteSingle(spClients[aCsiIdx].mpSerializers[i],
                     0xA,
                     I2C_MAX_OV490_ADDR(0) << 1);
-
+	msleep(10);
     //Serializer Broadcast Address
     CAM_WriteSingle(spClients[aCsiIdx].mpSerializers[i],
                     0xB,
@@ -1415,33 +1429,22 @@ CAM_LIB_RESULT MAXIM9286_96705_Init(enum CSI_IDX aCsiIdx,
     CAM_WriteSingle(spClients[aCsiIdx].mpSerializers[i],
                     0xC,
                     I2C_MAX_96705_ADDR(i) << 1);
-
+	msleep(10);
 	CAM_WriteSingle(spClients[aCsiIdx].mpSerializers[i], 0x07, 0x84);
-	msleep(5);
+	msleep(10);
   }
 
   CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x1C, 0xF4); //
 	msleep(10);
-
-  CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x1B, 0x0F);   //enable equalizer
-  msleep(10);
-  
-  CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x32, 0x99);   //
-  msleep(10);
-  
-  CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x33, 0x99);   //
-  msleep(10);
-
-  printf("....Completed\n");
 
   /*********************************************************************/
   /*                   MAX9286 Post MAX9271 Setup                      */
   /*********************************************************************/
   //printf("MAX9286 Post MAX96705 Setup \n");
   CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x0a,0xFF);    //Enable all I2C reverse and forward channels
-  msleep(2); // Wait 2ms
+  msleep(10); // Wait 2ms
   CAM_WriteSingle(spClients[aCsiIdx].mDeserializer, 0x0a,0xFF);    //Enable all I2C reverse and forward channels
-  msleep(2); // Wait 2ms
+  msleep(10); // Wait 2ms
 
 
    //printf("Checking %d attached OV490 cameras\n", acCamCnt);
@@ -1480,9 +1483,10 @@ CAM_LIB_RESULT MAXIM9286_96705_Init(enum CSI_IDX aCsiIdx,
         lRet = CAM_LIB_FAILURE;
     } else {
         lRet = CAM_LIB_SUCCESS;    
+        printf("....Completed\n");
     }
 
-  printf("....Completed\n");
+  g_sensor_is_init++;
 
   MAXIM_CsiDisable(aCsiIdx);
 
