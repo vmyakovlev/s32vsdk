@@ -143,7 +143,7 @@ void FrameOutputDCU::Init(uint32_t aWidth,
   mLcdPara.mVertPW    = 5;        /**< Vertical sync pulse */
   mLcdPara.mVertFP    = 4;       /**< Vertical front porch */
   mLcdPara.mVertFq    = 60;       /**< Vertical frequency/Pixell frequency/Division factor */
-  mLcdPara.mSyncPol   = 3;        /**< Sync signal polarity */
+  mLcdPara.mSyncPol   = 0;        /**< Sync signal polarity */
   mLcdPara.mDivFactor = 0;        /**< division factor */
   mDcuClk = 148500000; ///< DCU input clock
 
