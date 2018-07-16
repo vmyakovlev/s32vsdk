@@ -60,6 +60,10 @@ void *TerminalTask(void *ptr)
 			console_cmd = 6;
 		else if(ch == '7') 
 			console_cmd = 7;
+		else if(ch == '8') 
+			console_cmd = 8;
+		else if(ch == '9') 
+			console_cmd = 9;
 
 		else if(ch=='s'){
 			*filename = NULL;
@@ -91,52 +95,3 @@ void *TerminalTask(void *ptr)
 	}
 	return 0;
 }
-#if 0
- int saveframe(char *str, void *p, int length, int is_oneframe, char channel,int pic_num)
-{
-	FILE *fd;
-	#if 0
-	char str1[25];
-	char str3[10] = ".yuv";
-	char str4[100]= "";
-	
-	printf("%d,%d\n",channel,pic_num);//for test
-	sprintf(str1, "%d" , pic_num);
-	
-	if(channel==0)
-	str = "/home/cap/front";	
-       	else if(channel==1)
-	str = "/home/cap/back";	
-       	else if(channel==2)
-	str = "/home/cap/left";
-        else if(channel==3)
-	str = "/home/cap/right";		
-	strcat(str4,str);
-        strcat(str4,str1);
-	strcat(str4,str3);	
-	printf("%s\n",str4);	
-	#endif
-	if (is_oneframe) {
-		fd = fopen(str, "wb");
-	}
-	else {
-		fd = fopen(str, "a");
-	}     
-
-	if (!fd) {
-		printf("Open file error\n");
-		return -1;
-	}
-	if (fwrite(p, 1, length, fd)) {
-		printf("Write file successfully\n");
-		fclose(fd);
-		return 0;
-	}
-	else {
-		printf("Write file fail\n");
-		fclose(fd);
-		return -1;
-	}
-	
-}
-#endif

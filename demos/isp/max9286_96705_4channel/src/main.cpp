@@ -201,7 +201,7 @@ int main(int, char **)  //zhy
 		printf("Create TerminalTask error!\n");
 		return 1;
 	}
-#if 1	
+#if 0	
 	ret = pthread_create(&id9, NULL, Gui_meg_thread,NULL);
 	if(ret)	
 	{		
@@ -265,112 +265,64 @@ int main(int, char **)  //zhy
 }
 void *VideoCaptureTask(void *ptr1)  //zhy  
 {
-  int i;
-  LIB_RESULT lRet = LIB_SUCCESS;
-  LIB_RESULT lRes = LIB_SUCCESS; 
-///  char ch;
-  OAL_Initialize(); 
-  //*** Init DCU Output ***  
-  // setup Ctrl+C handler
-  if(SigintSetup() != SEQ_LIB_SUCCESS) 
-  {
-    VDB_LOG_ERROR("Failed to register Ctrl+C signal handler.");
-    return    0 ;// -1;
-  }  
-   printf("Press Ctrl+C to terminate the demo.\n");  
+	int i;
+	LIB_RESULT lRet = LIB_SUCCESS;
+	LIB_RESULT lRes = LIB_SUCCESS; 
+	///  char ch;
+	OAL_Initialize(); 
+	//*** Init DCU Output ***  
+	// setup Ctrl+C handler
+	if(SigintSetup() != SEQ_LIB_SUCCESS) 
+	{
+	VDB_LOG_ERROR("Failed to register Ctrl+C signal handler.");
+	return    0 ;// -1;
+	}  
+	printf("Press Ctrl+C to terminate the demo.\n");  
 
- // *** set terminal to nonblock input ***
- //TermNonBlockSet();
- #if 0
-	io::FrameOutputV234Fb
-	lDcuOutput(1280,720,io::IO_DATA_DEPTH_08,io::IO_DATA_CH3,DCU_BPP_YCbCr422);
-#else
+	/*** set terminal to nonblock input ***/
+	//TermNonBlockSet();
+
 	io::FrameOutputV234Fb
 	lDcuOutput(1920,1080,io::IO_DATA_DEPTH_08, io::IO_DATA_CH3,DCU_BPP_YCbCr422);
- #endif
-  printf("main.cpp line135\n");
-  ReadOriginalImage();  //
-  ReadLut(); 	
-#if 1
-  // *** Initialize SDI ***
-  lRes = sdi::Initialize(0); //no use ,may mask
-  printf("main.cpp line140\n");
-  // *** create grabber ***
-  sdi_grabber *lpGrabber = new(sdi_grabber);  // 
-  lpGrabber->ProcessSet(gpGraph, &gGraphMetadata);
-  // *** set user defined Sequencer event handler *** 
-  int32_t lCallbackUserData = 12345;
-  lpGrabber->SeqEventCallBackInstall(&SeqEventCallBack, &lCallbackUserData);
-  
-  // *** prepare IOs ***
-  sdi_FdmaIO *lpFdma = (sdi_FdmaIO*)lpGrabber->IoGet(SEQ_OTHRIX_FDMA);    
-  
-  // modify DDR frame geometry to fit display output
-  SDI_ImageDescriptor lFrmDesc = SDI_ImageDescriptor(WIDTH, HEIGHT, YUV422Stream_UYVY);//1280*720
-  lpFdma->DdrBufferDescSet(0, lFrmDesc);  
-  lFrmDesc = SDI_ImageDescriptor(WIDTH, HEIGHT, YUV422Stream_UYVY);
-  lpFdma->DdrBufferDescSet(1, lFrmDesc);  
-  lFrmDesc = SDI_ImageDescriptor(WIDTH, HEIGHT, YUV422Stream_UYVY);
-  lpFdma->DdrBufferDescSet(2, lFrmDesc);
-#if 0
+	printf("main.cpp line135\n");
+	ReadOriginalImage();  //
+	ReadLut(); 	
+	// *** Initialize SDI ***
+	lRes = sdi::Initialize(0); //no use ,may mask
+	printf("main.cpp line140\n");
+	// *** create grabber ***
+	sdi_grabber *lpGrabber = new(sdi_grabber);  // 
+	lpGrabber->ProcessSet(gpGraph, &gGraphMetadata);
+	// *** set user defined Sequencer event handler *** 
+	int32_t lCallbackUserData = 12345;
+	lpGrabber->SeqEventCallBackInstall(&SeqEventCallBack, &lCallbackUserData);
+	// *** prepare IOs ***
+	sdi_FdmaIO *lpFdma = (sdi_FdmaIO*)lpGrabber->IoGet(SEQ_OTHRIX_FDMA);   
+	// modify DDR frame geometry to fit display output
+	SDI_ImageDescriptor lFrmDesc = SDI_ImageDescriptor(WIDTH, HEIGHT, YUV422Stream_UYVY);//1280*720
+	lpFdma->DdrBufferDescSet(0, lFrmDesc);  
 	lFrmDesc = SDI_ImageDescriptor(WIDTH, HEIGHT, YUV422Stream_UYVY);
-#else
-        lFrmDesc = SDI_ImageDescriptor(1920 ,1080, YUV422Stream_UYVY); // wyf changed 2017.11.29
-#endif
-   lpFdma->DdrBufferDescSet(3, lFrmDesc); 
-  //*** allocate DDR buffers ***
-  lpFdma->DdrBuffersAlloc(DDR_BUFFER_CNT);
-
-  	load_config_file(car_up_left,car_down_right,front_fov_height,back_fov_height,left_fov_width,right_fov_width);
- 	printf("car_up_left.x= %d\n", car_up_left.x);
-	printf("car_up_left.y= %d\n", car_up_left.y);
-	printf("car_down_right.x= %d\n", car_down_right.x);
-	printf("car_down_right.y= %d\n", car_down_right.y);
-	printf("front_fov_height= %d\n", front_fov_height);
-	printf("back_fov_height= %d\n", back_fov_height);
-	printf("left_fov_width= %d\n", left_fov_width);
-	printf("right_fov_width= %d\n", right_fov_width);
-	
-/// 	car_up_left.x = 460;//448;//464;//352;
-///	car_up_left.y = 672;//672;//655;//396;
-///	car_down_right.x = 619;//631;// 591;//479;
-///	car_down_right.y = 991;//991;//1008;//627;
-///	front_fov_height = 672;//655;//396;
-///	back_fov_height = 672;//655;//396;
-///	left_fov_width = 460;//448;//464;//352;
-///	right_fov_width =460;//448;//464;//352;		
-	
-	p_lut_front_test=Lut_Front;
-	p_wt_front_test = Wt_Lut_Front;
-	p_lut_back_test=Lut_Back;
-	p_wt_back_test = (UInt32_t *)Wt_Lut_Back;
-	p_lut_left_test=Lut_Left;
-	p_wt_left_test = Wt_Lut_Left;
-	p_lut_right_test=Lut_Right;
-	p_wt_right_test = (UInt32_t *)Wt_Lut_Right;
-	
+	lpFdma->DdrBufferDescSet(1, lFrmDesc);  
+	lFrmDesc = SDI_ImageDescriptor(WIDTH, HEIGHT, YUV422Stream_UYVY);
+	lpFdma->DdrBufferDescSet(2, lFrmDesc);
+	lFrmDesc = SDI_ImageDescriptor(1920 ,1080, YUV422Stream_UYVY); // wyf changed 2017.11.29
+	lpFdma->DdrBufferDescSet(3, lFrmDesc); 
+	//*** allocate DDR buffers ***
+	lpFdma->DdrBuffersAlloc(DDR_BUFFER_CNT);
+	load_config_file(car_up_left,car_down_right,front_fov_height,back_fov_height,left_fov_width,right_fov_width);	
 	Bev_Tab_Init(p_lut_front_test, p_wt_front_test, 0, DST_WIDTH, car_up_left.y , bev_Table);
 	Bev_Tab_Init(p_lut_back_test, p_wt_back_test, 1, DST_WIDTH, car_up_left.y , bev_Table);
 	Bev_Tab_Init(p_lut_left_test, p_wt_left_test, 2, car_up_left.x , DST_HEIGHT, bev_Table);
-	Bev_Tab_Init(p_lut_right_test, p_wt_right_test, 3, car_up_left.x , DST_HEIGHT, bev_Table);
-
-
-
-  
-  // *** prestart grabber ***
-  lpGrabber->PreStart();
-  // fetched frame buffer storage
-  // *** start grabbing ***
-  lpGrabber->Start();  
-  #endif
-  unsigned long lTimeStart1 = 0, lTimeEnd1 = 0, lTimeDiff1 = 0;
-
-  uint32_t lFrmCnt = 0;
-  uint8_t lLoop=0; 
-
-  /*******************************************************************************/
-  /*******************************************************************************/
-  GETTIME(&lTimeStart1);
+	Bev_Tab_Init(p_lut_right_test, p_wt_right_test, 3, car_up_left.x , DST_HEIGHT, bev_Table);  
+	// *** prestart grabber ***
+	lpGrabber->PreStart();
+	// fetched frame buffer storage
+	// *** start grabbing ***
+	lpGrabber->Start();  
+	unsigned long lTimeStart1 = 0, lTimeEnd1 = 0, lTimeDiff1 = 0;
+	uint32_t lFrmCnt = 0;
+	uint8_t lLoop=0; 
+	GETTIME(&lTimeStart1);
   for(;;)
   {   
       // pop all  
@@ -416,7 +368,7 @@ void *VideoCaptureTask(void *ptr1)  //zhy
        lLoop = 0;
     }
 	lLoop++; 	
-	 console_cmd = 8;///2   //modified by che
+	/// console_cmd = 8;///2   //modified by che
 	switch(console_cmd)//
 	{	
 		 case 0 :	//snap of original view
@@ -924,5 +876,32 @@ Int32_t load_config_file(CvPoint1& car_up_left,CvPoint1& car_down_right,Int32_t&
 	fscanf(p_config_file, "%d\n", &right_fov_width);
 
 	fclose(p_config_file);
+
+	printf("car_up_left.x= %d\n", car_up_left.x);
+	printf("car_up_left.y= %d\n", car_up_left.y);
+	printf("car_down_right.x= %d\n", car_down_right.x);
+	printf("car_down_right.y= %d\n", car_down_right.y);
+	printf("front_fov_height= %d\n", front_fov_height);
+	printf("back_fov_height= %d\n", back_fov_height);
+	printf("left_fov_width= %d\n", left_fov_width);
+	printf("right_fov_width= %d\n", right_fov_width);
+
+	p_lut_front_test=Lut_Front;
+	p_wt_front_test = Wt_Lut_Front;
+	p_lut_back_test=Lut_Back;
+	p_wt_back_test = (UInt32_t *)Wt_Lut_Back;
+	p_lut_left_test=Lut_Left;
+	p_wt_left_test = Wt_Lut_Left;
+	p_lut_right_test=Lut_Right;
+	p_wt_right_test = (UInt32_t *)Wt_Lut_Right;
+
+	/// 	car_up_left.x = 460;//448;//464;//352;
+	///	car_up_left.y = 672;//672;//655;//396;
+	///	car_down_right.x = 619;//631;// 591;//479;
+	///	car_down_right.y = 991;//991;//1008;//627;
+	///	front_fov_height = 672;//655;//396;
+	///	back_fov_height = 672;//655;//396;
+	///	left_fov_width = 460;//448;//464;//352;
+	///	right_fov_width =460;//448;//464;//352;		
 	return ret;
 }

@@ -45,8 +45,8 @@ void *KeyTask(void *ptr1)
                 if((key_event->code == 59) && !key_event->value)
                 {
 				cha16++;
-				//console_cmd = cha16;
-				if(cha16>5)
+				console_cmd = cha16;
+				if(cha16>9)
 				cha16 = 0;	
 				parking_mode_ok_flag = 1;
 				printf("key16--mode: parking_mode_ok_flag=%d\n",parking_mode_ok_flag);	
