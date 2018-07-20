@@ -152,16 +152,16 @@ extern int gear_show_flag;
 /***********************************************************/
 void *Gui_meg_thread(void *t) 
 {
-	int i, j, k;
+	//int i, j, k;
 	int ret;
 
-	int dir;
-	int x, y;
+	//int dir;
+	//int x, y;
 	struct IOCTL_LAYER_POS layer_cfg;
-	struct IOCTL_LAYER_CHROMA layer_chroma_keys;
+	//struct IOCTL_LAYER_CHROMA layer_chroma_keys;
 	struct IOCTL_LAYER_ALFA_KEY layer_alfa_key;
-	struct IOCTL_LAYER_ALFA_VAL layer_alfa_value;
-	long int location = 0;
+	//struct IOCTL_LAYER_ALFA_VAL layer_alfa_value;
+	//long int location = 0;
 
 	int fb_resx = 1920;
 	int fb_resy = 1080;
@@ -601,8 +601,8 @@ void *Gui_draw_thread(void *t)
 					{			
 						for(j=0;j<240;j++)			
 						{				
-							if( *((int*)logo_gear_temp+j+i*240) == 0xffffff0e) 
-								*((int*)logo_gear_temp+j+i*240) = 0xffff0000;
+							if( *((unsigned int*)logo_gear_temp+j+i*240) == 0xffffff0e) 
+								*((unsigned int*)logo_gear_temp+j+i*240) = 0xffff0000;
 						}
 					}
 				}
@@ -624,8 +624,8 @@ void *Gui_draw_thread(void *t)
 				{			
 					for(j=0;j<240;j++)			
 					{				
-						if( *((int*)logo_gear_temp+j+i*240) == 0xffffff0e) 
-							*((int*)logo_gear_temp+j+i*240) = 0xffff0000;
+						if( *((unsigned int*)logo_gear_temp+j+i*240) == 0xffffff0e) 
+							*((unsigned int*)logo_gear_temp+j+i*240) = 0xffff0000;
 					}
 				}
 			}
@@ -654,8 +654,8 @@ void *Gui_draw_thread(void *t)
 					{			
 						for(j=0;j<240;j++)			
 						{				
-							if( *((int*)logo_park_status_temp+j+i*240) == 0xffed1c24) 
-								*((int*)logo_park_status_temp+j+i*240) = 0xffffff00;
+							if( *((unsigned int*)logo_park_status_temp+j+i*240) == 0xffed1c24) 
+								*((unsigned int*)logo_park_status_temp+j+i*240) = 0xffffff00;
 						}
 					}
 					for(i=0;i<240;i++)
@@ -691,8 +691,8 @@ void *Gui_draw_thread(void *t)
 					{			
 						for(j=0;j<240;j++)			
 						{				
-							if( *((int*)logo_park_status_temp+j+i*240) == 0xffed1c24) 
-								*((int*)logo_park_status_temp+j+i*240) = 0xffffff00;
+							if( *((unsigned int*)logo_park_status_temp+j+i*240) == 0xffed1c24) 
+								*((unsigned int*)logo_park_status_temp+j+i*240) = 0xffffff00;
 						}
 					}
 					for(i=0;i<240;i++)
@@ -1120,7 +1120,7 @@ void readbmp()
 	else
 	{	
 		fseek(fp,54L,SEEK_SET);
-		fread((unsigned char*)view_mem, sizeof(unsigned char), 1920*1080*4, fp);
+		fread((char*)view_mem, sizeof(char), 1920*1080*4, fp);
 		fflush(fp);		
 		fclose(fp);		
 		fp  = NULL;				
@@ -1128,189 +1128,189 @@ void readbmp()
 		{			
 			for(j=0;j<1920;j++)			
 			{				
-				if(*((int*)view_mem+j+i*1920) == 0xffffffff)
-					*((int*)view_mem+j+i*1920) = 0x00ffffff;
-				else if(*((int*)view_mem+j+i*1920) == 0xff000000)
-					*((int*)view_mem+j+i*1920) = 0xffffffff;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff008c) //r1
-					*((int*)view_mem+j+i*1920) = 0x00ff008c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff0078)
-					*((int*)view_mem+j+i*1920) = 0x00ff0078;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff0064)
-					*((int*)view_mem+j+i*1920) = 0x00ff0064;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff0050)
-					*((int*)view_mem+j+i*1920) = 0x00ff0050;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff003c)
-					*((int*)view_mem+j+i*1920) = 0x00ff003c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff0028)
-					*((int*)view_mem+j+i*1920) = 0x00ff0028;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff0014)
-					*((int*)view_mem+j+i*1920) = 0x00ff0014;
+				if(*((unsigned int*)view_mem+j+i*1920) == 0xffffffff)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffffff;
+				else if(*((unsigned int*)view_mem+j+i*1920) == 0xff000000)
+					*((unsigned int*)view_mem+j+i*1920) = 0xffffffff;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff008c) //r1
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff008c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff0078)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff0078;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff0064)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff0064;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff0050)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff0050;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff003c)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff003c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff0028)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff0028;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff0014)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff0014;
 
-				else if (*((int*)view_mem+j+i*1920) == 0xffff148c) //r2
-					*((int*)view_mem+j+i*1920) = 0x00ff148c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff1478)
-					*((int*)view_mem+j+i*1920) = 0x00ff1478;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff1464)
-					*((int*)view_mem+j+i*1920) = 0x00ff1464;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff1450)
-					*((int*)view_mem+j+i*1920) = 0x00ff1450;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff143c)
-					*((int*)view_mem+j+i*1920) = 0x00ff143c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff1428)
-					*((int*)view_mem+j+i*1920) = 0x00ff1428;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff1414)
-					*((int*)view_mem+j+i*1920) = 0x00ff1414;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff148c) //r2
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff148c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff1478)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff1478;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff1464)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff1464;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff1450)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff1450;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff143c)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff143c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff1428)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff1428;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff1414)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff1414;
 
-				else if (*((int*)view_mem+j+i*1920) == 0xffff288c) //r3
-					*((int*)view_mem+j+i*1920) = 0x00ff288c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff2878)
-					*((int*)view_mem+j+i*1920) = 0x00ff2878;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff2864)
-					*((int*)view_mem+j+i*1920) = 0x00ff2864;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff2850)
-					*((int*)view_mem+j+i*1920) = 0x00ff2850;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff283c)
-					*((int*)view_mem+j+i*1920) = 0x00ff283c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff2828)
-					*((int*)view_mem+j+i*1920) = 0x00ff2828;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff2814)
-					*((int*)view_mem+j+i*1920) = 0x00ff2814;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff288c) //r3
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff288c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff2878)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff2878;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff2864)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff2864;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff2850)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff2850;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff283c)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff283c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff2828)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff2828;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff2814)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff2814;
 
-				else if (*((int*)view_mem+j+i*1920) == 0xffff3c8c) //r4
-					*((int*)view_mem+j+i*1920) = 0x00ff3c8c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff3c78)
-					*((int*)view_mem+j+i*1920) = 0x00ff3c78;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff3c64)
-					*((int*)view_mem+j+i*1920) = 0x00ff3c64;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff3c50)
-					*((int*)view_mem+j+i*1920) = 0x00ff3c50;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff3c3c)
-					*((int*)view_mem+j+i*1920) = 0x00ff3c3c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff3c28)
-					*((int*)view_mem+j+i*1920) = 0x00ff3c28;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff3c14)
-					*((int*)view_mem+j+i*1920) = 0x00ff3c14;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff3c8c) //r4
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff3c8c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff3c78)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff3c78;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff3c64)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff3c64;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff3c50)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff3c50;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff3c3c)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff3c3c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff3c28)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff3c28;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff3c14)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff3c14;
 
-				else if (*((int*)view_mem+j+i*1920) == 0xffff508c) //r5
-					*((int*)view_mem+j+i*1920) = 0x00ff508c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff5078)
-					*((int*)view_mem+j+i*1920) = 0x00ff5078;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff5064)
-					*((int*)view_mem+j+i*1920) = 0x00ff5064;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff5050)
-					*((int*)view_mem+j+i*1920) = 0x00ff5050;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff503c)
-					*((int*)view_mem+j+i*1920) = 0x00ff503c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff5028)
-					*((int*)view_mem+j+i*1920) = 0x00ff5028;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff5014)
-					*((int*)view_mem+j+i*1920) = 0x00ff5014;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff508c) //r5
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff508c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff5078)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff5078;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff5064)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff5064;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff5050)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff5050;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff503c)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff503c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff5028)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff5028;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff5014)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff5014;
 				
-				else if (*((int*)view_mem+j+i*1920) == 0xffff648c) //r6
-					*((int*)view_mem+j+i*1920) = 0x00ff648c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff6478)
-					*((int*)view_mem+j+i*1920) = 0x00ff6478;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff6464)
-					*((int*)view_mem+j+i*1920) = 0x00ff6464;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff6450)
-					*((int*)view_mem+j+i*1920) = 0x00ff6450;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff643c)
-					*((int*)view_mem+j+i*1920) = 0x00ff643c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff6428)
-					*((int*)view_mem+j+i*1920) = 0x00ff6428;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff6414)
-					*((int*)view_mem+j+i*1920) = 0x00ff6414;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff648c) //r6
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff648c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff6478)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff6478;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff6464)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff6464;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff6450)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff6450;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff643c)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff643c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff6428)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff6428;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff6414)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff6414;
 
-				else if (*((int*)view_mem+j+i*1920) == 0xffff788c) //r7
-					*((int*)view_mem+j+i*1920) = 0x00ff788c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff7878)
-					*((int*)view_mem+j+i*1920) = 0x00ff7878;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff7864)
-					*((int*)view_mem+j+i*1920) = 0x00ff7864;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff7850)
-					*((int*)view_mem+j+i*1920) = 0x00ff7850;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff783c)
-					*((int*)view_mem+j+i*1920) = 0x00ff783c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff7828)
-					*((int*)view_mem+j+i*1920) = 0x00ff7828;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff7814)
-					*((int*)view_mem+j+i*1920) = 0x00ff7814;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff788c) //r7
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff788c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff7878)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff7878;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff7864)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff7864;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff7850)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff7850;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff783c)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff783c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff7828)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff7828;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff7814)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff7814;
 
-				else if (*((int*)view_mem+j+i*1920) == 0xffff8c8c) //r8
-					*((int*)view_mem+j+i*1920) = 0x00ff8c8c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff8c78)
-					*((int*)view_mem+j+i*1920) = 0x00ff8c78;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff8c64)
-					*((int*)view_mem+j+i*1920) = 0x00ff8c64;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff8c50)
-					*((int*)view_mem+j+i*1920) = 0x00ff8c50;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff8c3c)
-					*((int*)view_mem+j+i*1920) = 0x00ff8c3c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff8c28)
-					*((int*)view_mem+j+i*1920) = 0x00ff8c28;
-				else if (*((int*)view_mem+j+i*1920) == 0xffff8c14)
-					*((int*)view_mem+j+i*1920) = 0x00ff8c14;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff8c8c) //r8
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff8c8c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff8c78)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff8c78;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff8c64)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff8c64;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff8c50)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff8c50;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff8c3c)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff8c3c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff8c28)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff8c28;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffff8c14)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ff8c14;
 
-				else if (*((int*)view_mem+j+i*1920) == 0xffffa08c) //r9
-					*((int*)view_mem+j+i*1920) = 0x00ffa08c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffa078)
-					*((int*)view_mem+j+i*1920) = 0x00ffa078;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffa064)
-					*((int*)view_mem+j+i*1920) = 0x00ffa064;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffa050)
-					*((int*)view_mem+j+i*1920) = 0x00ffa050;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffa03c)
-					*((int*)view_mem+j+i*1920) = 0x00ffa03c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffa028)
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffa08c) //r9
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffa08c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffa078)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffa078;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffa064)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffa064;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffa050)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffa050;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffa03c)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffa03c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffa028)
 					*((int*)view_mem+j+i*1920) = 0x00ffa028;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffa014)
-					*((int*)view_mem+j+i*1920) = 0x00ffa014;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffa014)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffa014;
 
-				else if (*((int*)view_mem+j+i*1920) == 0xffffb48c) //r10
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffb48c) //r10
 					*((int*)view_mem+j+i*1920) = 0x00ffb48c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffb478)
-					*((int*)view_mem+j+i*1920) = 0x00ffb478;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffb464)
-					*((int*)view_mem+j+i*1920) = 0x00ffb464;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffb450)
-					*((int*)view_mem+j+i*1920) = 0x00ffb450;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffb43c)
-					*((int*)view_mem+j+i*1920) = 0x00ffb43c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffb428)
-					*((int*)view_mem+j+i*1920) = 0x00ffb428;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffb414)
-					*((int*)view_mem+j+i*1920) = 0x00ffb414;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffb478)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffb478;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffb464)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffb464;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffb450)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffb450;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffb43c)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffb43c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffb428)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffb428;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffb414)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffb414;
 
-				else if (*((int*)view_mem+j+i*1920) == 0xffffc88c) //r11
-					*((int*)view_mem+j+i*1920) = 0x00ffc88c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffc878)
-					*((int*)view_mem+j+i*1920) = 0x00ffc878;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffc864)
-					*((int*)view_mem+j+i*1920) = 0x00ffc864;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffc850)
-					*((int*)view_mem+j+i*1920) = 0x00ffc850;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffc83c)
-					*((int*)view_mem+j+i*1920) = 0x00ffc83c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffc828)
-					*((int*)view_mem+j+i*1920) = 0x00ffc828;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffc814)
-					*((int*)view_mem+j+i*1920) = 0x00ffc814;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffc88c) //r11
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffc88c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffc878)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffc878;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffc864)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffc864;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffc850)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffc850;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffc83c)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffc83c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffc828)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffc828;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffc814)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffc814;
 
-				else if (*((int*)view_mem+j+i*1920) == 0xffffdc8c) //r12
-					*((int*)view_mem+j+i*1920) = 0x00ffdc8c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffdc78)
-					*((int*)view_mem+j+i*1920) = 0x00ffdc78;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffdc64)
-					*((int*)view_mem+j+i*1920) = 0x00ffdc64;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffdc50)
-					*((int*)view_mem+j+i*1920) = 0x00ffdc50;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffdc3c)
-					*((int*)view_mem+j+i*1920) = 0x00ffdc3c;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffdc28)
-					*((int*)view_mem+j+i*1920) = 0x00ffdc28;
-				else if (*((int*)view_mem+j+i*1920) == 0xffffdc14)
-					*((int*)view_mem+j+i*1920) = 0x00ffdc14;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffdc8c) //r12
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffdc8c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffdc78)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffdc78;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffdc64)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffdc64;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffdc50)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffdc50;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffdc3c)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffdc3c;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffdc28)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffdc28;
+				else if (*((unsigned int*)view_mem+j+i*1920) == 0xffffdc14)
+					*((unsigned int*)view_mem+j+i*1920) = 0x00ffdc14;
 
 			}	
 		}	
@@ -1370,10 +1370,10 @@ void readbmp()
 		{			
 			for(j=0;j<240;j++)			
 			{				
-				if(*((int*)logo_park_status_scan+j+i*240) == 0xffffffff)
-					*((int*)logo_park_status_scan+j+i*240) = 0x00ffffff;
-				else if(*((int*)logo_park_status_scan+j+i*240) == 0xffc8bec8)
-					*((int*)logo_park_status_scan+j+i*240) = 0x80c8bec8;
+				if(*((unsigned int*)logo_park_status_scan+j+i*240) == 0xffffffff)
+					*((unsigned int*)logo_park_status_scan+j+i*240) = 0x00ffffff;
+				else if(*((unsigned int*)logo_park_status_scan+j+i*240) == 0xffc8bec8)
+					*((unsigned int*)logo_park_status_scan+j+i*240) = 0x80c8bec8;
 			}
 		}
 	}
@@ -1392,10 +1392,10 @@ void readbmp()
 		{			
 			for(j=0;j<240;j++)			
 			{				
-				if(*((int*)logo_park_status_ready+j+i*240) == 0xffffffff)
-					*((int*)logo_park_status_ready+j+i*240) = 0x00ffffff;
-				else if(*((int*)logo_park_status_ready+j+i*240) == 0xffc8bec8)
-					*((int*)logo_park_status_ready+j+i*240) = 0x80c8bec8;
+				if(*((unsigned int*)logo_park_status_ready+j+i*240) == 0xffffffff)
+					*((unsigned int*)logo_park_status_ready+j+i*240) = 0x00ffffff;
+				else if(*((unsigned int*)logo_park_status_ready+j+i*240) == 0xffc8bec8)
+					*((unsigned int*)logo_park_status_ready+j+i*240) = 0x80c8bec8;
 			}
 		}
 	}
@@ -1414,10 +1414,10 @@ void readbmp()
 		{			
 			for(j=0;j<240;j++)			
 			{				
-				if(*((int*)logo_park_status_run+j+i*240) == 0xffffffff)
-					*((int*)logo_park_status_run+j+i*240) = 0x00ffffff;
-				else if(*((int*)logo_park_status_run+j+i*240) == 0xffc8bec8)
-					*((int*)logo_park_status_run+j+i*240) = 0x80c8bec8;
+				if(*((unsigned int*)logo_park_status_run+j+i*240) == 0xffffffff)
+					*((unsigned int*)logo_park_status_run+j+i*240) = 0x00ffffff;
+				else if(*((unsigned int*)logo_park_status_run+j+i*240) == 0xffc8bec8)
+					*((unsigned int*)logo_park_status_run+j+i*240) = 0x80c8bec8;
 			}
 		}
 	}
@@ -1436,10 +1436,10 @@ void readbmp()
 		{			
 			for(j=0;j<240;j++)			
 			{				
-				if(*((int*)logo_park_status_stop+j+i*240) == 0xffffffff)
-					*((int*)logo_park_status_stop+j+i*240) = 0x00ffffff;
-				else if(*((int*)logo_park_status_stop+j+i*240) == 0xffc8bec8)
-					*((int*)logo_park_status_stop+j+i*240) = 0x80c8bec8;
+				if(*((unsigned int*)logo_park_status_stop+j+i*240) == 0xffffffff)
+					*((unsigned int*)logo_park_status_stop+j+i*240) = 0x00ffffff;
+				else if(*((unsigned int*)logo_park_status_stop+j+i*240) == 0xffc8bec8)
+					*((unsigned int*)logo_park_status_stop+j+i*240) = 0x80c8bec8;
 			}
 		}
 	}
@@ -1458,10 +1458,10 @@ void readbmp()
 		{			
 			for(j=0;j<240;j++)			
 			{				
-				if(*((int*)logo_park_status_fail+j+i*240) == 0xffffffff)
-					*((int*)logo_park_status_fail+j+i*240) = 0x00ffffff;
-				else if(*((int*)logo_park_status_fail+j+i*240) == 0xffc8bec8)
-					*((int*)logo_park_status_fail+j+i*240) = 0x80c8bec8;
+				if(*((unsigned int*)logo_park_status_fail+j+i*240) == 0xffffffff)
+					*((unsigned int*)logo_park_status_fail+j+i*240) = 0x00ffffff;
+				else if(*((unsigned int*)logo_park_status_fail+j+i*240) == 0xffc8bec8)
+					*((unsigned int*)logo_park_status_fail+j+i*240) = 0x80c8bec8;
 			}
 		}
 	}

@@ -43,7 +43,7 @@ short int parking_distance_end_x;
 short int parking_distance_end_y;
 short int parking_distance_depth;
 
-short int parking_rect_point0_x;
+short int parking_rect_point0_x;   
 short int parking_rect_point0_y;
 short int parking_rect_point1_x;
 short int parking_rect_point1_y;
@@ -70,6 +70,10 @@ int trail_arc_end_y;
 short int trail_arc_radius ;
 short int trail_arc_angle;
 int direction;  //0x01 --> left   0x02 --> right
+
+short int vehicle_speed;   //³µËÙ
+short int vehicle_wheel_angle;  //×ª½Ç 
+
 int parking_mode_select;
 int parking_mode_ok;
 int parking_mode_ok_flag;
@@ -286,6 +290,15 @@ void frame_get_data(unsigned char *r_buffer, unsigned char len)
 				break;
 			case ID_KEY_MCU:
 				direction = r_buffer[3];
+				vehicle_wheel_angle = 0;
+				vehicle_speed = 0;
+				vehicle_wheel_angle = vehicle_wheel_angle | r_buffer[4];
+				vehicle_wheel_angle = vehicle_wheel_angle << 8;
+				vehicle_wheel_angle = vehicle_wheel_angle | r_buffer[5];
+				vehicle_speed = vehicle_speed | r_buffer[6];
+				vehicle_speed = vehicle_speed << 8;
+				vehicle_speed = vehicle_speed | r_buffer[7];
+				printf("vehicle_wheel_angle = 0x%hx    vehicle_speed = 0x%hx\n", vehicle_wheel_angle,vehicle_speed);
 				printf("received:MCU key push signal\n");
 				break;	
 			case ID_GEAR_MCU:

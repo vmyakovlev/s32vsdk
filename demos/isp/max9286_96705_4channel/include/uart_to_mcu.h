@@ -28,7 +28,6 @@ typedef struct {
 #define ID_TRAIL_LINI2      	0x2C
 #define ID_KEY_MCU        		0xC2	
 #define ID_KEY_SOC        		0x30
-#define ID_KEY_SOC        		0x30
 #define ID_GEAR_MCU				0x31
 #define ID_PARK_RECT_POINT1		0x26
 #define ID_PARK_RECT_POINT2		0x27
