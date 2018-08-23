@@ -1475,10 +1475,11 @@ CAM_LIB_RESULT MAXIM9286_96705_Init(enum CSI_IDX aCsiIdx,
  // CAM_WriteSingle(spClients[aCsiIdx].mpSerializers[4], 0x04,0x83);    //Enable all serializer and disable configuration link
 
   //CAM_WriteSingle(spClients[aCsiIdx].mpSerializers[0], 0x04,0x83);	  //Enable all serializer and disable configuration link
-
   msleep(100); // Wait 5ms
+
     CAM_ReadSingle(spClients[aCsiIdx].mDeserializer, 0x70, lVal);
-    printf("Maxim9286_96705 Init statu 0x%x.\n", lVal);
+    printf("Maxim9286_96705 Init statu L:%d,R:%d,F:%d,B:%d.\n", (lVal>>6&0x01),
+                                     (lVal>>7&0x01), (lVal>>4&0x01), (lVal>>5&0x01));
     if(lVal != 0xf0) {
         lRet = CAM_LIB_FAILURE;
     } else {
